@@ -1,0 +1,64 @@
+@startuml SáchCủaT.DB
+
+object Sách {
+    Mã: Int <b>PK</b>
+    Tên: Text
+    Xong: Bool
+    ISBN: Text
+}
+object Tác_Giả {
+    Mã: Int <b>PK</b>
+    Tên: Text
+}
+object Dịch_Giả {
+    Mã: Int <b>PK</b>
+    Tên: Text
+}
+object Vị_Trí {
+    Mã: Int <b>PK</b>
+    Tên: Text
+}
+object NXB {
+    Mã: Int <b>PK</b>
+    Tên: Text
+    ISBN: Text
+}
+object Nhãn {
+    Mã: Int <b>PK</b>
+    Kiểu: Int
+    Tên: Text
+}
+object Tác_Giả_Sách {
+    Sách: Int
+    Tác_Giả: Int
+}
+object Dịch_Giả_Sách {
+    Sách: Int
+    Dịch_Giả: Int
+}
+object Vị_Trí_Sách {
+    Sách: Int
+    Vị_Trí: Int
+}
+object NXB_Sách {
+    Sách: Int
+    NXB: Int
+}
+object Nhãn_Sách {
+    Sách: Int
+    Nhãn: Int
+    Giá_Trị: Text
+}
+
+Sách "1" --> "N" Tác_Giả_Sách : Sách.Mã = Tác_Giả_Sách.Sách
+Tác_Giả "1" --> "N" Tác_Giả_Sách : Tác_Giả.Mã = Tác_Giả_Sách.Tác_Giả
+Sách "1" --> "N" Dịch_Giả_Sách : Sách.Mã = Dịch_Giả_Sách.Sách
+Dịch_Giả "1" --> "N" Dịch_Giả_Sách : Dịch_Giả.Mã = Dịch_Giả_Sách.Dịch_Giả
+Sách "1" --> "N" Vị_Trí_Sách : Sách.Mã = Vị_Trí_Sách.Sách
+Vị_Trí "1" --> "N" Vị_Trí_Sách : Vị_Trí.Mã = Vị_Trí_Sách.Vị_Trí
+Sách "1" --> "N" NXB_Sách : Sách.Mã = NXB_Sách.Sách
+NXB "1" --> "N" NXB_Sách : NXB.Mã = NXB_Sách.NXB
+Sách "1" --> "N" Nhãn_Sách : Sách.Mã = Nhãn_Sách.Sách
+Nhãn "1" --> "N" Nhãn_Sách : Nhãn.Mã = Nhãn_Sách.Nhãn
+
+@enduml
