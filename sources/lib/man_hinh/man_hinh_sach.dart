@@ -17,9 +17,13 @@
  */
 
 import 'package:flutter/material.dart';
-import 'package:sach_cua_t/man_hinh_co_so.dart';
+import 'package:sach_cua_t/man_hinh/man_hinh_co_so.dart';
+import 'package:sach_cua_t/models/native.dart';
 import 'package:sach_cua_t/models/vov.dart';
 import 'package:sach_cua_t/models/vtv.dart';
+import 'package:sach_cua_t/views/truong_tieu_de.dart';
+import 'package:sach_cua_t/utils/common.dart';
+import 'package:sach_cua_t/views/truong_van_ban.dart';
 
 class ManHinhSach extends StatefulWidget {
 
@@ -39,9 +43,12 @@ class _TrangThaiManHinhSach extends State<ManHinhSach> with KhuonMauQuanLyManHin
   @override
   String get tenManHinh => ManHinhSach.tenManHinh;
 
+  final TruongVanBan _tenSach = TruongVanBan(tieuDe: "Tên sách");
+
   @override
   void initState() {
     super.initState();
+    _tenSach.khiTrangThaiNhapThayDoi = _khiTrangThaiNhapTenSachThayDoi;
   }
 
   @override
@@ -50,7 +57,23 @@ class _TrangThaiManHinhSach extends State<ManHinhSach> with KhuonMauQuanLyManHin
       tieuDe: _xacDinhTieuDe(),
       nutTrai: IconButton(onPressed: _khiNhanThoat, icon: const Icon(Icons.arrow_back)),
       nutPhai: IconButton(onPressed: _khiNhanLuu, icon: const Icon(Icons.save)),
-      noiDung: const Center(child: Text("Hello again"))
+      noiDung: ListView(
+        padding: const EdgeInsets.all(5),
+        children: [
+          _tenSach.build(
+            context,
+            accesoryWidget: TextButton(
+              onPressed: () {
+                print("DEMO ${_tenSach.text}");
+                _khiNhatNutQuetISBN();
+                LinhTinh.dungNhapVanBan();
+              },
+              child: Text("Button1")
+            )
+          ),
+          const TruongTieuDe(tieuDeChinh: "Nhập thông tin", tieuDePhu: "Chi tiết")
+        ]
+      )
     );
   }
 
@@ -64,6 +87,17 @@ class _TrangThaiManHinhSach extends State<ManHinhSach> with KhuonMauQuanLyManHin
 
   void _khiNhanThoat() {
     pop();
+  }
+
+  void _khiTrangThaiNhapTenSachThayDoi(bool coTheNhap) {
+    print("TRANG THAI NHAP TEN SACH $coTheNhap");
+  }
+
+  void _khiNhatNutQuetISBN() async {
+    final String? maISBN = await HeThongMay.duyNhat.quetMaISBN();
+    if (maISBN != null) {
+      _tenSach.text = maISBN;
+    }
   }
 
   // Xử lý nội bộ

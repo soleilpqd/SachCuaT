@@ -17,7 +17,7 @@
  */
 
 import 'package:flutter/material.dart';
-import 'package:sach_cua_t/home.dart';
+import 'package:sach_cua_t/man_hinh/home.dart';
 
 void main() {
   runApp(const MainApp());
@@ -28,12 +28,18 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    const Color mainColor = Colors.blueAccent;
     return MaterialApp(
       home: const HomePage(),
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueAccent),
-        primaryColor: Colors.blueAccent,
+        colorScheme: ColorScheme.fromSeed(seedColor: mainColor),
+        primaryColor: mainColor,
         scaffoldBackgroundColor: Colors.white,
+        textButtonTheme: TextButtonThemeData(
+          style: TextButton.styleFrom(
+            foregroundColor: mainColor
+          )
+        ),
         popupMenuTheme: const PopupMenuThemeData(
           iconColor: Colors.black
         ),

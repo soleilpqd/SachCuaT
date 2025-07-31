@@ -17,8 +17,9 @@
  */
 
 import 'package:flutter/material.dart';
-import 'package:sach_cua_t/man_hinh_co_so.dart';
-import 'package:sach_cua_t/man_hinh_sach.dart';
+import 'package:sach_cua_t/man_hinh/man_hinh_co_so.dart';
+import 'package:sach_cua_t/man_hinh/man_hinh_sach.dart';
+import 'package:sach_cua_t/man_hinh/man_hinh_web.dart';
 import 'package:sach_cua_t/models/vov.dart';
 import 'package:sach_cua_t/models/vtv.dart';
 
@@ -117,6 +118,7 @@ class _HomePageState extends State<HomePage> with KhuonMauQuanLyManHinh {
 
   void _khiNhanThemSach() {
     push(ManHinhSach.tenManHinh, const ManHinhSach(null));
+    // push(ManHinhWeb.tenManHinh, const ManHinhWeb(tieuDe: "Lưu chiểu", url: "https://ppdvn.gov.vn/web/guest/tra-cuu-luu-chieu"));
   }
 
   void _khiNhanMenu() {
