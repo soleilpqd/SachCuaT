@@ -18,15 +18,20 @@
 
 import 'package:flutter/material.dart';
 
+/// Khuôn mẫu quản lý màn hình
 mixin KhuonMauQuanLyManHinh {
+  /// Tên (mã) màn hình
   String get tenManHinh;
+  /// Context
   BuildContext get context;
 
+  /// Chuyển sang màn hình tiếp
   void push(String tenManHinhTiep, Widget manHinhTiep) {
     DaiTruyenHinh.duyNhat._themManHinh(tenManHinhTiep);
     Navigator.of(context).push(MaterialPageRoute(builder: (_) => manHinhTiep));
   }
 
+  /// Quay về màn hình trước
   void pop() {
     DaiTruyenHinh.duyNhat._loaiManHinh(tenManHinh);
     Navigator.of(context).pop();
@@ -38,13 +43,16 @@ mixin KhuonMauQuanLyManHinh {
 class DaiTruyenHinh extends ChangeNotifier {
 
   DaiTruyenHinh._internal();
-
+  /// Singleton
   static final DaiTruyenHinh duyNhat = DaiTruyenHinh._internal();
 
   final List<String> _dsManHinh = [];
   String _manHinhTruoc = "";
 
+  /// Tên màn hình hiện tại
   String get manHinhHienTai => _dsManHinh.isNotEmpty ? _dsManHinh.last : "";
+  /// Tên màn hình trước khi chuyển sang màn hình hiện tại
+  /// (bao gồm cả trường hợp chuyển mới hay chuyển về)
   String get manHinhTruoc => _manHinhTruoc;
 
   void _themManHinh(String ten) {

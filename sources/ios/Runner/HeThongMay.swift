@@ -57,7 +57,9 @@ final class HeThongMay {
             if let manHinh = AppDelegate.app.rootViewController.storyboard?.instantiateViewController(withIdentifier: "ManHinhCamera") as? ManHinhCamera {
                 manHinh.resultHandle = result
                 manHinh.kieuQuet = .isbn
-                AppDelegate.app.rootViewController.present(manHinh, animated: true)
+                manHinh.chuanBi {
+                    AppDelegate.app.rootViewController.present(manHinh, animated: true)
+                }
             }
         }
     }

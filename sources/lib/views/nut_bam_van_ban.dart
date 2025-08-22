@@ -18,41 +18,33 @@
 
 import 'package:flutter/material.dart';
 import 'package:sach_cua_t/utils/vanbanhienthi.dart';
+import 'package:sach_cua_t/views/dieu_khien_co_so.dart';
 import 'package:sach_cua_t/views/van_ban_hien_thi_widget.dart';
 
-/// Trường tiêu đề: hiển thị 2 dòng văn bản
-///  IN ĐẬM
-///  in thường
-class TruongTieuDe extends StatelessWidget {
+/// Nút bấm văn bản có điều khiển trạng thái khả dụng
+class NutBamVanBan extends GiaoDienCoSo<DieuKhienCoSo> {
 
-  /// Tiêu đề chính
-  final Vbht tieuDeChinh;
-  /// Tiêu đề phụ
-  final Vbht? tieuDePhu;
+  /// Văn bản hiển thị
+  final Vbht vanBan;
+  /// Hàm xử lý khi nhấn
+  final void Function()? khiNhan;
 
-  /// CONSTRUCTOR
-  const TruongTieuDe({super.key, required this.tieuDeChinh, this.tieuDePhu});
+  const NutBamVanBan({super.key, required this.vanBan, this.khiNhan, super.dieuKhien});
+
+  @override
+  State<StatefulWidget> createState() => _TrangThaiNutBamBieuTuong();
+
+}
+
+class _TrangThaiNutBamBieuTuong extends TrangThaiCoSo<NutBamVanBan> {
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> children = [const SizedBox(height: 10)];
-    children.add(
-      VbhtWidget(
-        text: tieuDeChinh,
-        style: const TextStyle(
-          fontWeight: FontWeight.bold,
-          fontSize: 17
-        ),
-      )
-    );
-    if (tieuDePhu != null) {
-      children.add(
-        VbhtWidget(text: tieuDePhu!)
-      );
-    }
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: children
+    final bool khaDung = widget.dieuKhien?.khaDung ?? true;
+    return TextButton(
+      onPressed: khaDung ? widget.khiNhan : null,
+      style: ButtonStyle(foregroundColor: MaterialStatePropertyAll(khaDung ? Theme.of(context).primaryColor : Colors.grey)),
+      child: VbhtWidget(text: widget.vanBan)
     );
   }
 

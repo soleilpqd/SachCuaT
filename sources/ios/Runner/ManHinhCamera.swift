@@ -31,24 +31,21 @@ final class ManHinhCamera: UIViewController {
 
     private var videoLayer = AVCaptureVideoPreviewLayer()
     private var captureSession = AVCaptureSession()
-    private var daCauHinh = false
+    private var khiCauHinhXong: (() -> Void)?
 
     @IBOutlet private weak var nutDong: UIButton!
 
-    override func viewDidLoad() {
-        super.viewDidLoad()
-    }
-
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        if !daCauHinh {
-            daCauHinh = true
-            kiemTraQuyenTruyCap()
-        }
+    func chuanBi(_ khiXong: @escaping () -> Void) {
+        khiCauHinhXong = khiXong
+        kiemTraQuyenTruyCap()
     }
 
     @IBAction private func khiNhanNutDong(_ doiTuong: Any?) {
         ketThuc(voi: nil)
+    }
+
+    deinit {
+        print("DESTROY CAMERA VIEW")
     }
 
     // MARK: - Internal
@@ -87,11 +84,8 @@ final class ManHinhCamera: UIViewController {
     }
 
     private func khiKhongCoCamera() {
-        let alert = UIAlertController(title: "Camera không khả dụng", message: "Thiết bị không có camera hoặc bạn cần cấp quyền sử dụng camera", preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "Đóng", style: .cancel, handler: {[weak self] _ in
-            self?.khiNhanNutDong(nil)
-        }))
-        present(alert, animated: true)
+        resultHandle?(FlutterError(code: "2", message: "No camera", details: nil))
+        khiCauHinhXong = nil
     }
 
     private func cauHinhCamera() {
@@ -151,6 +145,8 @@ final class ManHinhCamera: UIViewController {
         self.view.layer.addSublayer(videoLayer)
         self.view.bringSubviewToFront(nutDong)
         captureSession.startRunning()
+        khiCauHinhXong?()
+        khiCauHinhXong = nil
     }
 
 }

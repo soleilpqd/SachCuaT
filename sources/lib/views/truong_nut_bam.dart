@@ -1,0 +1,72 @@
+/*
+  Sách của T - Quản lý sách cá nhân
+  Copyright © 2025 SoleilPQD
+
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+import 'package:flutter/material.dart';
+import 'package:sach_cua_t/utils/vanbanhienthi.dart';
+import 'package:sach_cua_t/views/dieu_khien_co_so.dart';
+import 'package:sach_cua_t/views/van_ban_hien_thi_widget.dart';
+
+/// Trường chỉ xử lý nhấn với Tiêu đề và Biểu tượng
+class TruongNutBam extends GiaoDienCoSo<DieuKhienCoSo> {
+
+  /// Hàm xử lý khi nhấn
+  final Function() khiNhan;
+  /// Tiêu đề
+  final Vbht tieuDe;
+  /// Hình biểu tượng
+  final IconData icon;
+
+  const TruongNutBam({
+    super.key,
+    required this.khiNhan,
+    required this.tieuDe,
+    required this.icon,
+    super.dieuKhien
+  });
+
+  @override
+  State<StatefulWidget> createState() => _TrangThaiTruongNutBam();
+
+}
+
+class _TrangThaiTruongNutBam extends TrangThaiCoSo<TruongNutBam> {
+
+  @override
+  Widget build(BuildContext context) {
+    final bool khaDung = widget.dieuKhien?.khaDung ?? true;
+    final Color color = khaDung ? Theme.of(context).primaryColor : Colors.grey;
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        TextButton(
+          onPressed: khaDung ? widget.khiNhan : null,
+          style: ButtonStyle(foregroundColor: MaterialStatePropertyAll(color)),
+          child: VbhtWidget(text: widget.tieuDe)
+        ),
+        IconButton(
+          onPressed: khaDung ? widget.khiNhan : null,
+          icon: Icon(
+            widget.icon,
+            color: color
+          )
+        )
+      ],
+    );
+  }
+
+}

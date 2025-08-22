@@ -123,14 +123,8 @@ class ManHinhCamera : AppCompatActivity() {
 
     /// Xử lý khi không có máy ảnh (phần cứng, quyền)
     private fun khiKhongCoMayAnh() {
-        // Dùng alert native vì hiện tại đang là màn hình native
-        val alert = AlertDialog.Builder(this)
-        alert.setTitle("Camera không khả dụng")
-        alert.setMessage("Thiết bị không có camera hoặc bạn cần cấp quyền sử dụng camera")
-        alert.setNeutralButton("Đóng") { dialog, which ->
-            finish()
-        }
-        alert.create().show()
+        HeThongMay.duyNhat.layTraKetQua(maKetQua)?.error("2", "No camera", "")
+        finish()
     }
 
     /// Khởi chạy camera

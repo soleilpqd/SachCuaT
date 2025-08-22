@@ -17,27 +17,45 @@
  */
 
 import 'package:flutter/material.dart';
+import 'package:sach_cua_t/utils/vanbanhienthi.dart';
+import 'package:sach_cua_t/views/dieu_khien_co_so.dart';
+import 'package:sach_cua_t/views/nut_bam_bieu_tuong.dart';
+import 'package:sach_cua_t/views/van_ban_hien_thi_widget.dart';
 
 /// Phần Navigation Bar dùng chung cho tất cả các màn hình.
 class ManHinhCoSo extends StatelessWidget {
 
-  final String tieuDe;
+  /// Tiêu đề
+  final Vbht tieuDe;
+  /// Nút trái
   final Widget? nutTrai;
+  /// Nút phải
   final Widget? nutPhai;
+  /// Phần chính bên dưới Navigation Bar
   final Widget noiDung;
+  /// Điều khiển nút quay lại (bỏ qua nếu `nutTrai != null`)
+  final DieuKhienCoSo? dkNutQuayLai;
+  /// Hàm xử lý khi nhấn nút quay lại (bỏ qua nếu `nutTrai != null`)
+  final Function()? khiNhanQuayLai;
 
-  const ManHinhCoSo({super.key, required this.tieuDe, this.nutTrai, this.nutPhai, required this.noiDung});
+  const ManHinhCoSo({super.key, required this.tieuDe, this.nutTrai, this.nutPhai, required this.noiDung, this.dkNutQuayLai, this.khiNhanQuayLai});
 
   @override
   Widget build(BuildContext context) {
+    Widget? nTrai = nutTrai;
+    if (nTrai == null && khiNhanQuayLai != null) {
+      nTrai = _taoNutQuayLai();
+    }
     return Scaffold(
         appBar: AppBar(
-          title: Text(tieuDe),
+          title: VbhtWidget(text: tieuDe),
           actions: nutPhai != null ? [nutPhai!] : null,
-          leading: nutTrai
+          leading: nTrai
         ),
         body: noiDung
       );
   }
+
+  Widget _taoNutQuayLai() => NutBamBieuTuong(icon: Icons.arrow_back, khiNhan: khiNhanQuayLai, dieuKhien: dkNutQuayLai);
 
 }

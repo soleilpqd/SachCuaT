@@ -1,5 +1,9 @@
 # Kệ sách cá nhân
 
+## TODO
+
+- Quét ISBN: báo lỗi trước khi hiện màn hình (bỏ dialog native)
+
 ## A.Cấu trúc dữ liệu
 
 Thuộc tính của sách:

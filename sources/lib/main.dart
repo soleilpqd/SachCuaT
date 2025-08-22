@@ -18,9 +18,10 @@
 
 import 'package:flutter/material.dart';
 import 'package:sach_cua_t/man_hinh/home.dart';
+import 'package:sach_cua_t/models/database.dart';
 
 void main() {
-  runApp(const MainApp());
+  CoSoDuLieu().khoiDau().then((value) => runApp(const MainApp()));
 }
 
 class MainApp extends StatelessWidget {

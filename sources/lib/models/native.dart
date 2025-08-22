@@ -16,8 +16,8 @@
   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 import 'package:flutter/services.dart';
+import 'package:sach_cua_t/utils/common.dart';
 
 enum _MethodFromNative {
   kiemTraISBN;
@@ -40,9 +40,10 @@ enum _MethodToNative {
   }
 }
 
+/// APIs trao đổi với module native
 class HeThongMay {
 
-  final MethodChannel _kenhKetNoi = MethodChannel("sach.cua.T");
+  final MethodChannel _kenhKetNoi = const MethodChannel("sach.cua.T");
 
   HeThongMay._internal() {
     _kenhKetNoi.setMethodCallHandler((call) {
@@ -58,63 +59,14 @@ class HeThongMay {
   }
   static final HeThongMay duyNhat = HeThongMay._internal();
 
+  /// Flutter -> Native: Bật camera để quét mã ISBN
   Future<String?> quetMaISBN() async {
     return _kenhKetNoi.invokeMethod<String>(_MethodToNative.quetMaISBN.value);
   }
 
+  /// Flutter <- Native: kiểm tra định dạng ISBN
   Future<bool> _kiemTraISBN(String giaTri) {
-    if (giaTri.length == 13) {
-      String prefix = giaTri.substring(0, 3);
-      if (prefix != "978" && prefix != "979") {
-        return Future.value(false);
-      }
-      int index = 0;
-      int tong = 0;
-      int lastDigit = 0;
-      for (final element in giaTri.runes) {
-        int digit = element - 48;
-        if (digit >= 0 && digit <= 9) {
-          if (index < 12) {
-            if (index % 2 == 0) {
-              tong += digit;
-            } else {
-              tong += 3 * digit;
-            }
-          } else {
-            lastDigit = digit;
-          }
-        } else {
-          return Future.value(false);
-        }
-        index += 1;
-      }
-      tong = 10 - (tong % 10);
-      if (tong < 10) {
-        if (lastDigit == tong) {
-          return Future.value(true);
-        }
-      } else {
-        if (lastDigit == 0) {
-          return Future.value(true);
-        }
-      }
-    } else if (giaTri.length == 10) {
-      int tong1 = 0;
-      int tong2 = 0;
-      for (final element in giaTri.runes) {
-        int digit = element - 48;
-        if (digit >= 0 && digit <= 9) {
-          tong1 += digit;
-          tong2 += tong1;
-        } else {
-          return Future.value(false);
-        }
-      }
-      if (tong2 % 11 == 0) {
-        return Future.value(true);
-      }
-    }
-    return Future.value(false);
+    return Future.value(LinhTinh.kiemTraISBN(giaTri));
   }
 
 }

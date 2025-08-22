@@ -19,9 +19,10 @@
 import 'package:flutter/material.dart';
 import 'package:sach_cua_t/man_hinh/man_hinh_co_so.dart';
 import 'package:sach_cua_t/man_hinh/man_hinh_sach.dart';
-import 'package:sach_cua_t/man_hinh/man_hinh_web.dart';
 import 'package:sach_cua_t/models/vov.dart';
 import 'package:sach_cua_t/models/vtv.dart';
+import 'package:sach_cua_t/utils/common.dart';
+import 'package:sach_cua_t/utils/vanbanhienthi.dart';
 
 enum MucMenuChinh {
   menuGoc,
@@ -56,6 +57,7 @@ class _HomePageState extends State<HomePage> with KhuonMauQuanLyManHinh {
   @override
   void initState() {
     super.initState();
+    // VanBanHienThi().printAll();
     DaiPhatThanh.duyNhat.addListener(_theoDoiDaiPhatThanh);
     DaiTruyenHinh.duyNhat.datManHinhDauTien(_xacDinhTieuDeMuc(_trangHienTai));
     DaiTruyenHinh.duyNhat.addListener(_theoDoiDaiTruyenHinh);
@@ -71,7 +73,7 @@ class _HomePageState extends State<HomePage> with KhuonMauQuanLyManHinh {
   @override
   Widget build(BuildContext context) {
     return ManHinhCoSo(
-      tieuDe: _xacDinhTieuDeMuc(_trangHienTai),
+      tieuDe: Vbht.trucTiep(_xacDinhTieuDeMuc(_trangHienTai)),
       nutTrai: _xacDinhNutTrai(),
       nutPhai: PopupMenuButton(
         icon: Icon(Icons.menu, color: Theme.of(context).appBarTheme.foregroundColor),
@@ -117,12 +119,7 @@ class _HomePageState extends State<HomePage> with KhuonMauQuanLyManHinh {
   }
 
   void _khiNhanThemSach() {
-    push(ManHinhSach.tenManHinh, const ManHinhSach(null));
-    // push(ManHinhWeb.tenManHinh, const ManHinhWeb(tieuDe: "Lưu chiểu", url: "https://ppdvn.gov.vn/web/guest/tra-cuu-luu-chieu"));
-  }
-
-  void _khiNhanMenu() {
-    print("Nhan Menu");
+    push(ManHinhSach.maManHinh, ManHinhSach(maSach: null));
   }
 
   void _khiNhanThemViTri() {
