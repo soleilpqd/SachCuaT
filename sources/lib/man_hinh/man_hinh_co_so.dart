@@ -56,6 +56,7 @@ class ManHinhCoSo extends StatelessWidget {
       );
   }
 
+  /// Tạo nút quay lại
   Widget _taoNutQuayLai() => NutBamBieuTuong(icon: Icons.arrow_back, khiNhan: khiNhanQuayLai, dieuKhien: dkNutQuayLai);
 
 }

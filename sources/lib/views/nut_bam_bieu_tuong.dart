@@ -24,11 +24,15 @@ class NutBamBieuTuong extends GiaoDienCoSo<DieuKhienCoSo> {
 
   /// Hình biểu tượng
   final IconData icon;
+  /// Màu chính
+  final Color mauChinh;
+  /// Màu phụ (màu không khả dụng)
+  final Color mauPhu;
   /// Hàm xử lý khi nhấn
   final void Function()? khiNhan;
 
   /// CONSTRUCTOR
-  const NutBamBieuTuong({super.key, required this.icon, this.khiNhan, super.dieuKhien});
+  const NutBamBieuTuong({super.key, required this.icon, this.khiNhan, super.dieuKhien, this.mauChinh = Colors.white, this.mauPhu = Colors.grey});
 
   @override
   State<StatefulWidget> createState() => _TrangThaiNutBamBieuTuong();
@@ -42,7 +46,7 @@ class _TrangThaiNutBamBieuTuong extends TrangThaiCoSo<NutBamBieuTuong> {
     final bool khaDung = widget.dieuKhien?.khaDung ?? true;
     return IconButton(
       onPressed: khaDung ? widget.khiNhan : null,
-      icon: Icon(widget.icon, color: khaDung ? Theme.of(context).primaryColor : Colors.grey)
+      icon: Icon(widget.icon, color: khaDung ? widget.mauChinh : widget.mauPhu)
     );
   }
 

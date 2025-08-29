@@ -18,25 +18,29 @@
 
 import 'package:flutter/material.dart' as Ui;
 import 'package:image/image.dart' as Img;
+import 'package:image_picker/image_picker.dart';
 
 typedef UiImage = Ui.Image;
 typedef ImgImage = Img.Image;
 
 /// Sách
 class Sach {
-  int maSo = -1;
+  int? maSo;
   String ten = "";
   bool daHoanThanh = false;
   String isbn = "";
-  int maNhieuTap = -1;
-  int tap = -1;
-  ImgImage? image;
+  int? maNhieuTap;
+  int? tap;
+  XFile? hinhAnh;
+  XFile? hinhThuNho;
 
-  List<int> nhaXuatBan = [];
-  List<int> tacGia = [];
-  List<int> dichGia = [];
-  List<int> viTri = [];
-  Map<int, String> nhan = {};
+  List<String> nhaXuatBan = [];
+  List<String> tacGia = [];
+  List<String> dichGia = [];
+  List<String> viTri = [];
+  Map<String, String> nhan = {};
+  List<String> danhDau = [];
+
 }
 
 /// Nhà xuất bản, đơn vị phát hành
@@ -75,6 +79,7 @@ class NhanSach {
 class ViTriSach {
   int maSo = -1;
   String ten = "";
+  int thoiGian = -1;
 }
 
 /// Đánh dấu (Bookmark)

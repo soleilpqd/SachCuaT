@@ -39,7 +39,10 @@ mixin KhuonMauQuanLyManHinh {
 
 }
 
-/// Cơ quan quản lý, theo dõi luồng di chuyển màn hình
+/// Cơ quan quản lý, theo dõi luồng di chuyển màn hình.
+/// Các màn hình phải triển khai theo KhuonMauManHinh (di chuyển màn hình dùng push và pop của mixin này).
+/// Các đối tượng có thể theo dõi `DaiTruyenHinh` để bắt sự kiện thay đổi màn hình,
+/// sử dụng các thuộc tính `manHinhHienTai` và `manHinhTruoc` để xác định việc di chuyển màn hình.
 class DaiTruyenHinh extends ChangeNotifier {
 
   DaiTruyenHinh._internal();
@@ -55,12 +58,14 @@ class DaiTruyenHinh extends ChangeNotifier {
   /// (bao gồm cả trường hợp chuyển mới hay chuyển về)
   String get manHinhTruoc => _manHinhTruoc;
 
+  /// Thêm màn hình
   void _themManHinh(String ten) {
     _manHinhTruoc = _dsManHinh.isNotEmpty ? _dsManHinh.last : "";
     _dsManHinh.add(ten);
     notifyListeners();
   }
 
+  /// Loại màn hình
   void _loaiManHinh(String ten) {
     if (_dsManHinh.isNotEmpty) {
       if (_dsManHinh.last == ten) {
@@ -74,12 +79,14 @@ class DaiTruyenHinh extends ChangeNotifier {
     }
   }
 
+  /// Đặt màn hình đầu tiên
   void datManHinhDauTien(String ten) {
     _manHinhTruoc = "";
     _dsManHinh.clear();
     _dsManHinh.add(ten);
   }
 
+  /// Đổi màn hình
   void doiManHinh(String mhTruoc, String mhSau) {
     _loaiManHinh(mhTruoc);
     _themManHinh(mhSau);

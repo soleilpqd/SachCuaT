@@ -72,7 +72,7 @@ class _TrangThaiTruongBatTat extends TrangThaiCoSo<TruongBatTat> {
 
   @override
   Widget build(BuildContext context) {
-    Color mainColor = Theme.of(context).primaryColor;
+    Color mainColor = (widget.dieuKhien?.khaDung ?? true) ? Theme.of(context).primaryColor : Colors.grey;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
