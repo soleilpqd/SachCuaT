@@ -85,7 +85,14 @@ enum TK {
   /// Cứ lưu
   cuLuu,
   /// Thiếu thông tin
-  thieuThongTin;
+  thieuThongTin,
+  /// Sách không tồn tại
+  sachKhongTonTai,
+  /// Lưu
+  luu,
+  /// Xác nhận lưu sách khi quay lại
+  xacNhanLuu
+  ;
 }
 
 /// Văn bản hiển thị

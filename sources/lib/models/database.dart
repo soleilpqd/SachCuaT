@@ -24,6 +24,7 @@ import 'package:image/image.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart';
 import 'package:sach_cua_t/models/dulieu.dart';
+import 'package:sach_cua_t/models/native.dart';
 import 'package:sach_cua_t/utils/isolations.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -129,7 +130,8 @@ class CoSoDuLieu {
   Future<int> taoMoiSach(Sach thongTin) async {
     assert(_db != null, "CSDL chưa được khởi tạo.");
     final duLieu = _taoDLChoBangSach(thongTin);
-    return _db!.insert(_BANG_SACH, duLieu);
+    thongTin.maSo = await _db!.insert(_BANG_SACH, duLieu);
+    return thongTin.maSo!;
   }
 
   /// Cập nhật thông tin sách
@@ -139,6 +141,22 @@ class CoSoDuLieu {
     final duLieu = _taoDLChoBangSach(thongTin);
     final ketQua = await _db!.update(_BANG_SACH, duLieu, where: "ma = ?", whereArgs: [thongTin.maSo]);
     return ketQua == 1;
+  }
+
+  Future<bool> napThongTinSach(Sach thongTin) async {
+    assert(_db != null, "CSDL chưa được khởi tạo.");
+    assert(thongTin.maSo != null, "Thiếu mã sách để cập nhật.");
+    final duLieu = await _db!.query(_BANG_SACH, where: "ma = ?", whereArgs: [thongTin.maSo!]);
+    if (duLieu.isNotEmpty) {
+      final banGhiDau = duLieu.first;
+      thongTin.ten = banGhiDau["ten"] as String;
+      thongTin.daHoanThanh = (banGhiDau["xong"] as int) != 0;
+      thongTin.isbn = banGhiDau["isbn"] as String;
+      thongTin.tap = banGhiDau["tap"] as int?;
+      thongTin.maNhieuTap = banGhiDau["chuoi"] as int?;
+      return true;
+    }
+    return false;
   }
 
   // ------
@@ -151,7 +169,7 @@ class CoSoDuLieu {
       final nxb = NhaXuatBan();
       nxb.maSo = ketQua.first["ma"] as int;
       nxb.ten = ketQua.first["ten"] as String;
-      nxb.maLuuChieu = ketQua.first["ma_luu_chieu"] as int?;
+      nxb.maLuuChieu = ketQua.first["ma_luu_chieu"] as String?;
       return nxb;
     }
     return null;
@@ -164,35 +182,38 @@ class CoSoDuLieu {
   }
 
   /// Lấy danh sách các NXB của sách
-  Future<List<NhaXuatBan>> layDsNhaXuatBanCuaSach(int maSach) async {
+  Future<List<NhaXuatBan>> layDsNhaXuatBanCuaSach(Sach sach) async {
     assert(_db != null, "CSDL chưa được khởi tạo.");
+    assert(sach.maSo != null, "Thiếu mã sách.");
     final List<Map<String, Object?>> ketQua = await _db!.rawQuery(
       """
 SELECT "$_BANG_NXB"."ma", "$_BANG_NXB"."ten", "$_BANG_NXB"."ma_luu_chieu" FROM "$_BANG_NXB"
 INNER JOIN "$_BANG_NXB_SACH" ON "$_BANG_NXB_SACH"."nxb" = "$_BANG_NXB"."ma"
 WHERE "$_BANG_NXB_SACH"."sach" = ?;
 """,
-      [maSach]
+      [sach.maSo!]
     );
     return ketQua.map((e) {
       final NhaXuatBan nxb = NhaXuatBan();
       nxb.maSo = e["ma"] as int;
       nxb.ten = e["ten"] as String;
-      nxb.maLuuChieu = e["ma_luu_chieu"] as int?;
+      nxb.maLuuChieu = e["ma_luu_chieu"] as String?;
       return nxb;
     }).toList();
   }
 
   /// Lưu đơn vị phát hành của sách
-  Future<void> themNxbCuaSach(int maSach, int maNXB) async {
+  Future<void> themNxbCuaSach(Sach sach, NhaXuatBan nxb) async {
     assert(_db != null, "CSDL chưa được khởi tạo.");
-    await _db!.insert(_BANG_NXB_SACH, {"sach": maSach, "nxb": maNXB});
+    assert(sach.maSo != null, "Thiếu mã sách.");
+    await _db!.insert(_BANG_NXB_SACH, {"sach": sach.maSo!, "nxb": nxb.maSo});
   }
 
   /// Xoá đơn vị phát hành của sách
-  Future<void> xoaNxbCuaSach(int maSach, int maNXB) async {
+  Future<void> xoaNxbCuaSach(Sach sach, NhaXuatBan nxb) async {
     assert(_db != null, "CSDL chưa được khởi tạo.");
-    await _db!.delete(_BANG_NXB_SACH, where: "sach = ? AND nxb = ?", whereArgs: [maSach, maNXB]);
+    assert(sach.maSo != null, "Thiếu mã sách.");
+    await _db!.delete(_BANG_NXB_SACH, where: "sach = ? AND nxb = ?", whereArgs: [sach.maSo, nxb.maSo]);
   }
 
   // ------
@@ -217,15 +238,16 @@ WHERE "$_BANG_NXB_SACH"."sach" = ?;
   }
 
   /// Lấy danh sách các tác giả của sách
-  Future<List<TacGia>> layDsTacGiaCuaSach(int maSach) async {
+  Future<List<TacGia>> layDsTacGiaCuaSach(Sach sach) async {
     assert(_db != null, "CSDL chưa được khởi tạo.");
+    assert(sach.maSo != null, "Thiếu mã sách.");
     final List<Map<String, Object?>> ketQua = await _db!.rawQuery(
       """
 SELECT "$_BANG_TAC_GIA"."ma", "$_BANG_TAC_GIA"."ten" FROM "$_BANG_TAC_GIA"
 INNER JOIN "$_BANG_TAC_GIA_SACH" ON "$_BANG_TAC_GIA_SACH"."tac_gia" = "$_BANG_TAC_GIA"."ma"
 WHERE "$_BANG_TAC_GIA_SACH"."sach" = ?;
 """,
-      [maSach]
+      [sach.maSo!]
     );
     return ketQua.map((e) {
       final TacGia tg = TacGia();
@@ -236,15 +258,17 @@ WHERE "$_BANG_TAC_GIA_SACH"."sach" = ?;
   }
 
     /// Lưu tác giả của sách
-  Future<void> themTacGiaCuaSach(int maSach, int maTg) async {
+  Future<void> themTacGiaCuaSach(Sach sach, TacGia tacGia) async {
     assert(_db != null, "CSDL chưa được khởi tạo.");
-    await _db!.insert(_BANG_TAC_GIA_SACH, {"sach": maSach, "tac_gia": maTg});
+    assert(sach.maSo != null, "Thiếu mã sách.");
+    await _db!.insert(_BANG_TAC_GIA_SACH, {"sach": sach.maSo!, "tac_gia": tacGia.maSo});
   }
 
   /// Xoá tác giả của sách
-  Future<void> xoaTacGiaCuaSach(int maSach, int maTG) async {
+  Future<void> xoaTacGiaCuaSach(Sach sach, TacGia tacGia) async {
     assert(_db != null, "CSDL chưa được khởi tạo.");
-    await _db!.delete(_BANG_TAC_GIA_SACH, where: "sach = ? AND tac_gia = ?", whereArgs: [maSach, maTG]);
+    assert(sach.maSo != null, "Thiếu mã sách.");
+    await _db!.delete(_BANG_TAC_GIA_SACH, where: "sach = ? AND tac_gia = ?", whereArgs: [sach.maSo!, tacGia.maSo]);
   }
 
   // ------
@@ -269,15 +293,16 @@ WHERE "$_BANG_TAC_GIA_SACH"."sach" = ?;
   }
 
   /// Lấy danh sách các dịch giả của sách
-  Future<List<DichGia>> layDsDichGiaCuaSach(int maSach) async {
+  Future<List<DichGia>> layDsDichGiaCuaSach(Sach sach) async {
     assert(_db != null, "CSDL chưa được khởi tạo.");
+    assert(sach.maSo != null, "Thiếu mã sách.");
     final List<Map<String, Object?>> ketQua = await _db!.rawQuery(
       """
 SELECT "$_BANG_DICH_GIA"."ma", "$_BANG_DICH_GIA"."ten" FROM "$_BANG_DICH_GIA"
 INNER JOIN "$_BANG_DICH_GIA_SACH" ON "$_BANG_DICH_GIA_SACH"."dich_gia" = "$_BANG_DICH_GIA"."ma"
 WHERE "$_BANG_DICH_GIA_SACH"."sach" = ?;
 """,
-      [maSach]
+      [sach.maSo!]
     );
     return ketQua.map((e) {
       final DichGia dg = DichGia();
@@ -288,20 +313,22 @@ WHERE "$_BANG_DICH_GIA_SACH"."sach" = ?;
   }
 
     /// Lưu dịch giả của sách
-  Future<void> themDichGiaCuaSach(int maSach, int maDg) async {
+  Future<void> themDichGiaCuaSach(Sach sach, DichGia dichGia) async {
     assert(_db != null, "CSDL chưa được khởi tạo.");
-    await _db!.insert(_BANG_DICH_GIA_SACH, {"sach": maSach, "dich_gia": maDg});
+    assert(sach.maSo != null, "Thiếu mã sách.");
+    await _db!.insert(_BANG_DICH_GIA_SACH, {"sach": sach.maSo!, "dich_gia": dichGia.maSo});
   }
 
   /// Xoá dịch giả của sách
-  Future<void> xoaDichGiaCuaSach(int maSach, int maDg) async {
+  Future<void> xoaDichGiaCuaSach(Sach sach, DichGia dichGia) async {
     assert(_db != null, "CSDL chưa được khởi tạo.");
-    await _db!.delete(_BANG_DICH_GIA_SACH, where: "sach = ? AND dich_gia = ?", whereArgs: [maSach, maDg]);
+    assert(sach.maSo != null, "Thiếu mã sách.");
+    await _db!.delete(_BANG_DICH_GIA_SACH, where: "sach = ? AND dich_gia = ?", whereArgs: [sach.maSo!, dichGia.maSo]);
   }
 
   // ------
 
-/// Tìm vị trí
+  /// Tìm vị trí
   Future<ViTriSach?> timViTri(String ten) async {
     assert(_db != null, "CSDL chưa được khởi tạo.");
     final List<Map<String, Object?>> ketQua = await _db!.query(_BANG_VI_TRI, where: "ten = ?", whereArgs: [ten]);
@@ -321,15 +348,16 @@ WHERE "$_BANG_DICH_GIA_SACH"."sach" = ?;
   }
 
   /// Lấy danh sách các vị trí của sách
-  Future<List<ViTriSach>> layDsViTriCuaSach(int maSach) async {
+  Future<List<ViTriSach>> layDsViTriCuaSach(Sach sach) async {
     assert(_db != null, "CSDL chưa được khởi tạo.");
+    assert(sach.maSo != null, "Thiếu mã sách.");
     final List<Map<String, Object?>> ketQua = await _db!.rawQuery(
       """
 SELECT "$_BANG_VI_TRI"."ma", "$_BANG_VI_TRI"."ten", "$_BANG_VI_TRI_SACH"."ngay_nhap" FROM "$_BANG_VI_TRI"
 INNER JOIN "$_BANG_VI_TRI_SACH" ON "$_BANG_VI_TRI_SACH"."vi_tri" = "$_BANG_VI_TRI"."ma"
 WHERE "$_BANG_VI_TRI_SACH"."sach" = ?;
 """,
-      [maSach]
+      [sach.maSo!]
     );
     return ketQua.map((e) {
       final ViTriSach vt = ViTriSach();
@@ -341,22 +369,25 @@ WHERE "$_BANG_VI_TRI_SACH"."sach" = ?;
   }
 
     /// Lưu vị trí của sách
-  Future<void> themViTriCuaSach(int maSach, int maVt) async {
+  Future<void> themViTriCuaSach(Sach sach, ViTriSach viTri) async {
     assert(_db != null, "CSDL chưa được khởi tạo.");
+    assert(sach.maSo != null, "Thiếu mã sách.");
     final now = DateTime.now().millisecondsSinceEpoch;
-    await _db!.insert(_BANG_VI_TRI_SACH, {"sach": maSach, "vi_tri": maVt, "ngay_nhap": now});
+    await _db!.insert(_BANG_VI_TRI_SACH, {"sach": sach.maSo!, "vi_tri": viTri.maSo, "ngay_nhap": now});
   }
 
   /// Xoá vị trí của sách
-  Future<void> xoaViTriCuaSach(int maSach, int maVt) async {
+  Future<void> xoaViTriCuaSach(Sach sach, ViTriSach viTri) async {
     assert(_db != null, "CSDL chưa được khởi tạo.");
-    await _db!.delete(_BANG_VI_TRI_SACH, where: "sach = ? AND dich_gia = ?", whereArgs: [maSach, maVt]);
+    assert(sach.maSo != null, "Thiếu mã sách.");
+    await _db!.delete(_BANG_VI_TRI_SACH, where: "sach = ? AND dich_gia = ?", whereArgs: [sach.maSo!, viTri]);
   }
 
   // ------
 
   /// Lấy ảnh của sách
   Future<void> layAnhSach(Sach sach) async {
+    assert(sach.maSo != null, "Thiếu mã sách để cập nhật.");
     final duongDanAnh = join(_thuMucAnhSach, "${sach.maSo!}.jpg");
     if (await File(duongDanAnh).exists()) {
       sach.hinhAnh = XFile(duongDanAnh);
@@ -369,17 +400,19 @@ WHERE "$_BANG_VI_TRI_SACH"."sach" = ?;
 
   /// Lưu ảnh của sách
   Future<void> luuAnhSach(Sach sach) async {
+    assert(sach.maSo != null, "Thiếu mã sách để cập nhật.");
     final String duongDanAnh = join(_thuMucAnhSach, "${sach.maSo!}.jpg");
     final String duongDanAnhNho = join(_thuMucAnhSach, "${sach.maSo!}_tn.jpg");
     if (sach.hinhAnh != null && sach.hinhAnh!.path != duongDanAnh) {
-      final ImgImage? anh = await Isolations.napAnhTuXFile(sach.hinhAnh!);
-      if (anh != null) {
-        encodeJpgFile(duongDanAnh, anh);
-        final ImgImage? anhThuNho = await Isolations.taoAnhThuNho(anh);
-        if (anhThuNho != null) {
-          encodeJpgFile(duongDanAnhNho, anhThuNho);
-        }
-      }
+      // final ImgImage? anh = await Isolations.napAnhTuXFile(sach.hinhAnh!);
+      // if (anh != null) {
+      //   encodeJpgFile(duongDanAnh, anh);
+      //   final ImgImage? anhThuNho = await Isolations.taoAnhThuNho(anh);
+      //   if (anhThuNho != null) {
+      //     encodeJpgFile(duongDanAnhNho, anhThuNho);
+      //   }
+      // }
+      await HeThongMay.duyNhat.luuAnhSach(anhGoc: sach.hinhAnh!.path, mucTieu: duongDanAnh, anhThuNho: duongDanAnhNho);
     } else if (sach.hinhAnh == null) {
       sach.hinhThuNho = null;
       final File fileAnh = File(duongDanAnh);

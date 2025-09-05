@@ -29,6 +29,9 @@ class MainActivity: FlutterActivity() {
         HeThongMay.register(flutterEngine, this)
     }
 
+    /// Hiển thị màn hình Camera
+    /// - [kieu]: kiểu quét mã
+    /// - [maTraKetQua]: mã lưu trữ đối tượng Flutter Result để trả lại kết quả cho FLutter module
     fun hienThiManHinhCamera(kieu: KieuQuetMaCamera, maTraKetQua: Int) {
         val intent = Intent(this, ManHinhCamera::class.java)
         intent.putExtra("mode", kieu.giaTri)

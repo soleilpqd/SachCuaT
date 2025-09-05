@@ -31,11 +31,13 @@ enum _MethodFromNative {
 }
 
 enum _MethodToNative {
-  quetMaISBN;
+  quetMaISBN,
+  luuAnhSach;
 
   String get value {
     return switch (this) {
-      _MethodToNative.quetMaISBN => "quetMaISBN"
+      _MethodToNative.quetMaISBN => "quetMaISBN",
+      _MethodToNative.luuAnhSach => "luuAnhSach"
     };
   }
 }
@@ -67,6 +69,21 @@ class HeThongMay {
   /// Flutter <- Native: kiểm tra định dạng ISBN
   Future<bool> _kiemTraISBN(String giaTri) {
     return Future.value(LinhTinh.kiemTraISBN(giaTri));
+  }
+
+  /// Lưu ảnh sách
+  /// - [anhGoc]: đường dẫn ảnh gốc
+  /// - [mucTieu]: đường dẫn lưu ảnh sách
+  /// - [anhThuNho]; đường dẫn lưu ảnh thu nhỏ
+  /// - [chieuCao]: chiều cao ảnh thu nhỏ
+  Future<bool?> luuAnhSach({required String anhGoc, required String mucTieu, required String anhThuNho, int chieuCao = 50}) async {
+    return _kenhKetNoi.invokeMethod<bool>(
+      _MethodToNative.luuAnhSach.value, {
+        "goc": anhGoc,
+        "dich": mucTieu,
+        "thunho": anhThuNho,
+        "cao": chieuCao
+      });
   }
 
 }

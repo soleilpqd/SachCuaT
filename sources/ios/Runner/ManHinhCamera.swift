@@ -19,8 +19,10 @@
 import UIKit
 import AVFoundation
 
+/// Màn hình Camera (quét mã đồ hoạ)
 final class ManHinhCamera: UIViewController {
 
+    /// Kiểu quét
     enum KieuQuet {
         case isbn
         case other
@@ -35,11 +37,13 @@ final class ManHinhCamera: UIViewController {
 
     @IBOutlet private weak var nutDong: UIButton!
 
+    /// Chuẩn bị (gọi trước khi hiển thị màn hình -> nếu có lỗi thì trả kết quả luôn)
     func chuanBi(_ khiXong: @escaping () -> Void) {
         khiCauHinhXong = khiXong
         kiemTraQuyenTruyCap()
     }
 
+    /// Khi nhấn nút đóng
     @IBAction private func khiNhanNutDong(_ doiTuong: Any?) {
         ketThuc(voi: nil)
     }
@@ -50,6 +54,7 @@ final class ManHinhCamera: UIViewController {
 
     // MARK: - Internal
 
+    /// Kết thúc
     private func ketThuc(voi ketQua: String?) {
         var this: ManHinhCamera? = self
         dismiss(animated: true) {
@@ -58,6 +63,7 @@ final class ManHinhCamera: UIViewController {
         }
     }
 
+    /// Kiểm tra quyền truy cập
     private func kiemTraQuyenTruyCap() {
         switch AVCaptureDevice.authorizationStatus(for: .video) {
         case .authorized:
@@ -71,6 +77,7 @@ final class ManHinhCamera: UIViewController {
         }
     }
 
+    /// Yêu cầu quyền truy cập
     private func yeuCauTruyCap() {
         AVCaptureDevice.requestAccess(for: .video) {[weak self] capPhep in
             DispatchQueue.main.async {
@@ -83,11 +90,13 @@ final class ManHinhCamera: UIViewController {
         }
     }
 
+    /// Khi không có camera
     private func khiKhongCoCamera() {
         resultHandle?(FlutterError(code: "2", message: "No camera", details: nil))
         khiCauHinhXong = nil
     }
 
+    /// Cấu hình camera
     private func cauHinhCamera() {
         guard let captureDevice = AVCaptureDevice.default(for: AVMediaType.video) else {
             khiKhongCoCamera()

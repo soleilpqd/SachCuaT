@@ -43,42 +43,35 @@ class Sach {
 
 }
 
-/// Nhà xuất bản, đơn vị phát hành
-class NhaXuatBan {
+abstract class DuLieuCoso {
   int maSo = -1;
   String ten = "";
-  int? maLuuChieu;
+}
+
+/// Nhà xuất bản, đơn vị phát hành
+class NhaXuatBan extends DuLieuCoso {
+  String? maLuuChieu;
 }
 
 /// Tác giả
-class TacGia {
-  int maSo = -1;
-  String ten = "";
+class TacGia extends DuLieuCoso {
 }
 
 /// Dịch giả
-class DichGia {
-  int maSo = -1;
-  String ten = "";
+class DichGia extends DuLieuCoso {
 }
 
 /// Chuỗi sách nhiều tập
-class SachNhieuTap {
-  int maSo = -1;
-  String ten = "";
+class SachNhieuTap extends DuLieuCoso {
 }
 
 /// Nhãn sách
-class NhanSach {
-  int maSo = -1;
+class NhanSach extends DuLieuCoso {
   int kieu = -1;
-  String ten = "";
 }
 
 /// Vị trí lưu trữ sách
-class ViTriSach {
-  int maSo = -1;
-  String ten = "";
+class ViTriSach extends DuLieuCoso {
   int thoiGian = -1;
 }
 

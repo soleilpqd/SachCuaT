@@ -24,6 +24,8 @@ import 'package:sach_cua_t/models/database.dart';
 import 'package:sach_cua_t/models/dulieu.dart';
 import 'package:sach_cua_t/models/native.dart';
 import 'package:sach_cua_t/models/operations/thao_tac_luu_sach.dart';
+import 'package:sach_cua_t/models/operations/thao_tac_nap_sach.dart';
+import 'package:sach_cua_t/models/operations/thao_tac_so_sanh_sach.dart';
 import 'package:sach_cua_t/models/vtv.dart';
 import 'package:sach_cua_t/utils/hopthoai.dart';
 import 'package:sach_cua_t/utils/vanbanhienthi.dart';
@@ -39,9 +41,10 @@ import 'package:sach_cua_t/views/truong_van_ban.dart';
 /// Điều khiển màn hình thông tin sách
 class _DieuKhienManHinhSach {
 
+  ThaoTacNapThongTinSach? thaoTacNap;
   late BuildContext context;
   /// Điều khiển nút Lưu (bên phải Top bar)
-  final DieuKhienCoSo dkNutLuu = DieuKhienCoSo(khaDung: false);
+  final DieuKhienCoSo dkNutLuu = DieuKhienCoSo(khaDung: true);
   /// Điều khiển nút Quay lại (bên trái Top bar)
   final DieuKhienCoSo dkNutQuayLai = DieuKhienCoSo();
   /// Bộ đệm Vbht cho toàn màn hình
@@ -77,11 +80,13 @@ class ManHinhSach extends StatelessWidget with KhuonMauQuanLyManHinh {
   /// Constructor
   ManHinhSach({super.key, this.maSach}) {
     CoSoDuLieu().truyVanDSNxb().then((value) => _dieuKhien.dsNxb = value);
-    if (maSach == null) {
-      _dieuKhien.dkNutLuu.khaDung = true;
-    }
     _dieuKhien.push = push;
     _dieuKhien.pop = pop;
+    if (maSach != null) {
+      Sach sach = Sach();
+      sach.maSo = maSach;
+      _dieuKhien.thaoTacNap = ThaoTacNapThongTinSach(sach);
+    }
   }
 
   @override
@@ -146,6 +151,7 @@ class _TrangThaiManHinhSoanThaoSach extends State<_ManHinhSoanThaoSach> with The
   final DieuKhienCoSo _dkThemDanhDau = DieuKhienCoSo();
 
   DieuKhienTruongVanBan? _dkVbHienTai;
+  void Function()? _choKetThucSoanThao;
 
 // TODO: nhãn (tag), nhiều tập
   final List<DieuKhienTruongVanBan> _dsDkNhan = [];
@@ -159,7 +165,25 @@ class _TrangThaiManHinhSoanThaoSach extends State<_ManHinhSoanThaoSach> with The
     _dkISBN.themTheoDoi(this);
     _dkTenSach.themTheoDoi(this);
     _dkThayDoiViTriTap.themTheoDoi(this);
-    _cauHinhLaiDauVao();
+
+    if (widget.maSach != null) {
+      widget.dkManHinh.thaoTacNap?.napThongTin().then((value) {
+      if (value) {
+        setState(() {
+          _khoiTaoManHinhTheoThongTinSach();
+        });
+      } else {
+        HopThoai.hienThiThongBao(
+          context,
+          noiDung: Vbht.tuKhoa(TK.sachKhongTonTai, dem: widget.dkManHinh.demVbht),
+          nhanNut: Vbht.tuKhoa(TK.dong, dem: widget.dkManHinh.demVbht),
+          khiDong: (_) => widget.dkManHinh.pop?.call()
+        );
+      }
+    });
+    } else {
+      _cauHinhLaiDauVao();
+    }
   }
 
   @override
@@ -304,6 +328,75 @@ class _TrangThaiManHinhSoanThaoSach extends State<_ManHinhSoanThaoSach> with The
     }
   }
 
+  /// Khởi tạo màn hình theo thông tin sách (chế độ sửa)
+  void _khoiTaoManHinhTheoThongTinSach() {
+    Sach sach = widget.dkManHinh.thaoTacNap!.thongTinSach;
+    _dkDaDocXong.giaTri = sach.daHoanThanh;
+    _dkHinhAnh.hinhAnh = sach.hinhAnh;
+    _dkTenSach.vanBan = sach.ten;
+    _dkISBN.vanBan = sach.isbn;
+
+    int dem = 0;
+    for (final muc in sach.tacGia) {
+      DieuKhienTruongVanBan dkVb = DieuKhienTruongVanBan();
+      dkVb.debugInfo = "TG $dem";
+      dkVb.vanBan = muc;
+      dkVb.trangThaiNutBenPhai = 0;
+      _dsDkTacGia.add(dkVb);
+      dem += 1;
+    }
+    DieuKhienTruongVanBan dkRong = DieuKhienTruongVanBan();
+    dkRong.debugInfo = "TG $dem";
+    dkRong.vanBan = "";
+    dkRong.trangThaiNutBenPhai = null;
+    _dsDkTacGia.add(dkRong);
+
+    dem = 0;
+    for (final muc in sach.dichGia) {
+      DieuKhienTruongVanBan dkVb = DieuKhienTruongVanBan();
+      dkVb.debugInfo = "DG $dem";
+      dkVb.vanBan = muc;
+      dkVb.trangThaiNutBenPhai = 0;
+      _dsDkDichGia.add(dkVb);
+      dem += 1;
+    }
+    dkRong = DieuKhienTruongVanBan();
+    dkRong.debugInfo = "DG $dem";
+    dkRong.vanBan = "";
+    dkRong.trangThaiNutBenPhai = null;
+    _dsDkDichGia.add(dkRong);
+
+    dem = 0;
+    for (final muc in sach.nhaXuatBan) {
+      DieuKhienTruongVanBan dkVb = DieuKhienTruongVanBan();
+      dkVb.debugInfo = "NXB $dem";
+      dkVb.vanBan = muc;
+      dkVb.trangThaiNutBenPhai = 0;
+      _dsDkNxb.add(dkVb);
+      dem += 1;
+    }
+    dkRong = DieuKhienTruongVanBan();
+    dkRong.debugInfo = "NXB $dem";
+    dkRong.vanBan = "";
+    dkRong.trangThaiNutBenPhai = null;
+    _dsDkNxb.add(dkRong);
+
+    dem = 0;
+    for (final muc in sach.viTri) {
+      DieuKhienTruongVanBan dkVb = DieuKhienTruongVanBan();
+      dkVb.debugInfo = "VT $dem";
+      dkVb.vanBan = muc;
+      dkVb.trangThaiNutBenPhai = 0;
+      _dsDkViTri.add(dkVb);
+      dem += 1;
+    }
+    dkRong = DieuKhienTruongVanBan();
+    dkRong.debugInfo = "VT $dem";
+    dkRong.vanBan = "";
+    dkRong.trangThaiNutBenPhai = null;
+    _dsDkViTri.add(dkRong);
+  }
+
   /// Khi nhấn loại bỏ trường văn bản
   void _khiNhanLoaiBoDauVao(DieuKhienTruongVanBan muc) {
     setState(() {
@@ -365,15 +458,23 @@ class _TrangThaiManHinhSoanThaoSach extends State<_ManHinhSoanThaoSach> with The
 
   @override
   Widget build(BuildContext context) {
+    if (widget.maSach != null && !widget.dkManHinh.thaoTacNap!.daXong) {
+      return Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor));
+    }
     const SizedBox spacing = SizedBox(height: 10,);
-    List<Widget> children = [
-      // Tra cứu lưu chiểu
-      TruongNutBam(
-        khiNhan: _khiNhanTraCuuLuuChieu,
-        tieuDe: Vbht.tuKhoa(TK.traCuuLuuChieu, dem: widget.dkManHinh.demVbht),
-        icon: Icons.arrow_forward,
-        dieuKhien: _dkLuuChieu,
-      ),
+    List<Widget> children = [];
+    if (widget.maSach == null) {
+      children.add(
+        // Tra cứu lưu chiểu
+        TruongNutBam(
+          khiNhan: _khiNhanTraCuuLuuChieu,
+          tieuDe: Vbht.tuKhoa(TK.traCuuLuuChieu, dem: widget.dkManHinh.demVbht),
+          icon: Icons.arrow_forward,
+          dieuKhien: _dkLuuChieu,
+        )
+      );
+    }
+    children.addAll([
       // Đã đọc xong
       TruongBatTat(tieuDe: Vbht.tuKhoa(TK.daDocXong, dem: widget.dkManHinh.demVbht), trinhDieuKhien: _dkDaDocXong),
       // Hình chụp
@@ -403,7 +504,7 @@ class _TrangThaiManHinhSoanThaoSach extends State<_ManHinhSoanThaoSach> with The
         tieuDePhu: Vbht.tuKhoa(TK.giaiThichThongTinCoBan, dem: widget.dkManHinh.demVbht)
       ),
       spacing
-    ];
+    ]);
     // DS tác giả
     for (final muc in _dsDkTacGia) {
       children.add(
@@ -547,6 +648,19 @@ class _TrangThaiManHinhSoanThaoSach extends State<_ManHinhSoanThaoSach> with The
     Future.delayed(const Duration(milliseconds: 1)).then((value) => setState(action));
   }
 
+  /// Dừng nhập văn bản
+  /// Delay 1 khoảng để đảm bảo xử lý event dừng
+  void asyncDungNhapVanBan(void Function() action) {
+    _choKetThucSoanThao = null;
+    if (_dkVbHienTai != null)  {
+      _choKetThucSoanThao = action;
+      _dkVbHienTai?.focus = false;
+      _dkVbHienTai = null;
+    } else {
+      action.call();
+    }
+  }
+
   /// Điều khiển cơ sở thay đổi thuộc tính
   /// (`mixin TheoDoiDieuKhienCoSo`)
   @override
@@ -579,8 +693,20 @@ class _TrangThaiManHinhSoanThaoSach extends State<_ManHinhSoanThaoSach> with The
       if (canThemOTrong) {
         // Hàm hiện tại nằm trong notifier của `DieuKhienTruongVanBan`.
         // Delay ra để thành 1 xử lý riêng biệt.
-        asyncSetState(() => _cauHinhLaiDauVao(nguon: muc));
+        void Function()? action;
+        if (_choKetThucSoanThao != null) {
+          action = _choKetThucSoanThao;
+          _choKetThucSoanThao = null;
+        }
+        asyncSetState(() {
+          _cauHinhLaiDauVao(nguon: muc);
+          action?.call();
+        });
       }
+    }
+    if (_choKetThucSoanThao != null) {
+      _choKetThucSoanThao?.call();
+      _choKetThucSoanThao = null;
     }
   }
 
@@ -615,7 +741,7 @@ class _TrangThaiManHinhSoanThaoSach extends State<_ManHinhSoanThaoSach> with The
 
   /// Khi chọn sách từ lưu chiểu
   void _khiChonSachTuLuuChieu(Map<String, String> duLieu) {
-    print("DEBUG $duLieu\n${widget.dkManHinh.dsNxb}");
+    // print("DEBUG $duLieu\n${widget.dkManHinh.dsNxb}");
     String isbn = duLieu["ISBN"] ?? "";
     String ten = duLieu["ten"] ?? "";
     String tacGia = duLieu["TG"] ?? "";
@@ -676,71 +802,98 @@ class _TrangThaiManHinhSoanThaoSach extends State<_ManHinhSoanThaoSach> with The
 
   /// Khi nhấn quay lại
   void _khiNhanQuayLai() {
-    // TODO: confirm
+    if (widget.dkManHinh.thaoTacNap?.thongTinSach != null) {
+      final ThaoTacSoSanhSach soSanh = ThaoTacSoSanhSach(
+        thongTin1: widget.dkManHinh.thaoTacNap!.thongTinSach,
+        thongTin2: _thongTinSachTuGiaoDien()
+      );
+      if (!soSanh.soSanh()) {
+        HopThoai.hienThiThongBaoNhieuNut(
+          context,
+          noiDung: Vbht.tuKhoa(TK.xacNhanLuu, dem: widget.dkManHinh.demVbht),
+          nhanCacNut: [
+            Vbht.tuKhoa(TK.luu, dem: widget.dkManHinh.demVbht),
+            Vbht.tuKhoa(TK.dong, dem: widget.dkManHinh.demVbht)
+          ],
+          khiDong: (ctx, stt, _) {
+            if (stt == 0) {
+              _khiNhanLuu();
+            } else {
+              widget.dkManHinh.pop?.call();
+            }
+        });
+        return;
+      }
+    }
     widget.dkManHinh.pop?.call();
   }
 
   /// Khi nhấn lưu
   void _khiNhanLuu() {
-    _dkVbHienTai?.focus = false;
-    _dkVbHienTai = null;
-    int coTheLuu = 0;
-    if (_dkTenSach.vanBan.isEmpty) {
-      _dkTenSach.thongBaoLoi = Vbht.tuKhoa(TK.thieuThongTin);
-      coTheLuu = 1;
-    } else {
-      _dkTenSach.thongBaoLoi = null;
-    }
-    if (_dkISBN.vanBan.isEmpty) {
-      _dkISBN.thongBaoLoi = Vbht.tuKhoa(TK.thieuThongTin);
-      coTheLuu = 1;
-    } else {
-      _dkISBN.thongBaoLoi = null;
-    }
-    if (_dkTenSach.vanBan.isEmpty && _dkISBN.vanBan.isEmpty) {
-      coTheLuu = 2;
-    }
-    for (final muc in _dsDkViTri) {
-      muc.thongBaoLoi = null;
-    }
-    if (_dsDkViTri.length == 1 && _dsDkViTri.first.vanBan.isEmpty) {
-      _dsDkViTri.first.thongBaoLoi = Vbht.tuKhoa(TK.thieuThongTin);
-      if (coTheLuu != 2) {
+    asyncDungNhapVanBan(() {
+      int coTheLuu = 0;
+      if (_dkTenSach.vanBan.isEmpty) {
+        _dkTenSach.thongBaoLoi = Vbht.tuKhoa(TK.thieuThongTin);
         coTheLuu = 1;
+      } else {
+        _dkTenSach.thongBaoLoi = null;
       }
-    }
-    switch (coTheLuu) {
-      case 1:
-        HopThoai.hienThiThongBaoNhieuNut(
-          context,
-          noiDung: Vbht.tuKhoa(TK.loiLuuSach),
-          nhanCacNut: [Vbht.tuKhoa(TK.cuLuu), Vbht.tuKhoa(TK.dong)],
-          khiDong: (ctx, nut, tieuDe) {
-            if (nut == 0) {
-              _luuSach();
+      if (_dkISBN.vanBan.isEmpty) {
+        _dkISBN.thongBaoLoi = Vbht.tuKhoa(TK.thieuThongTin);
+        coTheLuu = 1;
+      } else {
+        _dkISBN.thongBaoLoi = null;
+      }
+      if (_dkTenSach.vanBan.isEmpty && _dkISBN.vanBan.isEmpty) {
+        coTheLuu = 2;
+      }
+      for (final muc in _dsDkViTri) {
+        muc.thongBaoLoi = null;
+      }
+      if (_dsDkViTri.length == 1 && _dsDkViTri.first.vanBan.isEmpty) {
+        _dsDkViTri.first.thongBaoLoi = Vbht.tuKhoa(TK.thieuThongTin);
+        if (coTheLuu != 2) {
+          coTheLuu = 1;
+        }
+      }
+      switch (coTheLuu) {
+        case 1:
+          HopThoai.hienThiThongBaoNhieuNut(
+            context,
+            noiDung: Vbht.tuKhoa(TK.loiLuuSach),
+            nhanCacNut: [Vbht.tuKhoa(TK.cuLuu), Vbht.tuKhoa(TK.dong)],
+            khiDong: (ctx, nut, tieuDe) {
+              if (nut == 0) {
+                _luuSach();
+              }
             }
-          }
-        );
-      case 2:
-        HopThoai.hienThiThongBao(context, noiDung: Vbht.tuKhoa(TK.loiLuuSach), nhanNut: Vbht.tuKhoa(TK.dong));
-      default:
-        _luuSach();
-    }
+          );
+        case 2:
+          HopThoai.hienThiThongBao(context, noiDung: Vbht.tuKhoa(TK.loiLuuSach), nhanNut: Vbht.tuKhoa(TK.dong));
+        default:
+          _luuSach();
+      }
+    });
   }
 
-  /// Tiến hành lưu thông tin vào CSDL
-  void _luuSach() {
-    _khoaManHinh();
+  Sach _thongTinSachTuGiaoDien() {
     final Sach thongTinSach = Sach();
     thongTinSach.maSo = widget.maSach;
     thongTinSach.ten = _dkTenSach.vanBan;
     thongTinSach.isbn = _dkISBN.vanBan;
     thongTinSach.daHoanThanh = _dkDaDocXong.giaTri;
     thongTinSach.hinhAnh = _dkHinhAnh.hinhAnh;
-    thongTinSach.tacGia = _dsDkTacGia.map((e) => e.vanBan).toList();
-    thongTinSach.dichGia = _dsDkDichGia.map((e) => e.vanBan).toList();
-    thongTinSach.nhaXuatBan = _dsDkNxb.map((e) => e.vanBan).toList();
-    thongTinSach.viTri = _dsDkViTri.map((e) => e.vanBan).toList();
+    thongTinSach.tacGia = _dsDkTacGia.where((element) => element.vanBan.isNotEmpty).map((e) => e.vanBan).toList();
+    thongTinSach.dichGia = _dsDkDichGia.where((element) => element.vanBan.isNotEmpty).map((e) => e.vanBan).toList();
+    thongTinSach.nhaXuatBan = _dsDkNxb.where((element) => element.vanBan.isNotEmpty).map((e) => e.vanBan).toList();
+    thongTinSach.viTri = _dsDkViTri.where((element) => element.vanBan.isNotEmpty).map((e) => e.vanBan).toList();
+    return thongTinSach;
+  }
+
+  /// Tiến hành lưu thông tin vào CSDL
+  void _luuSach() {
+    _khoaManHinh();
+    final Sach thongTinSach = _thongTinSachTuGiaoDien();
     // TODO: nhan, danh dau, nhieu tap
     final ThaoTacLuuThongTinSach thaoTac = ThaoTacLuuThongTinSach(thongTinSach);
     thaoTac.luuThongTin().then((value) => widget.dkManHinh.pop?.call());

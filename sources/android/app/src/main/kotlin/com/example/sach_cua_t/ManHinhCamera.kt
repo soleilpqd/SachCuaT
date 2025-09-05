@@ -45,11 +45,13 @@ import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.common.InputImage
 
+/// Kiểu quét mã qua máy ảnh
 enum class KieuQuetMaCamera(val giaTri: Int) {
     isbn(0),
     other(1);
 
     companion object {
+        /// Tạo từ giá trị thô
         fun taoTuGiaTriTho(raw: Int): KieuQuetMaCamera? {
             for (item in KieuQuetMaCamera.values()) {
                 if (item.giaTri == raw) {
@@ -61,6 +63,7 @@ enum class KieuQuetMaCamera(val giaTri: Int) {
     }
 }
 
+/// Màn hình camera (quét mã đồ hoạ)
 class ManHinhCamera : AppCompatActivity() {
 
     private lateinit var binding: ActivityManHinhCameraBinding
@@ -116,6 +119,7 @@ class ManHinhCamera : AppCompatActivity() {
         barcodeScanner.close()
     }
 
+    /// Khi nhấn nút đóng
     private val khiNhanNutDong = View.OnTouchListener { view, motionEvent ->
         finish()
         false
@@ -185,14 +189,17 @@ class ManHinhCamera : AppCompatActivity() {
         }, ContextCompat.getMainExecutor(this))
     }
 
+    /// Kiểm tra quyền sử dụng máy ảnh
     private fun kiemTraQuyenSuDungMayAnh(): Boolean {
         return ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
     }
 
+    /// Yêu cầu quyền sử dụng máy ảnh
     private fun yeuCauQuyenSuDungMayAnh() {
         ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA), 1)
     }
 
+    /// Hàm xử lý kết quả yêu cầu quyền
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
@@ -206,6 +213,7 @@ class ManHinhCamera : AppCompatActivity() {
         }
     }
 
+    /// Khi quét được DL
     private fun khiQuetDuocDL(raw: String, cameraProvider: ProcessCameraProvider, imageProxy: ImageProxy) {
         HeThongMay.duyNhat.kiemTraISBN(raw) { ketQua ->
             if (ketQua) {

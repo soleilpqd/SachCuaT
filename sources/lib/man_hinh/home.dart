@@ -119,7 +119,7 @@ class _HomePageState extends State<HomePage> with KhuonMauQuanLyManHinh {
   }
 
   void _khiNhanThemSach() {
-    push(ManHinhSach.maManHinh, ManHinhSach(maSach: null));
+    push(ManHinhSach.maManHinh, ManHinhSach(maSach: 1));
   }
 
   void _khiNhanThemViTri() {

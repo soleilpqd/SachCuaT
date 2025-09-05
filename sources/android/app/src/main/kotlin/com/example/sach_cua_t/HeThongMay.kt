@@ -18,16 +18,20 @@
 
 package com.example.sach_cua_t
 
-import android.util.Log
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
+import java.io.File
+import java.io.FileOutputStream
 
 /// Tên hàm gọi từ Flutter đến native
 enum class TenHamTuFlutter(val value: String) {
 
-    quetMaISBN("quetMaISBN");
+    quetMaISBN("quetMaISBN"),
+    luuAnhSach("luuAnhSach");
 
     companion object {
         fun taoTuTenTho(raw: String): TenHamTuFlutter? {
@@ -49,9 +53,12 @@ enum class TenHamDenFlutter(val value: String) {
 
 }
 
+/// Callback trả kết quả khi từ native gọi đến flutter
 class NhanKetQuaKenhFlutter: MethodChannel.Result {
 
+    /// Khi thành công
     var khiThanhCong: ((duLieu: Any?) -> Unit)? = null
+    /// Khi thất bại
     var khiThatBai: ((errorCode: String, errorMessage: String?, errorDetails: Any?) -> Unit)? = null
 
     override fun success(result: Any?) {
@@ -66,10 +73,14 @@ class NhanKetQuaKenhFlutter: MethodChannel.Result {
 
 }
 
+/// Hệ thống máy
 class HeThongMay(kenh: MethodChannel, main: MainActivity): MethodCallHandler {
 
+    /// Kênh kết nối
     private val kenhKetNoi: MethodChannel = kenh
+    /// Màn hình chính
     private val manHinhChinh: MainActivity
+    /// Hàng đợi các đối tượng trả kết quả cho flutter
     private val dsTraKetQua = mutableMapOf<Int, MethodChannel.Result>()
 
     companion object {
@@ -85,6 +96,7 @@ class HeThongMay(kenh: MethodChannel, main: MainActivity): MethodCallHandler {
         manHinhChinh = main
     }
 
+    /// Thêm hàng đợi trả kết quả
     private fun themHangDoiTraKetQua(result: MethodChannel.Result): Int {
         for (index in Int.MIN_VALUE..Int.MAX_VALUE) {
             if (!dsTraKetQua.containsKey(index)) {
@@ -95,6 +107,7 @@ class HeThongMay(kenh: MethodChannel, main: MainActivity): MethodCallHandler {
         return 0
     }
 
+    /// Lấy đối tượng trả kết quả
     fun layTraKetQua(ma: Int): MethodChannel.Result? {
         return dsTraKetQua.remove(ma)
     }
@@ -105,10 +118,14 @@ class HeThongMay(kenh: MethodChannel, main: MainActivity): MethodCallHandler {
                 val ma = themHangDoiTraKetQua(result)
                 manHinhChinh.hienThiManHinhCamera(KieuQuetMaCamera.isbn, ma)
             }
+            TenHamTuFlutter.luuAnhSach -> {
+                luuAnhSach(call, result)
+            }
             null -> result.error("1", "Hàm không xác định", call.method)
         }
     }
 
+    /// Kiểm tra ISBN: hàm từ native gọi cho flutter
     fun kiemTraISBN(giaTri: String, nhanKetQua: (Boolean) -> Unit) {
         val callback = NhanKetQuaKenhFlutter()
         callback.khiThanhCong = { ketQua ->
@@ -117,6 +134,58 @@ class HeThongMay(kenh: MethodChannel, main: MainActivity): MethodCallHandler {
             }
         }
         kenhKetNoi.invokeMethod(TenHamDenFlutter.kiemTraISBN.value, giaTri, callback)
+    }
+
+    /// Lưu ảnh sách (ảnh chính, ảnh thu nhỏ)
+    private fun luuAnhSach(call: MethodCall, result: MethodChannel.Result) {
+        val anhGoc = call.argument<String>("goc")
+        val anhSach = call.argument<String>("dich")
+        val anhThuNho = call.argument<String>("thunho")
+        val chieuCao = call.argument<Int>("cao")
+        if (anhGoc == null || anhSach == null || anhThuNho == null || chieuCao == null) {
+            result.error("luuAnhSach_1", "Tham số không đúng", call.method)
+            return
+        }
+        // Nạp ảnh gốc
+        var bitmap: Bitmap? = null
+        try {
+            bitmap = BitmapFactory.decodeFile(anhGoc)
+        } catch (err: Exception) {}
+        if (bitmap == null) {
+            result.error("luuAnhSach_2", "Không nạp được ảnh gốc", anhGoc)
+            return
+        }
+        // Lưu vào CSDL dưới dạng JPEG
+        try {
+            val outStream = FileOutputStream(File(anhSach))
+            bitmap!!.compress(Bitmap.CompressFormat.JPEG, 100, outStream)
+            outStream.flush()
+            outStream.close()
+        } catch (err: Exception) {
+            result.error("luuAnhSach_3", "Không tạo được JPEG data", anhGoc)
+            return
+        }
+        // Tạo ảnh thu nhỏ
+        val chieuRong = chieuCao * bitmap.width / bitmap.height
+        var bitmapTn: Bitmap? = null
+        try {
+            bitmapTn = Bitmap.createScaledBitmap(bitmap, chieuRong, chieuCao, false)
+        } catch (err: Exception) {}
+        if (bitmapTn == null) {
+            result.error("luuAnhSach_5", "Không vẽ được ảnh thu nhỏ", anhThuNho)
+            return
+        }
+        // Lưu ảnh JPEG thu nhỏ
+        try {
+            val outStream = FileOutputStream(File(anhThuNho))
+            bitmapTn!!.compress(Bitmap.CompressFormat.JPEG, 100, outStream)
+            outStream.flush()
+            outStream.close()
+        } catch (err: Exception) {
+            result.error("luuAnhSach_6", "Không tạo được JPEG data ảnh thu nhỏ", anhGoc)
+            return
+        }
+        result.success(true)
     }
 
 }
