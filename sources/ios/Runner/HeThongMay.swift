@@ -42,10 +42,16 @@ final class HeThongMay {
     /// Kênh kết nối
     private let kenhKetNoi: FlutterMethodChannel
 
+//    private let kbToolbarView = UIView(frame: CGRect(x: 0, y: 0, width: 100, height: 50))
+
     public static func register(with rootController: FlutterViewController) {
         let channel = FlutterMethodChannel(name: "sach.cua.T", binaryMessenger: rootController.binaryMessenger)
         let instance = HeThongMay(kenh: channel)
         duyNhat = instance
+    }
+
+    deinit {
+        NotificationCenter.default.removeObserver(self)
     }
 
     init(kenh: FlutterMethodChannel) {
@@ -53,7 +59,50 @@ final class HeThongMay {
         kenhKetNoi.setMethodCallHandler { call, result in
             HeThongMay.duyNhat.xuLyHam(call: call, result: result)
         }
+//        nhungKeyboardToolbar()
+//        NotificationCenter.default.addObserver(self, selector: #selector(keyboardOnAppear), name: UIResponder.keyboardWillShowNotification, object: nil)
+//        NotificationCenter.default.addObserver(self, selector: #selector(keyboardOnResize), name: UIResponder.keyboardWillChangeFrameNotification, object: nil)
+//        NotificationCenter.default.addObserver(self, selector: #selector(keyboardOnDisappear), name: UIResponder.keyboardWillHideNotification, object: nil)
     }
+
+//    private func timView(viewCha: UIView, dieuKien: String) -> UIView? {
+//        for muc in viewCha.subviews {
+//            if muc.description.hasPrefix(dieuKien) {
+//                return muc
+//            }
+//        }
+//        return nil
+//    }
+
+//    private func nhungKeyboardToolbar() {
+//        kbToolbarView.isHidden = true
+//        kbToolbarView.backgroundColor = .red
+//        var viewChua: UIView?
+//        for win in UIApplication.shared.windows {
+//            if let muc = timView(viewCha: win, dieuKien: "<UIInputSetContainerView:") {
+//                viewChua = muc
+//                break
+//            }
+//        }
+//        guard let vChua = viewChua, let viewKB = timView(viewCha: vChua, dieuKien: "<UIInputSetHostView: ")
+//        else { return }
+//        kbToolbarView.translatesAutoresizingMaskIntoConstraints = false
+//        kbToolbarView.removeFromSuperview()
+//        vChua.addSubview(kbToolbarView)
+//        var constraint = NSLayoutConstraint(item: kbToolbarView, attribute: .leading, relatedBy: .equal, toItem: vChua, attribute: .leading, multiplier: 1.0, constant: 0)
+//        vChua.addConstraint(constraint)
+//        constraint = NSLayoutConstraint(item: kbToolbarView, attribute: .trailing, relatedBy: .equal, toItem: vChua, attribute: .trailing, multiplier: 1.0, constant: 0)
+//        vChua.addConstraint(constraint)
+//        constraint = NSLayoutConstraint(item: kbToolbarView, attribute: .bottom, relatedBy: .equal, toItem: viewKB, attribute: .top, multiplier: 1.0, constant: 0)
+//        vChua.addConstraint(constraint)
+//        constraint = NSLayoutConstraint(item: kbToolbarView, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .height, multiplier: 1.0, constant: 50)
+//        vChua.addConstraint(constraint)
+//        if kbToolbarView.subviews.isEmpty {
+//            let label = UILabel(frame: CGRect(x: 0, y: 0, width: 100, height: 30))
+//            label.text = "TEST"
+//            kbToolbarView.addSubview(label)
+//        }
+//    }
 
     /// Xử lý hàm
     private func xuLyHam(call: FlutterMethodCall, result: @escaping FlutterResult) {
@@ -136,5 +185,18 @@ final class HeThongMay {
         }
         result(true)
     }
+
+//    @IBAction private func keyboardOnAppear(_ notif: Notification) {
+////        nhungKeyboardToolbar()
+////        kbToolbarView.isHidden = false
+//    }
+//
+//    @IBAction private func keyboardOnResize(_ notif: Notification) {
+//
+//    }
+//
+//    @IBAction private func keyboardOnDisappear(_ notif: Notification) {
+////        kbToolbarView.isHidden = true
+//    }
 
 }

@@ -32,6 +32,7 @@ enum class TenHamTuFlutter(val value: String) {
 
     quetMaISBN("quetMaISBN"),
     luuAnhSach("luuAnhSach");
+//    layThongTinHienThi("layThongTinHienThi");
 
     companion object {
         fun taoTuTenTho(raw: String): TenHamTuFlutter? {
@@ -49,7 +50,8 @@ enum class TenHamTuFlutter(val value: String) {
 /// Tên hàm gọi từ Native về Flutter
 enum class TenHamDenFlutter(val value: String) {
 
-    kiemTraISBN("kiemTraISBN")
+    kiemTraISBN("kiemTraISBN");
+//    capNhatHienThi("capNhatHienThi");
 
 }
 
@@ -121,6 +123,10 @@ class HeThongMay(kenh: MethodChannel, main: MainActivity): MethodCallHandler {
             TenHamTuFlutter.luuAnhSach -> {
                 luuAnhSach(call, result)
             }
+//            TenHamTuFlutter.layThongTinHienThi -> {
+//                val ketQua = manHinhChinh.layThongTinManHinh()
+//                result.success(ketQua)
+//            }
             null -> result.error("1", "Hàm không xác định", call.method)
         }
     }
@@ -187,5 +193,9 @@ class HeThongMay(kenh: MethodChannel, main: MainActivity): MethodCallHandler {
         }
         result.success(true)
     }
+
+//    fun thongBaoCapNhatHienThi(thongTin: Map<String, Any>) {
+//        kenhKetNoi.invokeMethod(TenHamDenFlutter.capNhatHienThi.value, thongTin)
+//    }
 
 }

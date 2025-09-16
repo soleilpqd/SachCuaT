@@ -22,6 +22,15 @@ import 'package:flutter/material.dart';
 class HangSo {
 
   static const String urlLuuChieu = "https://ppdvn.gov.vn/web/guest/tra-cuu-luu-chieu";
+  static const Map<String, String> tiengVietKhongDau = {
+    "a": "àáảãạâầấẩẫậăằắẳẵặ",
+    "e": "èéẻẽẹêềếểễệ",
+    "i": "ìíỉĩị",
+    "o": "òóỏõọôồốổỗộơờớởỡợ",
+    "u": "ùúủũụưừứửữự",
+    "y": "ỳýỷỹỵ",
+    "d": "đ"
+  };
 
 }
 
@@ -121,6 +130,42 @@ class LinhTinh {
       ketQua.add(tam);
     }
     return ketQua;
+  }
+
+  static String _boDauTiengViet(String chu) {
+    for (final muc in HangSo.tiengVietKhongDau.entries) {
+      if (muc.value.contains(chu)) {
+        return muc.key;
+      }
+    }
+    return chu;
+  }
+
+  /// Loại bỏ dấu tiếng Việt
+  static String loaiBoDautiengViet(String vanBan) {
+    String ketQua = "";
+    for (final chu in vanBan.toLowerCase().characters) {
+      ketQua += _boDauTiengViet(chu);
+    }
+    return ketQua;
+  }
+
+}
+
+extension ViTriWidget on GlobalKey {
+
+  /// Tìm vị trí của widget
+  Rect? timViTriCuaWidget() {
+    final RenderBox? renderBox = currentContext?.findRenderObject() as RenderBox?;
+    if (renderBox != null) {
+      Offset pos = renderBox.localToGlobal(Offset.zero);
+      Size size = renderBox.size;
+      final RenderBox? parentBox = renderBox.parent as RenderBox?;
+      if (parentBox != null) {
+      }
+      return Rect.fromLTWH(pos.dx, pos.dy, size.width, size.height);
+    }
+    return null;
   }
 
 }

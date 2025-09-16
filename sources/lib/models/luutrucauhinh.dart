@@ -16,29 +16,31 @@
   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import 'package:sach_cua_t/views/truong_van_ban.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-/// Class test, không có tính ứng dụng
-class GoiYSo extends GoiYVanBan {
+/// Lưu trữ cấu hình
+class LuuTruCauHinh {
 
-  @override
-  Future<List<String>> timKiemGoiY(String dauVao, TruongVanBan widget) async {
-    List<String> ketQua = [];
-    if (widget.soKyTuToiDa != null && dauVao.length >= widget.soKyTuToiDa!) {
-      return ketQua;
-    }
-    for (var so = 0; so <= 9; so += 1) {
-      ketQua.add("$dauVao$so");
-    }
-    return ketQua;
+  LuuTruCauHinh._internal();
+  static final LuuTruCauHinh _duyNhat = LuuTruCauHinh._internal();
+  factory LuuTruCauHinh() => _duyNhat;
+
+  SharedPreferences? _prefs;
+
+  Future<void> _khoiTaoNeuCan() async {
+    _prefs ??= await SharedPreferences.getInstance();
   }
 
-  @override
-  bool tiepTucGoiY(String dauVao, TruongVanBan widget) {
-    if (widget.soKyTuToiDa != null && dauVao.length >= widget.soKyTuToiDa!) {
-      return false;
-    }
-    return true;
+  /// Lấy thời điểm tham chiếu
+  Future<int?> layThoiDiemThamChieu() async {
+    await _khoiTaoNeuCan();
+    return _prefs!.getInt("thoi_diem_tham_chieu");
+  }
+
+  /// Lưu thời điểm tham chiếu
+  Future<void> luuThoiDiemThamChieu(int value) async {
+    await _khoiTaoNeuCan();
+    _prefs!.setInt("thoi_diem_tham_chieu", value);
   }
 
 }

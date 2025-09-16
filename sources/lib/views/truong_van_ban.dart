@@ -18,6 +18,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:sach_cua_t/models/vanbannoibat.dart';
+import 'package:sach_cua_t/utils/common.dart';
 import 'package:sach_cua_t/utils/vanbanhienthi.dart';
 import 'package:sach_cua_t/views/dieu_khien_co_so.dart';
 import 'package:sach_cua_t/views/van_ban_hien_thi_noi_bat.dart';
@@ -26,11 +28,19 @@ import 'package:sach_cua_t/views/van_ban_hien_thi_widget.dart';
 /// Gợi ý văn bản cơ sở
 abstract class GoiYVanBan {
 
+  static double get chieuCaoHienThiGoiY => 125;
+
   /// Trả lại danh sách các vị trí (index) của danh sách gợi ý
-  List<String> timKiemGoiY(String dauVao, TruongVanBan widget) => [];
+  Future<List<String>> timKiemGoiY(String dauVao, TruongVanBan widget) async => [];
 
   /// Tiếp tục gợi ý sau khi đã chọn
   bool tiepTucGoiY(String dauVao, TruongVanBan widget) => false;
+
+  /// Lấy văn bản nổi bật (đã cache) để hiển thị
+  VanBanNoiBat? layVanBanNoiBat(String dayDu, String noiBat) => null;
+
+  /// User đã chọn 1 gợi ý
+  void daChonGoiY(String tuKhoa) {}
 
 }
 
@@ -177,23 +187,29 @@ class TruongVanBan extends GiaoDienCoSo<DieuKhienTruongVanBan> {
   final Widget? Function(int? giaTri, bool khaDung)? xayDungNutBenPhai;
 
   /// CONSTRUCTOR
-  const TruongVanBan({
-    super.key,
+  TruongVanBan({
     required this.tieuDe,
     required DieuKhienTruongVanBan trinhDieuKhien,
     this.kieuBanPhim = TextInputType.text,
     this.soKyTuToiDa,
     this.kiemSoatNhapLieu,
-    this.xayDungNutBenPhai
-  }) : super(dieuKhien: trinhDieuKhien);
+    this.xayDungNutBenPhai,
+  }) : super(key: GlobalKey(), dieuKhien: trinhDieuKhien);
 
   @override
   State<StatefulWidget> createState() => _TrangThaiTruongVanBan();
 
+  Rect? timViTriCuaToi() {
+    final GlobalKey? gKey = (key as GlobalKey?);
+    return gKey?.timViTriCuaWidget();
+  }
+
 }
 
+/// Trạng thái trường văn bản
 class _TrangThaiTruongVanBan extends TrangThaiCoSo<TruongVanBan> {
 
+  /// Điều khiển cơ sở thay đổi thuộc tính (`TheoDoiDieuKhienCoSo`)
   @override
   void dieuKhienCoSoThayDoiThuocTinh(DieuKhienCoSo nguon, Map<String, dynamic> cacGiaTri) {
     if (nguon == widget.dieuKhien) {
@@ -206,6 +222,23 @@ class _TrangThaiTruongVanBan extends TrangThaiCoSo<TruongVanBan> {
       }
     }
   }
+
+  /// Tìm gợi ý
+  Future<List<String>> _timGoiY({int dem = 0}) async {
+    final text = widget.dieuKhien?.vanBan ?? "";
+    List<String> ketQua = await widget.dieuKhien!.goiY?.timKiemGoiY(text, widget) ?? [];
+    if (widget.dieuKhien?.vanBan != text) { // Văn bản thay đổi trong khi tìm kiếm gợi ý
+      if (dem > 1) { // Giới hạn số lần gọi lồng nhau
+        ketQua = [];
+      } else {
+        ketQua = await _timGoiY(dem: dem + 1);
+      }
+    }
+    return ketQua;
+  }
+
+  /// Lấy văn bản nổi bật để hiển thị
+  VanBanNoiBat _layVanBanNoiBat(String dayDu, String noiBat) => widget.dieuKhien?.goiY?.layVanBanNoiBat(dayDu, noiBat) ?? VanBanNoiBat(vanBanDayDu: dayDu, vanBanNoiBat: noiBat);
 
   @override
   Widget build(BuildContext context) {
@@ -239,27 +272,55 @@ class _TrangThaiTruongVanBan extends TrangThaiCoSo<TruongVanBan> {
             )
           );
         },
-        optionsBuilder: (value) {
-          return widget.dieuKhien!.goiY?.timKiemGoiY(value.text, widget) ?? [];
-        },
+        optionsBuilder: (value) async => await _timGoiY(),
         optionsViewBuilder: (context, onSelected, options) {
-          return Container(
-            color: Colors.white,
-            child: ListView.separated(
-              padding: EdgeInsets.zero,
-              itemCount: options.length,
-              separatorBuilder: (context, index) => SizedBox(height: 1, child: Container(color: Colors.grey)),
-              itemBuilder: (context, index) {
-                final String opt = options.toList()[index];
-                return TextButton(
-                  style: const ButtonStyle(
-                    shape: MaterialStatePropertyAll(RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.zero))),
-                    foregroundColor: MaterialStatePropertyAll(Colors.black),
-                  ),
-                  onPressed: () => onSelected(opt),
-                  child: VanBanHienThiNoiBat(vanBanDayDu: opt, vanBanNoiBat: widget.dieuKhien!.vanBan)
-                );
-              }
+          double maxH = options.length * 50;
+          double gioiHan = GoiYVanBan.chieuCaoHienThiGoiY;
+          if (maxH > gioiHan) {
+            maxH = gioiHan;
+          }
+          double maxW = double.infinity;
+          final Rect? viTri = widget.timViTriCuaToi();
+          if (viTri != null) {
+            maxW = viTri.width;
+          //   double h = MediaQuery.sizeOf(context).height - viTri.bottom;
+          //   if (h < 100) {
+          //     h = 100;
+          //   }
+          //   if (maxH > h) {
+          //     maxH = h;
+          //   }
+          }
+          // NOTE: có cần trừ chiều cao bàn phím?
+          return Align(
+            alignment: Alignment.topLeft,
+            child: Container(
+              // color: Color.fromARGB(255, 170, 170, 170),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.all(Radius.circular(5)),
+                boxShadow: [
+                  BoxShadow(offset: Offset(5, 5), blurRadius: 5, color: Color.fromARGB(255, 200, 200, 200)),
+                  BoxShadow(offset: Offset(-1, -1), blurRadius: 1, color: Color.fromARGB(255, 200, 200, 200))
+                ]
+              ),
+              constraints: BoxConstraints(maxHeight: maxH, maxWidth: maxW),
+              child: ListView.separated(
+                padding: EdgeInsets.zero,
+                itemCount: options.length,
+                separatorBuilder: (context, index) => SizedBox(height: 1, child: Container(color: Colors.grey)),
+                itemBuilder: (context, index) {
+                  final String opt = options.toList()[index];
+                  return TextButton(
+                    style: const ButtonStyle(
+                      shape: MaterialStatePropertyAll(RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.zero))),
+                      foregroundColor: MaterialStatePropertyAll(Colors.black),
+                    ),
+                    onPressed: () => onSelected(opt),
+                    child: VanBanHienThiNoiBat(vanBan: _layVanBanNoiBat(opt, widget.dieuKhien!.vanBan))
+                  );
+                }
+              )
             )
           );
         },
@@ -270,6 +331,7 @@ class _TrangThaiTruongVanBan extends TrangThaiCoSo<TruongVanBan> {
             widget.dieuKhien!.vanBan = option;
             widget.dieuKhien!._coTheTheoDoiThayDoiVanBan = true;
           }
+          widget.dieuKhien?.goiY?.daChonGoiY(option);
         }
       )
     );

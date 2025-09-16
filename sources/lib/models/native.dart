@@ -17,14 +17,17 @@
  */
 
 import 'package:flutter/services.dart';
+// import 'package:sach_cua_t/models/hienthinentang.dart';
 import 'package:sach_cua_t/utils/common.dart';
 
 enum _MethodFromNative {
   kiemTraISBN;
+  // capNhatHienThi;
 
   static _MethodFromNative? init(String raw) {
     return switch (raw) {
       "kiemTraISBN" => _MethodFromNative.kiemTraISBN,
+      // "capNhatHienThi" => _MethodFromNative.capNhatHienThi,
       _ => null
     };
   }
@@ -33,14 +36,22 @@ enum _MethodFromNative {
 enum _MethodToNative {
   quetMaISBN,
   luuAnhSach;
+  // layThongTinHienThi;
 
   String get value {
     return switch (this) {
       _MethodToNative.quetMaISBN => "quetMaISBN",
-      _MethodToNative.luuAnhSach => "luuAnhSach"
+      _MethodToNative.luuAnhSach => "luuAnhSach",
+      // _MethodToNative.layThongTinHienThi => "layThongTinHienThi"
     };
   }
 }
+
+// mixin TheoDoiHeThongMay {
+
+//   void heThongCapNhatHienThi(bool banPhim, bool chieuManHinh);
+
+// }
 
 /// APIs trao đổi với module native
 class HeThongMay {
@@ -54,12 +65,17 @@ class HeThongMay {
         switch (method) {
         case _MethodFromNative.kiemTraISBN:
           return _kiemTraISBN(call.arguments);
+        // case _MethodFromNative.capNhatHienThi:
+        //   _xuLyThongTinHienThi(call.arguments);
+        //   _thongBaoCapNhatHienThi(call.arguments);
         }
       }
       return Future(() => null);
     });
   }
   static final HeThongMay duyNhat = HeThongMay._internal();
+  // final thongTinHienThi = HienThiNenTang();
+  // final theoDoi = <TheoDoiHeThongMay>[];
 
   /// Flutter -> Native: Bật camera để quét mã ISBN
   Future<String?> quetMaISBN() async {
@@ -85,5 +101,35 @@ class HeThongMay {
         "cao": chieuCao
       });
   }
+
+  // void _xuLyThongTinHienThi(dynamic duLieu) {
+  //   if (duLieu is Map<Object?, Object?>) {
+  //     thongTinHienThi.trichXuat(duLieu);
+  //   }
+  // }
+
+  // void _thongBaoCapNhatHienThi(dynamic duLieu) {
+  //   bool thayDoiBp = false;
+  //   bool thayDoiChieu = false;
+  //   if (duLieu is Map<Object?, Object?>) {
+  //     dynamic banPhim = duLieu["bp"];
+  //     dynamic chieu = duLieu["chieu"];
+  //     if (banPhim is bool) {
+  //       thayDoiBp = banPhim;
+  //     }
+  //     if (chieu is bool) {
+  //       thayDoiChieu = chieu;
+  //     }
+  //   }
+  //   for (final muc in theoDoi) {
+  //     muc.heThongCapNhatHienThi(thayDoiBp, thayDoiChieu);
+  //   }
+  // }
+
+  /// Lấy thông tin hiển thị của Native module
+  // Future<void> layThongTinHienThi() async {
+    // final duLieu = await _kenhKetNoi.invokeMethod<Map<Object?, Object?>>(_MethodToNative.layThongTinHienThi.value);
+    // _xuLyThongTinHienThi(duLieu);
+  // }
 
 }

@@ -16,29 +16,34 @@
   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import 'package:sach_cua_t/models/database.dart';
+import 'package:sach_cua_t/models/vanbannoibat.dart';
 import 'package:sach_cua_t/views/truong_van_ban.dart';
 
-/// Class test, không có tính ứng dụng
-class GoiYSo extends GoiYVanBan {
+/// Gợi ý từ 1 trường trong CSDL
+class GoiYCSDL extends GoiYVanBan {
+
+  final String bang;
+  List<VanBanNoiBat> _dsKetQua = [];
+
+  GoiYCSDL({required this.bang});
 
   @override
   Future<List<String>> timKiemGoiY(String dauVao, TruongVanBan widget) async {
-    List<String> ketQua = [];
-    if (widget.soKyTuToiDa != null && dauVao.length >= widget.soKyTuToiDa!) {
-      return ketQua;
+    if (dauVao.isEmpty) {
+      return [];
     }
-    for (var so = 0; so <= 9; so += 1) {
-      ketQua.add("$dauVao$so");
-    }
-    return ketQua;
+    _dsKetQua = await CoSoDuLieu().timKiemGoiY(bang, dauVao);
+    _dsKetQua.sapXep();
+    return _dsKetQua.map((e) => e.vanBanDayDu).toList();
   }
 
   @override
-  bool tiepTucGoiY(String dauVao, TruongVanBan widget) {
-    if (widget.soKyTuToiDa != null && dauVao.length >= widget.soKyTuToiDa!) {
-      return false;
-    }
-    return true;
+  VanBanNoiBat? layVanBanNoiBat(String dayDu, String noiBat)  => _dsKetQua.firstWhere((element) => element.vanBanDayDu == dayDu && element.vanBanNoiBat == noiBat);
+
+  @override
+  void daChonGoiY(String tuKhoa) {
+    CoSoDuLieu().luuThoiDiemChonGoiY(bang, tuKhoa);
   }
 
 }

@@ -17,43 +17,34 @@
  */
 
 import 'package:flutter/material.dart';
+import 'package:sach_cua_t/models/vanbannoibat.dart';
 
 /// Hiển thị nổi bật (tô nền) các đoạn [vanBanNoiBat] có trong [vanBanDayDu]
 class VanBanHienThiNoiBat extends StatelessWidget {
 
   /// Văn bản nổi bật
-  final String vanBanNoiBat;
-  /// Văn bản đầy đủ
-  final String vanBanDayDu;
+  final VanBanNoiBat vanBan;
 
   /// Constructor
-  const VanBanHienThiNoiBat({super.key, required this.vanBanDayDu, required this.vanBanNoiBat});
+  const VanBanHienThiNoiBat({super.key, required this.vanBan});
 
   /// Xây dựng các đoạn văn bản
   List<Text> _xayDungCacDoanVanBan() {
     List<Text> ketQua = [];
-    if (vanBanNoiBat.isEmpty) {
-      ketQua.add(Text(vanBanDayDu));
+    if (vanBan.dsViTriKd.isEmpty) {
+      ketQua.add(Text(vanBan.vanBanDayDu));
       return ketQua;
     }
-    String buffer = vanBanDayDu;
-    String bufferCmp = buffer.toLowerCase();
-    String gocCmp = vanBanNoiBat.toLowerCase();
-    while (buffer.isNotEmpty) {
-      final int viTri = bufferCmp.indexOf(gocCmp);
-      if (viTri > 0) {
-        ketQua.add(Text(buffer.substring(0, viTri)));
-        ketQua.add(Text(vanBanNoiBat, style: const TextStyle(backgroundColor: Colors.yellow)));
-        buffer = buffer.substring(viTri + vanBanNoiBat.length);
-        bufferCmp = buffer.toLowerCase();
-      } else if (viTri == 0) {
-        ketQua.add(Text(vanBanNoiBat, style: const TextStyle(backgroundColor: Colors.yellow)));
-        buffer = buffer.substring(vanBanNoiBat.length);
-        bufferCmp = buffer.toLowerCase();
-      } else {
-        ketQua.add(Text(buffer));
-        buffer = "";
+    int vtHt = 0;
+    for (final vt in vanBan.dsViTriKd) {
+      if (vt > vtHt) {
+        ketQua.add(Text(vanBan.vanBanDayDu.substring(vtHt, vt)));
       }
+      vtHt = vt + vanBan.vanBanNoiBat.length;
+      ketQua.add(Text(vanBan.vanBanDayDu.substring(vt, vtHt), style: const TextStyle(backgroundColor: Colors.yellow)));
+    }
+    if (vtHt < vanBan.vanBanDayDu.length) {
+      ketQua.add(Text(vanBan.vanBanDayDu.substring(vtHt)));
     }
     return ketQua;
   }

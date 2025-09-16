@@ -2,8 +2,6 @@
 
 ## TODO
 
-- Quét ISBN: báo lỗi trước khi hiện màn hình (bỏ dialog native)
-
 ## A.Cấu trúc dữ liệu
 
 Thuộc tính của sách:
@@ -21,6 +19,12 @@ Nhãn sách: có 3 kiểu
 - Số
 - Văn bản
 - Mã vạch
+
+Các thuộc tính chung:
+- `ten_kd`: tên không dấu (tiếng Việt bỏ dấu, tự động tạo từ `ten`)
+- `xem`: thời điểm tham chiếu lần cuối xem/cập nhật
+- `chon`: thời điểm tham chiếu lần cuối chọn trên danh sách gợi ý
+- Thời điểm tham chiếu: thời điểm hiện tại tham chiếu đến gốc thời gian (epoch) - thời điểm cài app tham chiếu đến gốc thời gian.
 
 Đơn vị phát hành: có thể có hoặc không mã ISBN.
 

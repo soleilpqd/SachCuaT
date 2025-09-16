@@ -21,7 +21,6 @@ import 'package:sach_cua_t/man_hinh/man_hinh_co_so.dart';
 import 'package:sach_cua_t/man_hinh/man_hinh_sach.dart';
 import 'package:sach_cua_t/models/vov.dart';
 import 'package:sach_cua_t/models/vtv.dart';
-import 'package:sach_cua_t/utils/common.dart';
 import 'package:sach_cua_t/utils/vanbanhienthi.dart';
 
 enum MucMenuChinh {
@@ -58,6 +57,8 @@ class _HomePageState extends State<HomePage> with KhuonMauQuanLyManHinh {
   void initState() {
     super.initState();
     // VanBanHienThi().printAll();
+    /// Khởi tạo thông tin hệ thống
+    // HeThongMay.duyNhat.layThongTinHienThi();
     DaiPhatThanh.duyNhat.addListener(_theoDoiDaiPhatThanh);
     DaiTruyenHinh.duyNhat.datManHinhDauTien(_xacDinhTieuDeMuc(_trangHienTai));
     DaiTruyenHinh.duyNhat.addListener(_theoDoiDaiTruyenHinh);
@@ -119,7 +120,7 @@ class _HomePageState extends State<HomePage> with KhuonMauQuanLyManHinh {
   }
 
   void _khiNhanThemSach() {
-    push(ManHinhSach.maManHinh, ManHinhSach(maSach: 1));
+    push(ManHinhSach.maManHinh, ManHinhSach(maSach: null));
   }
 
   void _khiNhanThemViTri() {
