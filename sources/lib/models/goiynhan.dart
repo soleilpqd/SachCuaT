@@ -20,13 +20,19 @@ import 'package:sach_cua_t/models/database.dart';
 import 'package:sach_cua_t/models/vanbannoibat.dart';
 import 'package:sach_cua_t/views/truong_van_ban.dart';
 
-/// Gợi ý từ 1 trường trong CSDL
-class GoiYCSDL extends GoiYVanBan {
+/// Gợi ý giá trị nhãn
+class GoiYNhan extends GoiYVanBan {
 
-  final String bang;
+  /// Danh sách kết quả
   List<VanBanNoiBat> _dsKetQua = [];
+  /// Lấy tên nhãn
+  String Function()? layTenNhan;
 
-  GoiYCSDL({required this.bang});
+  GoiYNhan();
+
+  void dispose() {
+    layTenNhan = null;
+  }
 
   @override
   Future<List<String>> timKiemGoiY(String dauVao, TruongVanBan widget) async {
@@ -34,9 +40,22 @@ class GoiYCSDL extends GoiYVanBan {
     if (dauVao.isEmpty) {
       return [];
     }
-    _dsKetQua = await CoSoDuLieu().timKiemGoiY(bang, dauVao);
+    final String nhan = layTenNhan?.call() ?? "";
+    if (nhan.isEmpty) {
+      return [];
+    }
+    _dsKetQua = await CoSoDuLieu().timKiemGiaTriNhan(nhan, dauVao);
     _dsKetQua.sapXep();
     return _dsKetQua.map((e) => e.vanBanDayDu).toList();
+  }
+
+  @override
+  void daChonGoiY(String tuKhoa) {
+    final String nhan = layTenNhan?.call() ?? "";
+    if (nhan.isEmpty) {
+      return;
+    }
+    CoSoDuLieu().luuThoiDiemChonGiaTriNhan(nhan, tuKhoa);
   }
 
   @override
@@ -46,11 +65,6 @@ class GoiYCSDL extends GoiYVanBan {
     } catch (_) {
       return null;
     }
-  }
-
-  @override
-  void daChonGoiY(String tuKhoa) {
-    CoSoDuLieu().luuThoiDiemChonGoiY(bang, tuKhoa);
   }
 
 }

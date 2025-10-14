@@ -17,6 +17,7 @@
  */
 
 import 'package:sach_cua_t/models/database.dart';
+import 'package:sach_cua_t/utils/common.dart';
 
 /// Từ khoá văn bản hiển thị
 enum TK {
@@ -60,38 +61,40 @@ enum TK {
   tieuDeSachNhieuTap,
   /// Giải thích phần sách nhiều tập
   giaiThichSachNhieuTap,
-  /// Thay đổi thứ tự tập
-  thayDoiViTriSachNhieuTap,
-  /// Nhân bản thông tin hiện tại thành 1 tập mới
-  themTapSach,
-  /// Chọn 1 tập sách trong cùng chuỗi
-  chonTapSach,
-  /// Xoá bỏ tập
-  xoaTap,
   /// Tiêu đề nhãn
   tieuDeNhan,
   /// Giải thích nhãn
   giaiThichNhan,
-  /// Thêm nhãn
-  themNhan,
   /// Tiêu đề đánh dấu
   tieuDeDanhDau,
   /// Giải thích đánh dấu
   giaiThichDanhDau,
-  /// Thêm đánh dấu
-  themDanhDau,
-  /// Lỗi lưu sách
-  loiLuuSach,
+  /// Tiêu đề đánh dấu (từng mục)
+  danhDau,
+  /// Lỗi lưu sách (không thể lưu)
+  loiKhongLuuSach,
+  /// Lỗi lưu sách (cần xem lại)
+  loiXemLaiTruocKhiLuuSach,
   /// Cứ lưu
   cuLuu,
   /// Thiếu thông tin
   thieuThongTin,
+  /// Tên sách đã tồn tại
+  tenSachDaTonTai,
   /// Sách không tồn tại
   sachKhongTonTai,
   /// Lưu
   luu,
   /// Xác nhận lưu sách khi quay lại
-  xacNhanLuu
+  xacNhanLuu,
+  /// Không thuộc chuỗi/nhóm sách nhiều tập
+  khongThuocChuoi,
+  /// Tập số # trong chuỗi sách # tập
+  namTrongChuoi,
+  /// Ghi chú chuỗi sách
+  ghiChuChuoi,
+  /// Luôn hiển thị
+  luonHienThi,
   ;
 }
 
@@ -109,20 +112,31 @@ class Vbht {
   Function(String)? khiXong;
   /// Bộ đệm
   final BoDemVbht? dem;
+  /// Tham số
+  final List<String>? thamSo;
+
+  /// Áp dụng tham số
+  void _apDungThamSo() {
+    if (thamSo != null && thamSo!.isNotEmpty) {
+      _vanBan = LinhTinh.dienVaoChoTrong(_vanBan, thamSo!);
+    }
+  }
 
   /// CONSTRUCTOR
   /// Nếu [trucTiep] = true thì [vanBan] là [tuKhoa].
   /// [trucTiep] = false thì dùng [tuKhoa] để nạp nội dung từ `VanBanHienThi`, sau đó chạy [khiXong]
-  Vbht({required this.tuKhoa, bool trucTiep = true, this.dem}) {
+  Vbht({required this.tuKhoa, bool trucTiep = true, this.dem, this.thamSo}) {
     _vanBan = tuKhoa;
     if (!trucTiep) {
       String? vbDem = dem?[tuKhoa];
       if (vbDem != null) {
         _vanBan = vbDem;
+        _apDungThamSo();
       } else {
         VanBanHienThi().napVanBanHienThi(tuKhoa).then((value) {
           _vanBan = value;
           dem?[tuKhoa] = value;
+          _apDungThamSo();
           khiXong?.call(value);
         });
       }
@@ -132,7 +146,7 @@ class Vbht {
   /// CONVENIENCE CONSTRUCTOR: văn bản trực tiếp
   Vbht.trucTiep(String tk) : this(tuKhoa: tk, trucTiep: true);
   /// CONVENIENCE CONSTRUCTOR: văn bản cần nạp từ CSDL thông qua từ khoá
-  Vbht.tuKhoa(TK tk, {BoDemVbht? dem}) : this(tuKhoa: tk.name, trucTiep: false, dem: dem);
+  Vbht.tuKhoa(TK tk, {BoDemVbht? dem, List<String>? ts}) : this(tuKhoa: tk.name, trucTiep: false, dem: dem, thamSo: ts);
 
 }
 
@@ -189,7 +203,7 @@ class VanBanHienThi {
   static final VanBanHienThi _duyNhat = VanBanHienThi._internal();
   factory VanBanHienThi() { return _duyNhat; }
 
-  String phanLoai = "vi";
+  List<String> phanLoai = ["vi"];
 
   /// In ra tất cả các từ khoá -> hỗ trợ tạo tệp CSV
   void printAll() {
@@ -200,8 +214,13 @@ class VanBanHienThi {
 
   /// Nạp văn bản hiển thị từ CSDL
   Future<String> napVanBanHienThi(String tuKhoa) async {
-    final ketQua = await CoSoDuLieu().truyVanVanBanHienThi(tuKhoa, phanLoai);
-    return ketQua ?? tuKhoa;
+    for (final pl in phanLoai) {
+      final ketQua = await CoSoDuLieu().truyVanVanBanHienThi(tuKhoa, pl);
+      if (ketQua != null && ketQua.isNotEmpty) {
+        return ketQua;
+      }
+    }
+    return tuKhoa;
   }
 
   /// Nạp 1 loạt văn bản hiển thị từ CSDL

@@ -16,7 +16,6 @@
   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:sach_cua_t/man_hinh/man_hinh_co_so.dart';
@@ -24,6 +23,7 @@ import 'package:sach_cua_t/man_hinh/man_hinh_web.dart';
 import 'package:sach_cua_t/models/database.dart';
 import 'package:sach_cua_t/models/dulieu.dart';
 import 'package:sach_cua_t/models/goiycsdl.dart';
+import 'package:sach_cua_t/models/goiynhan.dart';
 import 'package:sach_cua_t/models/native.dart';
 import 'package:sach_cua_t/models/operations/thao_tac_luu_sach.dart';
 import 'package:sach_cua_t/models/operations/thao_tac_nap_sach.dart';
@@ -33,6 +33,7 @@ import 'package:sach_cua_t/utils/hopthoai.dart';
 import 'package:sach_cua_t/utils/vanbanhienthi.dart';
 import 'package:sach_cua_t/views/dieu_khien_co_so.dart';
 import 'package:sach_cua_t/views/nut_bam_bieu_tuong.dart';
+import 'package:sach_cua_t/views/nut_bam_tieu_de.dart';
 import 'package:sach_cua_t/views/truong_bat_tat.dart';
 import 'package:sach_cua_t/views/truong_hinh_anh.dart';
 import 'package:sach_cua_t/views/truong_nut_bam.dart';
@@ -140,30 +141,27 @@ class _TrangThaiManHinhSoanThaoSach extends State<_ManHinhSoanThaoSach> with The
   final DieuKhienCoSo _dkLuuChieu = DieuKhienCoSo();
   final DieuKhienTruongBatTat _dkDaDocXong = DieuKhienTruongBatTat();
   final DieuKhienTruongHinhAnh _dkHinhAnh = DieuKhienTruongHinhAnh();
-  final DieuKhienTruongVanBan _dkTenSach = DieuKhienTruongVanBan(goiY: GoiYCSDL(bang: CoSoDuLieu.BANG_SACH));
+  final DieuKhienTruongVanBan _dkTenSach = DieuKhienTruongVanBan(goiYNoiDung: GoiYCSDL(bang: CoSoDuLieu.BANG_SACH));
   final DieuKhienTruongVanBan _dkISBN = DieuKhienTruongVanBan();
   final List<DieuKhienTruongVanBan> _dsDkTacGia = [];
   final List<DieuKhienTruongVanBan> _dsDkDichGia = [];
   final List<DieuKhienTruongVanBan> _dsDkNxb = [];
   final List<DieuKhienTruongVanBan> _dsDkViTri = [];
-  final DieuKhienTruongBatTat _dkThayDoiViTriTap = DieuKhienTruongBatTat();
-  final DieuKhienCoSo _dkChonTapSach = DieuKhienCoSo();
-  final DieuKhienCoSo _dkNhanBanDeThemTapSach = DieuKhienCoSo();
-  final DieuKhienCoSo _dkXoaTapSach = DieuKhienCoSo();
-  final DieuKhienCoSo _dkThemNhan = DieuKhienCoSo();
-  final DieuKhienCoSo _dkThemDanhDau = DieuKhienCoSo();
+  final List<DieuKhienTruongVanBan> _dsDkDanhDau = [];
+  final DieuKhienCoSo _dkSuaTap = DieuKhienCoSo();
+  // TODO: danh sách các tập
+  final DieuKhienTruongVanBan _dkGhiChuTap = DieuKhienTruongVanBan();
+  final List<DieuKhienTruongVanBan> _dsDkNhan = [];
 
   final GoiYCSDL _goiYTg = GoiYCSDL(bang: CoSoDuLieu.BANG_TAC_GIA);
   final GoiYCSDL _goiYDg = GoiYCSDL(bang: CoSoDuLieu.BANG_DICH_GIA);
   final GoiYCSDL _goiYNxb = GoiYCSDL(bang: CoSoDuLieu.BANG_NXB);
   final GoiYCSDL _goiYViTri = GoiYCSDL(bang: CoSoDuLieu.BANG_VI_TRI);
+  final GoiYCSDL _goiYTenNhan = GoiYCSDL(bang: CoSoDuLieu.BANG_NHAN);
+  final GoiYNhan _goiYGiaTriNhan = GoiYNhan();
 
   DieuKhienTruongVanBan? _dkVbHienTai;
   void Function()? _choKetThucSoanThao;
-
-// TODO: nhãn (tag), nhiều tập, đánh dấu
-  final List<DieuKhienTruongVanBan> _dsDkNhan = [];
-  int? _chuoiSach;
 
   @override
   void initState() {
@@ -172,26 +170,37 @@ class _TrangThaiManHinhSoanThaoSach extends State<_ManHinhSoanThaoSach> with The
     widget.dkManHinh.khiNhanQuayLai = _khiNhanQuayLai;
     _dkISBN.themTheoDoi(this);
     _dkTenSach.themTheoDoi(this);
-    _dkThayDoiViTriTap.themTheoDoi(this);
+    _dkGhiChuTap.themTheoDoi(this);
+    _goiYGiaTriNhan.layTenNhan = () {
+      if (_dkVbHienTai != null && _dsDkNhan.contains(_dkVbHienTai)) {
+        return _dkVbHienTai!.vbTieuDe;
+      }
+      return "";
+    };
 
-    if (widget.maSach != null) {
-      widget.dkManHinh.thaoTacNap?.napThongTin().then((value) {
-      if (value) {
-        setState(() {
-          _khoiTaoManHinhTheoThongTinSach();
+  // TODO: khởi tạo danh sách nhãn (luôn hiện + giá trị của sách)
+    _khoiTaoDSNhan().then((_) {
+      if (widget.maSach != null) {
+        widget.dkManHinh.thaoTacNap?.napThongTin().then((value) {
+          if (value) {
+            setState(() {
+              _khoiTaoManHinhTheoThongTinSach();
+            });
+          } else {
+            HopThoai.hienThiThongBao(
+              context,
+              noiDung: Vbht.tuKhoa(TK.sachKhongTonTai, dem: widget.dkManHinh.demVbht),
+              nhanNut: Vbht.tuKhoa(TK.dong, dem: widget.dkManHinh.demVbht),
+              khiDong: (_) => widget.dkManHinh.pop?.call()
+            );
+          }
         });
       } else {
-        HopThoai.hienThiThongBao(
-          context,
-          noiDung: Vbht.tuKhoa(TK.sachKhongTonTai, dem: widget.dkManHinh.demVbht),
-          nhanNut: Vbht.tuKhoa(TK.dong, dem: widget.dkManHinh.demVbht),
-          khiDong: (_) => widget.dkManHinh.pop?.call()
-        );
+        setState(() {
+          _cauHinhLaiDauVao();
+        });
       }
     });
-    } else {
-      _cauHinhLaiDauVao();
-    }
   }
 
   @override
@@ -203,6 +212,10 @@ class _TrangThaiManHinhSoanThaoSach extends State<_ManHinhSoanThaoSach> with The
     widget.dkManHinh.khiNhanQuayLai = _khiNhanQuayLai;
   }
 
+  Future<void> _khoiTaoDSNhan() async {
+    // TODO: nạp ds nhãn luôn hiển thị
+  }
+
   /// Làm sạch tất cả đầu vào: xoá các trường văn bản, hình ảnh
   void _lamSachTatCaDauVao() {
     _dkVbHienTai = null;
@@ -210,56 +223,77 @@ class _TrangThaiManHinhSoanThaoSach extends State<_ManHinhSoanThaoSach> with The
     _dkHinhAnh.hinhAnh = null;
     _dkTenSach.thongBaoLoi = null;
     _dkISBN.thongBaoLoi = null;
+    _dkGhiChuTap.thongBaoLoi = null;
     _lamSachDSDauvao(_dsDkTacGia, tatCa: true);
     _lamSachDSDauvao(_dsDkTacGia, tatCa: true);
     _lamSachDSDauvao(_dsDkDichGia, tatCa: true);
     _lamSachDSDauvao(_dsDkNxb, tatCa: true);
     _lamSachDSDauvao(_dsDkViTri, tatCa: true);
+    _lamSachDSDauvao(_dsDkDanhDau, tatCa: true);
+    _lamSachDSDauvao(_dsDkNhan, tatCa: true);
   }
 
   /// Destructor
   @override
   void dispose() {
     super.dispose();
-    _dkThayDoiViTriTap.boTheoDoi(this);
+    // _dkThayDoiViTriTap.boTheoDoi(this);
     _lamSachTatCaDauVao();
     _dkLuuChieu.dispose();
+    _dkSuaTap.dispose();
     _dkTenSach.dispose();
     _dkISBN.dispose();
     _dkDaDocXong.dispose();
     _dkHinhAnh.dispose();
-    _dkThayDoiViTriTap.dispose();
+    _dkGhiChuTap.dispose();
     widget.dkManHinh.khiNhanLuu = null;
     widget.dkManHinh.khiNhanQuayLai = null;
-    _dkChonTapSach.dispose();
-    _dkNhanBanDeThemTapSach.dispose();
-    _dkXoaTapSach.dispose();
-    _dkThemNhan.dispose();
-    _dkThemDanhDau.dispose();
+    _goiYGiaTriNhan.dispose();
+    // _dkChonTapSach.dispose();
+    // _dkNhanBanDeThemTapSach.dispose();
+    // _dkXoaTapSach.dispose();
+    // _dkThemNhan.dispose();
+    // _dkThemDanhDau.dispose();
   }
 
   /// Cấu hình lại nhóm các trường văn bản có chứa [nguon]
   /// hoặc tất cả các nhóm nếu [nguon] là `null`
   void _cauHinhLaiDauVao({DieuKhienTruongVanBan? nguon}) {
     if (nguon == null || _dsDkTacGia.contains(nguon)) {
-      _lamSachDSDauvao(_dsDkTacGia, tatCa: false, debugInfo: "TG", goiY: _goiYTg);
+      _lamSachDSDauvao(_dsDkTacGia, tatCa: false, debugInfo: "TG", goiYNoiDung: _goiYTg);
     }
     if (nguon == null || _dsDkDichGia.contains(nguon)) {
-      _lamSachDSDauvao(_dsDkDichGia, tatCa: false, debugInfo: "DG", goiY: _goiYDg);
+      _lamSachDSDauvao(_dsDkDichGia, tatCa: false, debugInfo: "DG", goiYNoiDung: _goiYDg);
     }
     if (nguon == null || _dsDkNxb.contains(nguon)) {
-      _lamSachDSDauvao(_dsDkNxb, tatCa: false, debugInfo: "NXB", goiY: _goiYNxb);
+      _lamSachDSDauvao(_dsDkNxb, tatCa: false, debugInfo: "NXB", goiYNoiDung: _goiYNxb);
     }
     if (nguon == null || _dsDkViTri.contains(nguon)) {
-      _lamSachDSDauvao(_dsDkViTri, tatCa: false, khongLap: false, debugInfo: "VT", goiY: _goiYViTri);
+      _lamSachDSDauvao(_dsDkViTri, tatCa: false, khongLap: false, debugInfo: "VT", goiYNoiDung: _goiYViTri);
     }
-    // TODO: nhãn, đánh dấu
+    if (nguon == null || _dsDkDanhDau.contains(nguon)) {
+      _lamSachDSDauvao(_dsDkDanhDau, tatCa: false, debugInfo: "Dau");
+    }
+    if (nguon == null || _dsDkNhan.contains(nguon)) {
+      _lamSachDSDauvao(_dsDkNhan, tatCa: false, debugInfo: "Nhan", goiYNoiDung: _goiYGiaTriNhan, goiYTieuDe: _goiYTenNhan);
+    }
   }
 
   /// Làm sạch trường văn bản:
   /// Loại bỏ các điều khiển văn bản trống ([tatCa] = false) hoặc tất cả các điều khiển ([tatCa] = true).
   /// `[khongLap] = true` thì loại bỏ các điều khiển trùng lặp trong dánh sách.
-  void _lamSachDSDauvao(List<DieuKhienTruongVanBan> danhSach, {required bool tatCa, bool khongLap = true, String debugInfo = "", GoiYCSDL? goiY}) {
+  void _lamSachDSDauvao(
+    List<DieuKhienTruongVanBan> danhSach,
+    {
+      required bool tatCa,
+      bool khongLap = true,
+      String debugInfo = "",
+      GoiYVanBan? goiYNoiDung,
+      GoiYVanBan? goiYTieuDe
+    }
+  ) {
+    final bool coTheSuaTieuDe = danhSach == _dsDkNhan;
+    final bool coTheTuDongChiaDong = !coTheSuaTieuDe;
     List<DieuKhienTruongVanBan> boDem = [];
     DieuKhienTruongVanBan? dkRong;
     int dem = 0;
@@ -272,24 +306,8 @@ class _TrangThaiManHinhSoanThaoSach extends State<_ManHinhSoanThaoSach> with The
         muc.dispose();
       } else {
         String vanBan = muc.vanBan.trim();
-        if (vanBan.isEmpty) {
-          if (dkRong == null) {
-            dkRong = muc;
-          } else {
-            if (muc == _dkVbHienTai) {
-              _dkVbHienTai = null;
-            }
-            muc.dispose();
-          }
-        } else {
-          List<String> cacDoan = LinhTinh.phanChiaTextTheoKyTuDacBiet(vanBan);
-          if (cacDoan.length > 1) {
-            muc.vanBan = cacDoan.first;
-          } else {
-            muc.vanBan = vanBan;
-          }
-          muc.trangThaiNutBenPhai = 0;
-          if (khongLap && boDem.indexWhere((mucDem) => mucDem.vanBan == muc.vanBan) >= 0) {
+        if (coTheTuDongChiaDong) {
+          if (vanBan.isEmpty) {
             if (dkRong == null) {
               dkRong = muc;
             } else {
@@ -299,25 +317,63 @@ class _TrangThaiManHinhSoanThaoSach extends State<_ManHinhSoanThaoSach> with The
               muc.dispose();
             }
           } else {
+            List<String> cacDoan = LinhTinh.phanChiaTextTheoKyTuDacBiet(vanBan);
+            if (cacDoan.length > 1) {
+              muc.vanBan = cacDoan.first;
+            } else {
+              muc.vanBan = vanBan;
+            }
+            muc.trangThaiNutBenPhai = 0;
+            if (khongLap && boDem.indexWhere((mucDem) => mucDem.vanBan == muc.vanBan) >= 0) {
+              if (dkRong == null) {
+                dkRong = muc;
+              } else {
+                if (muc == _dkVbHienTai) {
+                  _dkVbHienTai = null;
+                }
+                muc.dispose();
+              }
+            } else {
+              muc.debugInfo = "$debugInfo $dem";
+              boDem.add(muc);
+              dem += 1;
+            }
+            if (cacDoan.length > 1) {
+              for (int so = 1; so < cacDoan.length; so += 1) {
+                String doan = cacDoan[so];
+                if (khongLap && boDem.indexWhere((mucDem) => mucDem.vanBan == doan) >= 0) {
+                  // Do nothing
+                } else {
+                  DieuKhienTruongVanBan dkDoan = DieuKhienTruongVanBan(goiYNoiDung: goiYNoiDung, goiYTieuDe: goiYTieuDe);
+                  dkDoan.debugInfo = "$debugInfo $dem";
+                  dkDoan.vanBan = doan;
+                  dkDoan.trangThaiNutBenPhai = 0;
+                  dkDoan.themTheoDoi(this);
+                  boDem.add(dkDoan);
+                  dem += 1;
+                }
+              }
+            }
+          }
+        }
+        if (coTheSuaTieuDe) {
+          String tieuDe = muc.vbTieuDe.trim();
+          if (vanBan.isEmpty && tieuDe.isEmpty) {
+            if (dkRong == null) {
+              dkRong = muc;
+            } else {
+              if (muc == _dkVbHienTai) {
+                _dkVbHienTai = null;
+              }
+              muc.dispose();
+            }
+          } else {
+            muc.trangThaiNutBenPhai = 0;
+            muc.vanBan = vanBan;
+            muc.vbTieuDe = tieuDe;
             muc.debugInfo = "$debugInfo $dem";
             boDem.add(muc);
             dem += 1;
-          }
-          if (cacDoan.length > 1) {
-            for (int so = 1; so < cacDoan.length; so += 1) {
-              String doan = cacDoan[so];
-              if (khongLap && boDem.indexWhere((mucDem) => mucDem.vanBan == doan) >= 0) {
-                // Do nothing
-              } else {
-                DieuKhienTruongVanBan dkDoan = DieuKhienTruongVanBan(goiY: goiY);
-                dkDoan.debugInfo = "$debugInfo $dem";
-                dkDoan.vanBan = doan;
-                dkDoan.trangThaiNutBenPhai = 0;
-                dkDoan.themTheoDoi(this);
-                boDem.add(dkDoan);
-                dem += 1;
-              }
-            }
           }
         }
       }
@@ -325,10 +381,10 @@ class _TrangThaiManHinhSoanThaoSach extends State<_ManHinhSoanThaoSach> with The
     danhSach.clear();
     if (!tatCa) {
       if (dkRong == null) {
-        dkRong = DieuKhienTruongVanBan(goiY: goiY);
+        dkRong = DieuKhienTruongVanBan(goiYNoiDung: goiYNoiDung, goiYTieuDe: goiYTieuDe);
         dkRong.themTheoDoi(this);
-        dkRong.debugInfo = "$debugInfo $dem";
       }
+      dkRong.debugInfo = "$debugInfo $dem";
       dkRong.vanBan = "";
       dkRong.trangThaiNutBenPhai = null;
       boDem.add(dkRong);
@@ -391,18 +447,19 @@ class _TrangThaiManHinhSoanThaoSach extends State<_ManHinhSoanThaoSach> with The
 
     dem = 0;
     for (final muc in sach.viTri) {
-      DieuKhienTruongVanBan dkVb = DieuKhienTruongVanBan(goiY: _goiYViTri);
+      DieuKhienTruongVanBan dkVb = DieuKhienTruongVanBan(goiYNoiDung: _goiYViTri);
       dkVb.debugInfo = "VT $dem";
       dkVb.vanBan = muc;
       dkVb.trangThaiNutBenPhai = 0;
       _dsDkViTri.add(dkVb);
       dem += 1;
     }
-    dkRong = DieuKhienTruongVanBan(goiY: _goiYViTri);
+    dkRong = DieuKhienTruongVanBan(goiYNoiDung: _goiYViTri);
     dkRong.debugInfo = "VT $dem";
     dkRong.vanBan = "";
     dkRong.trangThaiNutBenPhai = null;
     _dsDkViTri.add(dkRong);
+    // TODO: nhan, danh dau, tap
   }
 
   /// Khi nhấn loại bỏ trường văn bản
@@ -420,6 +477,12 @@ class _TrangThaiManHinhSoanThaoSach extends State<_ManHinhSoanThaoSach> with The
       } else if (_dsDkViTri.contains(muc)) {
         _dsDkViTri.remove(muc);
         muc.dispose();
+      } else if (_dsDkDanhDau.contains(muc)) {
+        _dsDkDanhDau.remove(muc);
+        muc.dispose();
+      } else if (_dsDkNhan.contains(muc)) {
+        _dsDkNhan.remove(muc);
+        muc.dispose();
       }
     });
   }
@@ -432,12 +495,13 @@ class _TrangThaiManHinhSoanThaoSach extends State<_ManHinhSoanThaoSach> with The
       _dkISBN,
       _dkHinhAnh,
       _dkDaDocXong,
-      _dkThayDoiViTriTap,
-      _dkChonTapSach,
-      _dkNhanBanDeThemTapSach,
-      _dkXoaTapSach,
-      _dkThemNhan,
-      _dkThemDanhDau,
+      // _dkThayDoiViTriTap,
+      // _dkChonTapSach,
+      // _dkNhanBanDeThemTapSach,
+      // _dkXoaTapSach,
+      // _dkThemNhan,
+      // _dkThemDanhDau,
+      _dkSuaTap,
       widget.dkManHinh.dkNutLuu,
       widget.dkManHinh.dkNutQuayLai
     ];
@@ -445,6 +509,7 @@ class _TrangThaiManHinhSoanThaoSach extends State<_ManHinhSoanThaoSach> with The
     tatCaDieuKhien.addAll(_dsDkDichGia);
     tatCaDieuKhien.addAll(_dsDkNxb);
     tatCaDieuKhien.addAll(_dsDkViTri);
+    tatCaDieuKhien.addAll(_dsDkDanhDau);
     // TODO: nhan, danh dau
     for (final muc in tatCaDieuKhien) {
       muc.khaDung = false;
@@ -454,12 +519,13 @@ class _TrangThaiManHinhSoanThaoSach extends State<_ManHinhSoanThaoSach> with The
   @override
   void setState(void Function() action) {
     DieuKhienTruongVanBan? tam = _dkVbHienTai;
-    tam?.focus = false;
+    TrangThaiNhapVanBan tamFocus = tam?.trangThaiNhap ?? TrangThaiNhapVanBan.khong;
+    tam?.trangThaiNhap = TrangThaiNhapVanBan.khong;
     super.setState(action);
     // Khôi phục lại trường văn bản đang focus trước khi refresh lại state
     if (tam != null) {
       Future.delayed(const Duration(milliseconds: 100)).then((value) {
-        tam.focus = true;
+        tam.trangThaiNhap = tamFocus;
       });
     }
   }
@@ -498,11 +564,13 @@ class _TrangThaiManHinhSoanThaoSach extends State<_ManHinhSoanThaoSach> with The
       // Mã ISBN
       TruongVanBan(
         tieuDe: Vbht.tuKhoa(TK.isbn, dem: widget.dkManHinh.demVbht),
+        cauHinh: CauHinhTruongVanBan(
+          kieuBanPhim: TextInputType.number,
+          kiemSoatNhapLieu: [FilteringTextInputFormatter.digitsOnly],
+          soKyTuToiDa: 13,
+        ),
         trinhDieuKhien: _dkISBN,
-        kieuBanPhim: TextInputType.number,
-        kiemSoatNhapLieu: [FilteringTextInputFormatter.digitsOnly],
-        soKyTuToiDa: 13,
-        xayDungNutBenPhai: (_, khaDung) => IconButton(
+        xayDungNutBenPhai: (_, khaDung) => NutBamBieuTuongTieuDe(
           onPressed: khaDung ? _khiNhanNutQuetISBN : null,
           icon: Icon(Icons.camera_alt_outlined, color: khaDung ? Theme.of(context).primaryColor : Colors.grey)
         ),
@@ -519,7 +587,7 @@ class _TrangThaiManHinhSoanThaoSach extends State<_ManHinhSoanThaoSach> with The
         TruongVanBan(
           tieuDe: Vbht.tuKhoa(TK.tacGia, dem: widget.dkManHinh.demVbht),
           trinhDieuKhien: muc,
-          xayDungNutBenPhai: (danhDau, khaDung) => danhDau == null ? null : IconButton(
+          xayDungNutBenPhai: (danhDau, khaDung) => danhDau == null ? null : NutBamBieuTuongTieuDe(
             onPressed: !khaDung ? null : () {
               _khiNhanLoaiBoDauVao(muc);
             }, icon: Icon(Icons.delete_outline, color: khaDung ? Theme.of(context).primaryColor : Colors.grey)
@@ -534,7 +602,7 @@ class _TrangThaiManHinhSoanThaoSach extends State<_ManHinhSoanThaoSach> with The
         TruongVanBan(
           tieuDe: Vbht.tuKhoa(TK.dichGia, dem: widget.dkManHinh.demVbht),
           trinhDieuKhien: muc,
-          xayDungNutBenPhai: (danhDau, khaDung) => danhDau == null ? null : IconButton(
+          xayDungNutBenPhai: (danhDau, khaDung) => danhDau == null ? null : NutBamBieuTuongTieuDe(
             onPressed: !khaDung ? null : () {
               _khiNhanLoaiBoDauVao(muc);
             }, icon: Icon(Icons.delete_outline, color: khaDung ? Theme.of(context).primaryColor : Colors.grey)
@@ -549,7 +617,7 @@ class _TrangThaiManHinhSoanThaoSach extends State<_ManHinhSoanThaoSach> with The
         TruongVanBan(
           tieuDe: Vbht.tuKhoa(TK.dvPhatHanh, dem: widget.dkManHinh.demVbht),
           trinhDieuKhien: muc,
-          xayDungNutBenPhai: (danhDau, khaDung) => danhDau == null ? null : IconButton(
+          xayDungNutBenPhai: (danhDau, khaDung) => danhDau == null ? null : NutBamBieuTuongTieuDe(
             onPressed: !khaDung ? null : () {
               _khiNhanLoaiBoDauVao(muc);
             }, icon: Icon(Icons.delete_outline, color: khaDung ? Theme.of(context).primaryColor : Colors.grey)
@@ -569,7 +637,7 @@ class _TrangThaiManHinhSoanThaoSach extends State<_ManHinhSoanThaoSach> with The
         TruongVanBan(
           tieuDe: Vbht.tuKhoa(TK.viTri, dem: widget.dkManHinh.demVbht),
           trinhDieuKhien: muc,
-          xayDungNutBenPhai: (danhDau, khaDung) => danhDau == null ? null : IconButton(
+          xayDungNutBenPhai: (danhDau, khaDung) => danhDau == null ? null : NutBamBieuTuongTieuDe(
             onPressed: !khaDung ? null : () {
               _khiNhanLoaiBoDauVao(muc);
             }, icon: Icon(Icons.delete_outline, color: khaDung ? Theme.of(context).primaryColor : Colors.grey)
@@ -578,12 +646,6 @@ class _TrangThaiManHinhSoanThaoSach extends State<_ManHinhSoanThaoSach> with The
       );
       children.add(spacing);
     }
-    // children.add(
-    //   TruongTieuDe(
-    //     tieuDeChinh: Vbht.tuKhoa(TK.tieuDeSachNhieuTap, dem: widget.dkManHinh.demVbht),
-    //     tieuDePhu: Vbht.tuKhoa(TK.giaiThichSachNhieuTap, dem: widget.dkManHinh.demVbht)
-    //   )
-    // );
     // children.add(
     //   TruongBatTat(
     //     tieuDe: Vbht.tuKhoa(TK.thayDoiViTriSachNhieuTap, dem: widget.dkManHinh.demVbht),
@@ -615,12 +677,6 @@ class _TrangThaiManHinhSoanThaoSach extends State<_ManHinhSoanThaoSach> with The
     //   )
     // );
     // children.add(
-    //   TruongTieuDe(
-    //     tieuDeChinh: Vbht.tuKhoa(TK.tieuDeNhan, dem: widget.dkManHinh.demVbht),
-    //     tieuDePhu: Vbht.tuKhoa(TK.giaiThichNhan, dem: widget.dkManHinh.demVbht)
-    //   )
-    // );
-    // children.add(
     //   TruongNutBam(
     //     khiNhan: _khiNhanThemNhan,
     //     tieuDe: Vbht.tuKhoa(TK.themNhan, dem: widget.dkManHinh.demVbht),
@@ -628,12 +684,60 @@ class _TrangThaiManHinhSoanThaoSach extends State<_ManHinhSoanThaoSach> with The
     //     dieuKhien: _dkThemNhan
     //   )
     // );
-    // children.add(
-    //   TruongTieuDe(
-    //     tieuDeChinh: Vbht.tuKhoa(TK.tieuDeDanhDau, dem: widget.dkManHinh.demVbht),
-    //     tieuDePhu: Vbht.tuKhoa(TK.giaiThichDanhDau, dem: widget.dkManHinh.demVbht)
-    //   )
-    // );
+    children.add(
+      TruongTieuDe(
+        tieuDeChinh: Vbht.tuKhoa(TK.tieuDeDanhDau, dem: widget.dkManHinh.demVbht),
+        tieuDePhu: Vbht.tuKhoa(TK.giaiThichDanhDau, dem: widget.dkManHinh.demVbht)
+      )
+    );
+    children.add(spacing);
+    for (final muc in _dsDkDanhDau) {
+      children.add(
+        TruongVanBan(
+          tieuDe: Vbht.tuKhoa(TK.danhDau, dem: widget.dkManHinh.demVbht),
+          trinhDieuKhien: muc,
+          xayDungNutBenPhai: (danhDau, khaDung) => danhDau == null ? null : NutBamBieuTuongTieuDe(
+            onPressed: !khaDung ? null : () {
+              _khiNhanLoaiBoDauVao(muc);
+            }, icon: Icon(Icons.delete_outline, color: khaDung ? Theme.of(context).primaryColor : Colors.grey)
+          ),
+        )
+      );
+      children.add(spacing);
+    }
+
+    children.add(
+      TruongTieuDe(
+        tieuDeChinh: Vbht.tuKhoa(TK.tieuDeSachNhieuTap, dem: widget.dkManHinh.demVbht),
+        tieuDePhu: Vbht.tuKhoa(TK.giaiThichSachNhieuTap, dem: widget.dkManHinh.demVbht)
+      )
+    );
+  // TODO: Số tập / Tổng số
+  // TODO: ghi chú của chuỗi, nhóm
+    children.add(
+      // Chỉnh sửa số tập
+      TruongNutBam(
+        khiNhan: _khiNhanSuaTap,
+        tieuDe: Vbht.tuKhoa(TK.khongThuocChuoi, dem: widget.dkManHinh.demVbht),
+        icon: Icons.layers,
+        dieuKhien: _dkSuaTap,
+      )
+    );
+    children.add(
+      TruongVanBan(
+        tieuDe: Vbht.tuKhoa(TK.ghiChuChuoi, dem: widget.dkManHinh.demVbht),
+        trinhDieuKhien: _dkGhiChuTap
+      )
+    );
+
+    children.add(
+      TruongTieuDe(
+        tieuDeChinh: Vbht.tuKhoa(TK.tieuDeNhan, dem: widget.dkManHinh.demVbht),
+        tieuDePhu: Vbht.tuKhoa(TK.giaiThichNhan, dem: widget.dkManHinh.demVbht)
+      )
+    );
+    children.add(spacing);
+  // TODO: ô nhập tiêu đề nhãn / nội dung nhãn
     // children.add(
     //   TruongNutBam(
     //     khiNhan: _khiNhanThemDanhDau,
@@ -642,6 +746,21 @@ class _TrangThaiManHinhSoanThaoSach extends State<_ManHinhSoanThaoSach> with The
     //     dieuKhien: _dkThemDanhDau
     //   )
     // );
+    for (final muc in _dsDkNhan) {
+      children.add(
+        TruongVanBan(
+          cauHinhTieuDe: const CauHinhTruongVanBan(),
+          batLuonHienThi: true,
+          trinhDieuKhien: muc,
+          demVbht: widget.dkManHinh.demVbht,
+          xayDungNutBenPhai: (coTheXoa, khaDung) => coTheXoa == null ? null : NutBamBieuTuongTieuDe(
+              onPressed: !khaDung ? null : () {
+                _khiNhanLoaiBoDauVao(muc);
+              }, icon: Icon(Icons.delete_outline, color: khaDung ? Theme.of(context).primaryColor : Colors.grey)
+            ),
+        )
+      );
+    }
     children.add(Container(height: GoiYVanBan.chieuCaoHienThiGoiY)); // Khoảng trống cho Keyboard và Gợi ý
     return children;
   }
@@ -652,6 +771,7 @@ class _TrangThaiManHinhSoanThaoSach extends State<_ManHinhSoanThaoSach> with The
     if (widget.maSach != null && !widget.dkManHinh.thaoTacNap!.daXong) {
       return Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor));
     }
+    // TODO: danh sách sách tương tự
     // return Stack(children: [
     return ListView(
         padding: const EdgeInsets.all(5),
@@ -678,7 +798,7 @@ class _TrangThaiManHinhSoanThaoSach extends State<_ManHinhSoanThaoSach> with The
     _choKetThucSoanThao = null;
     if (_dkVbHienTai != null)  {
       _choKetThucSoanThao = action;
-      _dkVbHienTai?.focus = false;
+      _dkVbHienTai?.trangThaiNhap = TrangThaiNhapVanBan.khong;
       _dkVbHienTai = null;
     } else {
       action.call();
@@ -690,29 +810,30 @@ class _TrangThaiManHinhSoanThaoSach extends State<_ManHinhSoanThaoSach> with The
   @override
   void dieuKhienCoSoThayDoiThuocTinh(DieuKhienCoSo nguon, Map<String, dynamic> cacGiaTri) {
     super.dieuKhienCoSoThayDoiThuocTinh(nguon, cacGiaTri);
-    if (nguon == _dkThayDoiViTriTap) {
-      if (cacGiaTri.keys.contains(ThuocTinhTruongBatTat.giaTri.name)) {
-        _khiThayDoiViTriTap();
-      }
-    }
-    if (cacGiaTri.keys.contains(ThuocTinhTruongVanBan.focus.name)) {
+    // if (nguon == _dkThayDoiViTriTap) {
+    //   if (cacGiaTri.keys.contains(ThuocTinhTruongBatTat.giaTri.name)) {
+    //     _khiThayDoiViTriTap();
+    //   }
+    // }
+    if (cacGiaTri.keys.contains(ThuocTinhTruongVanBan.trangThaiNhap.name)) {
       truongVanBanThayDoiFocus(nguon as DieuKhienTruongVanBan);
     }
   }
 
   /// Trường văn bản thay đổi focus
   void truongVanBanThayDoiFocus(DieuKhienTruongVanBan muc) {
-    if (!muc.focus && _dkVbHienTai == muc) {
+    // print("FOCUS CHANGE ${muc.debugInfo} ${muc.trangThaiNhap}");
+    if (muc.trangThaiNhap == TrangThaiNhapVanBan.khong && _dkVbHienTai == muc) {
       _dkVbHienTai = null;
-    } else if (muc.focus) {
+    } else if (muc.dangTrongTrangThaiNhap()) {
       _dkVbHienTai = muc;
     }
-    if (!muc.focus) {
+    if (muc.trangThaiNhap == TrangThaiNhapVanBan.khong) {
       muc.vanBan = muc.vanBan.trim();
       if (muc.vanBan.isNotEmpty) {
         muc.thongBaoLoi = null;
       }
-      bool canThemOTrong = _dsDkTacGia.contains(muc) || _dsDkDichGia.contains(muc) || _dsDkNxb.contains(muc) || _dsDkViTri.contains(muc);
+      bool canThemOTrong = _dsDkTacGia.contains(muc) || _dsDkDichGia.contains(muc) || _dsDkNxb.contains(muc) || _dsDkViTri.contains(muc) || _dsDkDanhDau.contains(muc) || _dsDkNhan.contains(muc);
       // print("TRANG THAI NHAP TEN SACH ${muc.focus} $canThemOTrong");
       if (canThemOTrong) {
         // Hàm hiện tại nằm trong notifier của `DieuKhienTruongVanBan`.
@@ -771,58 +892,65 @@ class _TrangThaiManHinhSoanThaoSach extends State<_ManHinhSoanThaoSach> with The
     String tacGia = duLieu["TG"] ?? "";
     String nxb = duLieu["NXB"] ?? "";
     String doiTac = (duLieu["DT"] ?? "").toUpperCase();
-    setState(() {
-      _lamSachTatCaDauVao();
-      _dkHinhAnh.hinhAnh = null;
-      _dkISBN.vanBan = isbn;
-      _dkTenSach.vanBan = ten;
-      DieuKhienTruongVanBan dkTg = DieuKhienTruongVanBan();
-      dkTg.vanBan = tacGia;
-      _dsDkTacGia.add(dkTg);
-      DieuKhienTruongVanBan dkNxb = DieuKhienTruongVanBan();
-      dkNxb.vanBan = nxb;
-      _dsDkNxb.add(dkNxb);
-      for (final muc in widget.dkManHinh.dsNxb) {
-        if (muc != nxb && doiTac.contains(muc.toUpperCase())) {
-          dkNxb = DieuKhienTruongVanBan();
-          dkNxb.vanBan = muc;
-          _dsDkNxb.add(dkNxb);
-          break;
-        }
+    _lamSachTatCaDauVao();
+    _dkHinhAnh.hinhAnh = null;
+    _dkISBN.vanBan = isbn;
+    _dkTenSach.vanBan = ten;
+    DieuKhienTruongVanBan dkTg = DieuKhienTruongVanBan();
+    dkTg.vanBan = tacGia;
+    _dsDkTacGia.add(dkTg);
+    DieuKhienTruongVanBan dkNxb = DieuKhienTruongVanBan();
+    dkNxb.vanBan = nxb;
+    _dsDkNxb.add(dkNxb);
+    for (final muc in widget.dkManHinh.dsNxb) {
+      if (muc != nxb && doiTac.contains(muc.toUpperCase())) {
+        dkNxb = DieuKhienTruongVanBan();
+        dkNxb.vanBan = muc;
+        _dsDkNxb.add(dkNxb);
+        break;
       }
-      _cauHinhLaiDauVao();
+    }
+    _khoiTaoDSNhan().then((_) {
+      setState(() {
+        _cauHinhLaiDauVao();
+      });
     });
   }
 
+  /// Khi nhấn vào sửa tập
+  void _khiNhanSuaTap() {
+
+  }
+
   /// Khi thay đổi vị trí tập (bật tắt checkbox vị trí tập)
-  void _khiThayDoiViTriTap() {
-    print("GIA TRI Episode ${_dkThayDoiViTriTap.giaTri}");
-  }
+  // void _khiThayDoiViTriTap() {
+  //   print("GIA TRI Episode ${_dkThayDoiViTriTap.giaTri}");
+  // }
 
-  /// Khi nhấn chọn tập
-  void _khiNhanChonTap() {
+  // /// Khi nhấn chọn tập
+  // void _khiNhanChonTap() {
 
-  }
+  // }
 
-  /// Khi nhấn nhân bản thành tập mới
-  void _khiNhanThemTapMoi() {
+  // /// Khi nhấn nhân bản thành tập mới
+  // void _khiNhanThemTapMoi() {
 
-  }
+  // }
 
-  /// Khi nhấn xoá tập
-  void _khiNhanXoaTap() {
+  // /// Khi nhấn xoá tập
+  // void _khiNhanXoaTap() {
 
-  }
+  // }
 
-  /// Khi nhấn thêm nhãn
-  void _khiNhanThemNhan() {
+  // /// Khi nhấn thêm nhãn
+  // void _khiNhanThemNhan() {
 
-  }
+  // }
 
-  /// Khi nhấn thêm đánh dấu
-  void _khiNhanThemDanhDau() {
+  // /// Khi nhấn thêm đánh dấu
+  // void _khiNhanThemDanhDau() {
 
-  }
+  // }
 
   /// Khi nhấn quay lại
   void _khiNhanQuayLai() {
@@ -854,11 +982,19 @@ class _TrangThaiManHinhSoanThaoSach extends State<_ManHinhSoanThaoSach> with The
 
   /// Khi nhấn lưu
   void _khiNhanLuu() {
-    asyncDungNhapVanBan(() {
+    asyncDungNhapVanBan(() async {
       int coTheLuu = 0;
       if (_dkTenSach.vanBan.isEmpty) {
         _dkTenSach.thongBaoLoi = Vbht.tuKhoa(TK.thieuThongTin);
         coTheLuu = 1;
+      } else if (widget.maSach == null) {
+        final daTonTai = await CoSoDuLieu().kiemTraTenSach(_dkTenSach.vanBan);
+        if (daTonTai) {
+          _dkTenSach.thongBaoLoi = Vbht.tuKhoa(TK.tenSachDaTonTai);
+          coTheLuu = 1;
+        } else {
+          _dkTenSach.thongBaoLoi = null;
+        }
       } else {
         _dkTenSach.thongBaoLoi = null;
       }
@@ -884,7 +1020,7 @@ class _TrangThaiManHinhSoanThaoSach extends State<_ManHinhSoanThaoSach> with The
         case 1:
           HopThoai.hienThiThongBaoNhieuNut(
             context,
-            noiDung: Vbht.tuKhoa(TK.loiLuuSach),
+            noiDung: Vbht.tuKhoa(TK.loiXemLaiTruocKhiLuuSach),
             nhanCacNut: [Vbht.tuKhoa(TK.cuLuu), Vbht.tuKhoa(TK.dong)],
             khiDong: (ctx, nut, tieuDe) {
               if (nut == 0) {
@@ -893,7 +1029,7 @@ class _TrangThaiManHinhSoanThaoSach extends State<_ManHinhSoanThaoSach> with The
             }
           );
         case 2:
-          HopThoai.hienThiThongBao(context, noiDung: Vbht.tuKhoa(TK.loiLuuSach), nhanNut: Vbht.tuKhoa(TK.dong));
+          HopThoai.hienThiThongBao(context, noiDung: Vbht.tuKhoa(TK.loiKhongLuuSach), nhanNut: Vbht.tuKhoa(TK.dong));
         default:
           _luuSach();
       }

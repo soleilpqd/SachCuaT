@@ -19,6 +19,7 @@
 import 'package:flutter/material.dart';
 import 'package:sach_cua_t/utils/vanbanhienthi.dart';
 import 'package:sach_cua_t/views/dieu_khien_co_so.dart';
+import 'package:sach_cua_t/views/nut_bam_tieu_de.dart';
 import 'package:sach_cua_t/views/van_ban_hien_thi_widget.dart';
 
 /// Thuộc tính trường bật/tắt (checkbox)
@@ -59,9 +60,12 @@ class TruongBatTat extends GiaoDienCoSo<DieuKhienTruongBatTat> {
 
   /// Tiêu đề
   final Vbht tieuDe;
+  final MainAxisAlignment sapXep;
+  /// Đảo chiều (thứ tự) hiển thị tiêu đề và ô kiểm
+  final bool daoChieu;
 
   /// CONSTRUCTOR
-  const TruongBatTat({super.key, required this.tieuDe, required DieuKhienTruongBatTat trinhDieuKhien}) : super(dieuKhien: trinhDieuKhien);
+  const TruongBatTat({super.key, required this.tieuDe, required DieuKhienTruongBatTat trinhDieuKhien, this.sapXep = MainAxisAlignment.spaceBetween, this.daoChieu = false}) : super(dieuKhien: trinhDieuKhien);
 
   @override
   State<StatefulWidget> createState() => _TrangThaiTruongBatTat();
@@ -73,27 +77,35 @@ class _TrangThaiTruongBatTat extends TrangThaiCoSo<TruongBatTat> {
   @override
   Widget build(BuildContext context) {
     Color mainColor = (widget.dieuKhien?.khaDung ?? true) ? Theme.of(context).primaryColor : Colors.grey;
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        VbhtWidget(text: widget.tieuDe),
-        Checkbox(
-          value: widget.dieuKhien!.giaTri,
-          activeColor: mainColor,
-          side: BorderSide(
-            color: mainColor,
-            width: 2
-          ),
-          onChanged: widget.dieuKhien!.khaDung
-          ? (value) {
-            if (value != null) {
-              widget.dieuKhien!.giaTri = value;
-            }
+    List<Widget> dsCacO = [
+      NutBamTieuDe(
+        onPressed: _khiNhanTieuDe,
+        child: VbhtWidget(text: widget.tieuDe)
+      ),
+      Checkbox(
+        value: widget.dieuKhien!.giaTri,
+        activeColor: mainColor,
+        side: BorderSide(
+          color: mainColor,
+          width: 2
+        ),
+        onChanged: widget.dieuKhien!.khaDung
+        ? (value) {
+          if (value != null) {
+            widget.dieuKhien!.giaTri = value;
           }
-          : null
-        )
-      ],
+        }
+        : null
+      )
+    ];
+    return Row(
+      mainAxisAlignment: widget.sapXep,
+      children: widget.daoChieu ? dsCacO.reversed.toList() : dsCacO,
     );
+  }
+
+  void _khiNhanTieuDe() {
+    widget.dieuKhien?.giaTri = !(widget.dieuKhien?.giaTri ?? false);
   }
 
 }

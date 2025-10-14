@@ -18,6 +18,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:sach_cua_t/views/dieu_khien_co_so.dart';
+import 'package:sach_cua_t/views/nut_bam_tieu_de.dart';
 
 /// Nút bấm biểu tượng có điều khiển trạng thái khả dụng
 class NutBamBieuTuong extends GiaoDienCoSo<DieuKhienCoSo> {
@@ -44,7 +45,7 @@ class _TrangThaiNutBamBieuTuong extends TrangThaiCoSo<NutBamBieuTuong> {
   @override
   Widget build(BuildContext context) {
     final bool khaDung = widget.dieuKhien?.khaDung ?? true;
-    return IconButton(
+    return NutBamBieuTuongTieuDe(
       onPressed: khaDung ? widget.khiNhan : null,
       icon: Icon(widget.icon, color: khaDung ? widget.mauChinh : widget.mauPhu)
     );

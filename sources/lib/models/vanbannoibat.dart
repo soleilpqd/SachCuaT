@@ -17,6 +17,7 @@
  */
 
 import 'package:sach_cua_t/utils/common.dart';
+import 'package:sach_cua_t/utils/vonglapgioihan.dart';
 
 /// Văn bản nổi bật
 class VanBanNoiBat {
@@ -38,8 +39,12 @@ class VanBanNoiBat {
   static List<int> xayDungViTriNoiBat(String vbDayDu, String vbNoiBat) {
     String dem = vbDayDu;
     List<int> ketQua = [];
+    if (vbDayDu.isEmpty || vbNoiBat.isEmpty) {
+      return ketQua;
+    }
     int vtHt = 0;
-    while (dem.isNotEmpty) {
+    VongLapGioiHan.lap((_) {
+      if (dem.isEmpty) { return false; }
       final int vt = dem.indexOf(vbNoiBat);
       if (vt >= 0) {
         vtHt += vt;
@@ -48,8 +53,10 @@ class VanBanNoiBat {
         dem = dem.substring(vt + vbNoiBat.length);
       } else {
         dem = "";
+        return false;
       }
-    }
+      return true;
+    });
     return ketQua;
   }
 

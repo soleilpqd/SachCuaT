@@ -178,6 +178,13 @@ class CoSoDuLieu {
     return false;
   }
 
+  /// Kiểm tra tên sách có tồn tại hay không
+  Future<bool> kiemTraTenSach(String ten) async {
+    assert(_db != null, "CSDL chưa được khởi tạo.");
+    final duLieu = await _db!.query(BANG_SACH, where: "\"ten\" = ?", whereArgs: [ten], limit: 1);
+    return duLieu.isNotEmpty;
+  }
+
   /// Lưu thời điểm tham chiếu vừa xem
   Future<void> luuVuaXem(String bang, int ma) async {
     assert(_db != null, "CSDL chưa được khởi tạo.");
@@ -482,19 +489,48 @@ WHERE "$BANG_VI_TRI_SACH"."sach" = ?;
   Future<List<VanBanNoiBat>> timKiemGoiY(String bang, String tuKhoa) async {
     assert(_db != null, "CSDL chưa được khởi tạo.");
     final String tkKd = LinhTinh.loaiBoDautiengViet(tuKhoa);
-    final result = await _db!.query(
+    // print("TimKiemGoiY: $bang; $tuKhoa; $tkKd");
+    final ketQua = await _db!.query(
       bang,
       columns: ["ten", "chon"],
       where: "\"ten\" LIKE ? OR \"ten_kd\" LIKE ?",
       whereArgs: ["%$tuKhoa%", "%$tkKd%"]
     );
-    return result.map((e) => VanBanNoiBat(vanBanDayDu: e["ten"] as String, vanBanNoiBat: tuKhoa, daChon: e["chon"] as int?)).toList();
+    return ketQua.map((e) => VanBanNoiBat(vanBanDayDu: e["ten"] as String, vanBanNoiBat: tuKhoa, daChon: e["chon"] as int?)).toList();
   }
 
   /// Lưu thời điểm đã chọn gợi ý vào bảng [bang]
   Future<void> luuThoiDiemChonGoiY(String bang, String tuKhoa) async {
     assert(_db != null, "CSDL chưa được khởi tạo.");
     await _db!.update(bang, {"chon": thoiDiemThamChieuHienTai}, where: "\"ten\" = ?", whereArgs: [tuKhoa]);
+  }
+
+  /// Tìm kiếm giá trị nhãn
+  Future<List<VanBanNoiBat>> timKiemGiaTriNhan(String tenNhan, String tuKhoa) async {
+    assert(_db != null, "CSDL chưa được khởi tạo.");
+    final String tkKd = LinhTinh.loaiBoDautiengViet(tuKhoa);
+    final List<Map<String, Object?>> ketQua = await _db!.rawQuery(
+      """
+SELECT "$BANG_NHAN_SACH"."gia_tri", MAX("$BANG_NHAN_SACH"."chon") AS "chon" FROM "$BANG_NHAN_SACH"
+INNER JOIN "$BANG_NHAN" ON "$BANG_NHAN_SACH"."nhan" = "$BANG_NHAN"."ma"
+WHERE "$BANG_NHAN"."ten" = ? AND ("$BANG_NHAN_SACH"."gia_tri" LIKE ? OR "$BANG_NHAN_SACH"."gia_tri_kd" LIKE ?)
+GROUP BY "$BANG_NHAN_SACH"."gia_tri";
+""",
+      [tenNhan, tuKhoa, tkKd]
+    );
+    return ketQua.map((e) => VanBanNoiBat(vanBanDayDu: e["gia_tri"] as String, vanBanNoiBat: tuKhoa, daChon: e["chon"] as int?)).toList();
+  }
+
+  Future<void> luuThoiDiemChonGiaTriNhan(String tenNhan, String tuKhoa) async {
+    assert(_db != null, "CSDL chưa được khởi tạo.");
+    final kqNhan = await _db!.query(BANG_NHAN, columns: ["ma"], where: "\"ten\" = ?", whereArgs: [tenNhan]);
+    final td = {"chon": thoiDiemThamChieuHienTai};
+    if (kqNhan.isNotEmpty) {
+      for (final muc in kqNhan) {
+        final int nhan = muc["ma"] as int;
+        _db!.update(BANG_NHAN_SACH, td, where: "\"nhan\" = ? AND \"gia_tri\" = ?", whereArgs: [nhan, tuKhoa]);
+      }
+    }
   }
 
   // ------

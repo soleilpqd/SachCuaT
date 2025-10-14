@@ -19,6 +19,7 @@
 import 'package:flutter/material.dart';
 import 'package:sach_cua_t/utils/vanbanhienthi.dart';
 import 'package:sach_cua_t/views/dieu_khien_co_so.dart';
+import 'package:sach_cua_t/views/nut_bam_tieu_de.dart';
 import 'package:sach_cua_t/views/van_ban_hien_thi_widget.dart';
 
 /// Trường chỉ xử lý nhấn với Tiêu đề và Biểu tượng
@@ -53,12 +54,11 @@ class _TrangThaiTruongNutBam extends TrangThaiCoSo<TruongNutBam> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        TextButton(
+        NutBamTieuDe(
           onPressed: khaDung ? widget.khiNhan : null,
-          style: ButtonStyle(foregroundColor: MaterialStatePropertyAll(color)),
           child: VbhtWidget(text: widget.tieuDe)
         ),
-        IconButton(
+        NutBamBieuTuongTieuDe(
           onPressed: khaDung ? widget.khiNhan : null,
           icon: Icon(
             widget.icon,

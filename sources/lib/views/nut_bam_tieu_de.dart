@@ -16,29 +16,31 @@
   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import 'package:sach_cua_t/views/truong_van_ban.dart';
+import 'package:flutter/material.dart';
 
-/// Class test, không có tính ứng dụng
-class GoiYSo extends GoiYVanBan {
+/// Nút bấm chỉ có tiêu đề (ko hiệu ứng nền)
+class NutBamTieuDe extends TextButton {
 
-  @override
-  Future<List<String>> timKiemGoiY(String dauVao, TruongVanBan widget) async {
-    List<String> ketQua = [];
-    if (widget.cauHinh.soKyTuToiDa != null && dauVao.length >= widget.cauHinh.soKyTuToiDa!) {
-      return ketQua;
-    }
-    for (var so = 0; so <= 9; so += 1) {
-      ketQua.add("$dauVao$so");
-    }
-    return ketQua;
-  }
+  const NutBamTieuDe({
+    super.key,
+    required super.child,
+    required super.onPressed
+  }) : super(style: const ButtonStyle(
+    overlayColor: MaterialStatePropertyAll(Colors.transparent),
+    splashFactory: NoSplash.splashFactory
+  ));
 
-  @override
-  bool tiepTucGoiY(String dauVao, TruongVanBan widget) {
-    if (widget.cauHinh.soKyTuToiDa != null && dauVao.length >= widget.cauHinh.soKyTuToiDa!) {
-      return false;
-    }
-    return true;
-  }
+}
+
+class NutBamBieuTuongTieuDe extends IconButton {
+
+  const NutBamBieuTuongTieuDe({
+    super.key,
+    super.onPressed,
+    required super.icon
+  }) : super(style: const ButtonStyle(
+    overlayColor: MaterialStatePropertyAll(Colors.transparent),
+    splashFactory: NoSplash.splashFactory
+  ));
 
 }

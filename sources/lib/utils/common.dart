@@ -150,6 +150,109 @@ class LinhTinh {
     return ketQua;
   }
 
+  /// Điền vào chỗ trống: thay thế cụm Ký tự tránh + Chỗ trống `[kyTuTranh][choTrong]` trong mẫu [mau] bằng tham số [thamSo].
+  /// Tham số không đủ thì giữ nguyên văn bản trong mẫu.
+  /// VD: ("###_ #_", ["A"]) -> "#A #_"
+  static String dienVaoChoTrong(String mau, List<String> thamSo, {String choTrong = "_", String kyTuTranh = "#"}) {
+    String ketQua = "";
+    assert(choTrong.isNotEmpty, "Chuỗi `Chỗ trống` phải dài ít nhất 1 ký tự");
+    assert(kyTuTranh.length == 1, "Chuỗi `Ký tự tránh` phải dài đúng 1 ký tự");
+    assert(!choTrong.startsWith(kyTuTranh), "Chuỗi `Chỗ trống` không được bắt đầu bằng `Ký tự tránh`");
+    String giuCho = kyTuTranh + choTrong;
+    String tranh = kyTuTranh + kyTuTranh;
+    String dem = "";
+    int so = 0;
+    for (final String kyTu in mau.characters) {
+      if (so < 0) {
+        ketQua += kyTu;
+        continue;
+      }
+      if (dem.isNotEmpty) {
+        dem += kyTu;
+        if (dem == giuCho) {
+          if (so < thamSo.length) {
+            ketQua += thamSo[so];
+            so += 1;
+            dem = "";
+          } else {
+            so = -1;
+            ketQua += dem;
+            dem = "";
+          }
+        } else  if (dem == tranh) {
+          ketQua += kyTuTranh;
+          dem = "";
+        } else if (!giuCho.startsWith(dem)) {
+          ketQua += dem;
+          dem = "";
+        }
+      } else if (kyTu == kyTuTranh) {
+        dem += kyTu;
+      } else {
+        ketQua += kyTu;
+      }
+    }
+    if (dem.isEmpty) {
+      ketQua += dem;
+    }
+    return ketQua;
+  }
+
+  /// Điền vào chỗ trống: thay thế cụm Ký tự tránh + Chỉ số + Ký tự tránh `[kyTuTranh]n[kyTuTranh]` trong mẫu [mau] bằng tham số [thamSo][n].
+  /// Tham số không đủ thì giữ nguyên văn bản trong mẫu.
+  /// Hàm chủ yếu áp dụng cho mẫu thay đổi vị trí tham số trong các trường hợp khác nhau (vd ngôn ngữ) hoặc tham số lặp lại.
+  /// Nếu không có thay đổi vị trí tham số thì sử dụng hàm `dienVaoChoTrong` thì hiệu quả hơn.
+  /// Chú ý [kyTuTranh] được dùng trong RegEx nên tránh các ký tự đặc biệt của RegEx.
+  /// VD: ("%%%0% %0% %1%", ["A"]) -> "%A A %1%"
+  static String dienVaoChoTrongTheoChiSo(String mau, List<String> thamSo, {String kyTuTranh = "%"}) {
+    assert(kyTuTranh.length == 1, "Chuỗi `Ký tự tránh` phải dài đúng 1 ký tự");
+    String ketQua = "";
+    String tranh = kyTuTranh + kyTuTranh;
+    String dem = "";
+    String kyTuTranhExp = kyTuTranh;
+    const String kyTuRegExpDacBiet = "{}[]\\.*+?^\$-|";
+    if (kyTuRegExpDacBiet.contains(kyTuTranhExp)) {
+      kyTuTranhExp = "\\$kyTuTranhExp";
+    }
+    if (kyTuTranhExp == " ") {
+      kyTuTranhExp = "\\s";
+    }
+    final RegExp expTiepTuc = RegExp("^$kyTuTranhExp\\d+\$");
+    final RegExp expDayDu = RegExp("^$kyTuTranhExp\\d+$kyTuTranhExp\$");
+    for (final String kyTu in mau.characters) {
+      if (dem.isNotEmpty) {
+        dem += kyTu;
+        if (expDayDu.allMatches(dem).isNotEmpty) {
+          try {
+            final int so = int.parse(dem.substring(1, dem.length - 1));
+            if (so < thamSo.length) {
+              ketQua += thamSo[so];
+            } else {
+              ketQua += dem;
+            }
+          } catch (_) {
+            ketQua += dem;
+          }
+          dem = "";
+        } else if (dem == tranh) {
+          ketQua += kyTuTranh;
+          dem = "";
+        } else if (expTiepTuc.allMatches(dem).isEmpty) {
+          ketQua += dem;
+          dem = "";
+        }
+      } else if (kyTu == kyTuTranh) {
+        dem += kyTu;
+      } else {
+        ketQua += kyTu;
+      }
+    }
+    if (dem.isEmpty) {
+      ketQua += dem;
+    }
+    return ketQua;
+  }
+
 }
 
 extension ViTriWidget on GlobalKey {
