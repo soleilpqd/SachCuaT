@@ -21,6 +21,8 @@ import 'package:sach_cua_t/utils/common.dart';
 
 /// Từ khoá văn bản hiển thị
 enum TK {
+  /// Sách của T
+  sachCuaT,
   /// Lưu chiểu
   luuChieu,
   /// Đã đọc xong
@@ -87,14 +89,26 @@ enum TK {
   luu,
   /// Xác nhận lưu sách khi quay lại
   xacNhanLuu,
-  /// Không thuộc chuỗi/nhóm sách nhiều tập
-  khongThuocChuoi,
+  /// Chọn sách để lập nhóm/chuỗi chuỗchuỗi
+  chonSachLapChuoi,
+  /// Xoá sách khỏi chuỗi
+  roiChuoi,
   /// Tập số # trong chuỗi sách # tập
   namTrongChuoi,
   /// Ghi chú chuỗi sách
   ghiChuChuoi,
+  /// Tập còn thiếu
+  tapConThieu,
   /// Luôn hiển thị
   luonHienThi,
+  /// Tập số
+  tapSo,
+  /// Hiển thị danh sách tập đầy đủ
+  hienThiDSTapDayDu,
+  /// Tìm kiếm,
+  timKiem,
+  /// Tìm kiếm chính xác
+  timKiemChinhXac,
   ;
 }
 
@@ -118,7 +132,11 @@ class Vbht {
   /// Áp dụng tham số
   void _apDungThamSo() {
     if (thamSo != null && thamSo!.isNotEmpty) {
+      final String tmp = _vanBan;
       _vanBan = LinhTinh.dienVaoChoTrong(_vanBan, thamSo!);
+      if (tmp == tmp) {
+        _vanBan += " ${thamSo!}";
+      }
     }
   }
 

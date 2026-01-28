@@ -17,21 +17,33 @@
  */
 
 import 'package:flutter/material.dart';
-import 'package:sach_cua_t/man_hinh/home.dart';
+import 'package:man_hinh_ung_dung/luong_man_hinh.dart';
+import 'package:man_hinh_ung_dung/widget_luong_man_hinh_truot.dart';
+import 'package:man_hinh_ung_dung/widget_luong_man_hinh_xep_lop.dart';
+import 'package:sach_cua_t/man_hinh/man_hinh_mo_dau.dart';
 import 'package:sach_cua_t/models/database.dart';
 
 void main() {
-  CoSoDuLieu().khoiDau().then((value) => runApp(const MainApp()));
+  CoSoDuLieu().khoiDau().then((value) => runApp(MainApp()));
 }
 
 class MainApp extends StatelessWidget {
-  const MainApp({super.key});
+  static final LuongManHinh luongMHGoc = LuongManHinh();
+
+  MainApp({super.key}) {
+    luongMHGoc.widgetCuaManHinh = WidgetLuongManHinhXepLop(dieuKhienManHinh: luongMHGoc);
+    final LuongManHinh luongChinh = LuongManHinh();
+    luongChinh.widgetCuaManHinh = WidgetLuongManHinhTruot(dieuKhienManHinh: luongChinh);
+    final DieuKhienManHinhMoDau dkMhMoDau = DieuKhienManHinhMoDau();
+    luongChinh.themManHinh(manHinh: dkMhMoDau);
+    luongMHGoc.themManHinh(manHinh: luongChinh);
+  }
 
   @override
   Widget build(BuildContext context) {
-    const Color mainColor = Colors.blueAccent;
+    const Color mainColor = Colors.blue;
     return MaterialApp(
-      home: const HomePage(),
+      home: luongMHGoc.xayDungGiaoDienNguoiDung(context, null),
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: mainColor),
         primaryColor: mainColor,
@@ -48,7 +60,7 @@ class MainApp extends StatelessWidget {
           bodyMedium: TextStyle(color: Colors.black)
         ),
         appBarTheme: const AppBarTheme(
-          backgroundColor: Colors.blueAccent,
+          backgroundColor: mainColor,
           foregroundColor: Colors.white
         )
       )

@@ -262,13 +262,16 @@ class CauHinhTruongVanBan {
   final TextInputType kieuBanPhim;
   /// Số ký tự tối đa
   final int? soKyTuToiDa;
+  /// Tự động bật bàn phím
+  final bool tuDongKichHoatNhap;
   /// Kiểm soát ký tự nhập vào
   final List<TextInputFormatter>? kiemSoatNhapLieu;
 
   const CauHinhTruongVanBan({
     this.kieuBanPhim = TextInputType.text,
     this.soKyTuToiDa,
-    this.kiemSoatNhapLieu
+    this.kiemSoatNhapLieu,
+    this.tuDongKichHoatNhap = false
   });
 
 }
@@ -321,7 +324,7 @@ class _TrangThaiTruongVanBan extends TrangThaiCoSo<TruongVanBan> {
         cacGiaTri.keys.contains(ThuocTinhTruongVanBan.thongBaoLoi.name) ||
         cacGiaTri.keys.contains(ThuocTinhDkCoSo.khaDung.name)
       ) {
-        setState(() {});
+        datTrangThaiKhiAnToan();
       }
     }
   }
@@ -457,6 +460,7 @@ class _TrangThaiTruongVanBan extends TrangThaiCoSo<TruongVanBan> {
             readOnly: !widget.dieuKhien!.khaDung,
             maxLength: cauHinh.soKyTuToiDa,
             inputFormatters: cauHinh.kiemSoatNhapLieu,
+            autofocus: cauHinh.tuDongKichHoatNhap,
             onFieldSubmitted: (value) {
               // onFieldSubmitted();
             }
@@ -509,7 +513,7 @@ class _TrangThaiTruongVanBan extends TrangThaiCoSo<TruongVanBan> {
                     foregroundColor: MaterialStatePropertyAll(Colors.black),
                   ),
                   onPressed: () => onSelected(opt),
-                  child: VanBanHienThiNoiBat(vanBan: _layVanBanNoiBat(dayDu: opt, laPhanNoiDung: laONhapChinh))
+                  child: Row(children: [VanBanHienThiNoiBat(vanBan: _layVanBanNoiBat(dayDu: opt, laPhanNoiDung: laONhapChinh))])
                 );
               }
             )

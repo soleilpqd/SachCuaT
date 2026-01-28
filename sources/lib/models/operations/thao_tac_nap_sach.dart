@@ -26,6 +26,8 @@ class ThaoTacNapThongTinSach {
   final Sach thongTinSach;
   /// Đã nạp xong.
   bool daXong = false;
+  /// Kết quả nạp dữ liệu
+  bool thanhCong = false;
 
   /// Constructor
   ThaoTacNapThongTinSach(this.thongTinSach);
@@ -34,6 +36,8 @@ class ThaoTacNapThongTinSach {
     final CoSoDuLieu csdl = CoSoDuLieu();
     final bool kq = await csdl.napThongTinSach(thongTinSach);
     if (!kq) {
+      daXong = true;
+      thanhCong = false;
       return kq;
     }
     await csdl.layAnhSach(thongTinSach);
@@ -43,6 +47,7 @@ class ThaoTacNapThongTinSach {
     thongTinSach.nhaXuatBan = (await csdl.layDsNhaXuatBanCuaSach(thongTinSach)).map((e) => e.ten).toList();
     // TODO:
     daXong = true;
+    thanhCong = true;
     return true;
   }
 

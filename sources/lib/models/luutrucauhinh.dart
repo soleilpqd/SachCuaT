@@ -43,4 +43,28 @@ class LuuTruCauHinh {
     _prefs!.setInt("thoi_diem_tham_chieu", value);
   }
 
+  /// Lấy tuỳ chọn hiển thị danh sách tập đầy đủ
+  Future<bool?> layHienThiDSTapDayDu() async {
+    await _khoiTaoNeuCan();
+    return _prefs!.getBool("hien_thi_ds_tap_day_du");
+  }
+
+  /// Lưu tuỳ chọn hiển thị danh sách tập đầy đủ
+  Future<void> luuHienThiDSTapDayDu(bool value) async {
+    await _khoiTaoNeuCan();
+    _prefs!.setBool("hien_thi_ds_tap_day_du", value);
+  }
+
+  /// Lấy tuỳ chọn hiển thị danh sách tập đầy đủ
+  Future<bool?> layTimKiemChinhXac() async {
+    await _khoiTaoNeuCan();
+    return _prefs!.getBool("tim_kiem_chinh_xac");
+  }
+
+  /// Lưu tuỳ chọn hiển thị danh sách tập đầy đủ
+  Future<void> luuTimKiemChinhXac(bool value) async {
+    await _khoiTaoNeuCan();
+    _prefs!.setBool("tim_kiem_chinh_xac", value);
+  }
+
 }

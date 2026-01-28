@@ -16,6 +16,8 @@ dependencies:
   shared_preferences: ^2.2.3
   sqflite: ^2.3.3+1
   webview_flutter: ^4.8.0
+  man_hinh_ung_dung:
+    path: ../../man_hinh_ung_dung
 
 dev_dependencies:
   flutter_test:
@@ -26,3 +28,4 @@ flutter:
   uses-material-design: true
   assets:
     - assets/sachcuat.db
+    - assets/book.jpg

@@ -18,7 +18,7 @@
 
 import 'package:flutter/material.dart' as Ui;
 import 'package:image/image.dart' as Img;
-import 'package:image_picker/image_picker.dart';
+import 'package:sach_cua_t/utils/common.dart';
 
 typedef UiImage = Ui.Image;
 typedef ImgImage = Img.Image;
@@ -31,8 +31,8 @@ class Sach {
   String isbn = "";
   int? maNhieuTap;
   int? tap;
-  XFile? hinhAnh;
-  XFile? hinhThuNho;
+  Uri? hinhAnh;
+  Uri? hinhThuNho;
 
   List<String> nhaXuatBan = [];
   List<String> tacGia = [];
@@ -40,6 +40,25 @@ class Sach {
   List<String> viTri = [];
   Map<String, String> nhan = {};
   List<String> danhDau = [];
+
+  static Sach taoDuLieuGia({int chiSo = 0}) {
+    Sach ketQua = Sach();
+    ketQua.maSo = chiSo;
+    ketQua.ten = "Tên sách $chiSo";
+    ketQua.isbn = "1234567890";
+    ketQua.tacGia.add("Tác giả 01");
+    ketQua.tacGia.add("Tác giả 02");
+    ketQua.dichGia.add("Dịch giả 01");
+    ketQua.dichGia.add("Dịch giả 02");
+    ketQua.nhaXuatBan.add("Nhà xuất bản 01");
+    ketQua.nhaXuatBan.add("Nhà xuất bản 02");
+    ketQua.viTri.add("Vị trí 01");
+    ketQua.viTri.add("Vị trí 02");
+    ketQua.tap = chiSo;
+    ketQua.hinhAnh = LinhTinh.taoDuongDan(phanLoai: PhanLoaiDuongDan.assets, duongDan: "assets/book.jpg");
+    ketQua.hinhThuNho = LinhTinh.taoDuongDan(phanLoai: PhanLoaiDuongDan.assets, duongDan: "assets/book.jpg");
+    return ketQua;
+  }
 
 }
 
@@ -81,4 +100,9 @@ class DanhDauSach {
   int maSach = -1;
   String trang = "";
   ImgImage? image;
+}
+
+class NhomSach {
+  int maSo = -1;
+  String ghiChu = "";
 }

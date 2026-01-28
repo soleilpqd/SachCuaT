@@ -20,7 +20,6 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart';
 import 'package:sach_cua_t/models/dulieu.dart';
 import 'package:sach_cua_t/models/luutrucauhinh.dart';
@@ -447,11 +446,11 @@ WHERE "$BANG_VI_TRI_SACH"."sach" = ?;
     assert(sach.maSo != null, "Thiếu mã sách để cập nhật.");
     final duongDanAnh = join(_thuMucAnhSach, "${sach.maSo!}.jpg");
     if (await File(duongDanAnh).exists()) {
-      sach.hinhAnh = XFile(duongDanAnh);
+      sach.hinhAnh = LinhTinh.taoDuongDan(phanLoai: PhanLoaiDuongDan.file, duongDan: duongDanAnh);
     }
     final duongDanAnhNho = join(_thuMucAnhSach, "${sach.maSo!}_tn.jpg");
     if (await File(duongDanAnhNho).exists()) {
-      sach.hinhThuNho = XFile(duongDanAnhNho);
+      sach.hinhThuNho = LinhTinh.taoDuongDan(phanLoai: PhanLoaiDuongDan.file, duongDan: duongDanAnhNho);
     }
   }
 
@@ -531,6 +530,12 @@ GROUP BY "$BANG_NHAN_SACH"."gia_tri";
         _db!.update(BANG_NHAN_SACH, td, where: "\"nhan\" = ? AND \"gia_tri\" = ?", whereArgs: [nhan, tuKhoa]);
       }
     }
+  }
+
+  Future<List<String>> layDSNhanLuonHien() async {
+    assert(_db != null, "CSDL chưa được khởi tạo.");
+    final ketQua = await _db!.query(BANG_NHAN, columns: ["ten"], where: "\"luon_hien\" > 0");
+    return ketQua.map((e) => e["ten"] as String).toList();
   }
 
   // ------

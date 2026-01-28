@@ -17,6 +17,7 @@
  */
 
 import 'package:flutter/material.dart';
+import 'package:sach_cua_t/utils/common.dart';
 
 /// Theo dõi điều khiển cơ sở
 mixin TheoDoiDieuKhienCoSo {
@@ -267,7 +268,7 @@ abstract class TrangThaiCoSo<T extends GiaoDienCoSo> extends State<T> with TheoD
   @override
   void dieuKhienCoSoThayDoiThuocTinh(DieuKhienCoSo nguon, Map<String, dynamic> cacGiaTri) {
     if (nguon == widget.dieuKhien) {
-      setState(() {});
+      datTrangThaiKhiAnToan();
     }
   }
 

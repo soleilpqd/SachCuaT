@@ -17,6 +17,7 @@
  */
 
 import 'package:flutter/material.dart';
+import 'package:sach_cua_t/utils/common.dart';
 import 'package:sach_cua_t/utils/vanbanhienthi.dart';
 
 /// Text widget mở rộng cho việc nạp Văn bản hiển thị
@@ -75,8 +76,8 @@ class _VbhtWidgetState extends State<VbhtWidget> {
   }
 
   void _napLaiDuLieu() {
-    widget.text.khiXong = (_) => setState(() {});
-    widget.semanticsLabel?.khiXong = (_) => setState(() {});
+    widget.text.khiXong = (_) => datTrangThaiKhiAnToan();
+    widget.semanticsLabel?.khiXong = (_) => datTrangThaiKhiAnToan();
   }
 
   @override

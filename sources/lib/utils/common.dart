@@ -16,7 +16,14 @@
   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:sach_cua_t/models/dulieu.dart';
+
+enum PhanLoaiDuongDan {
+  file, assets;
+}
 
 /// Hằng số
 class HangSo {
@@ -34,12 +41,43 @@ class HangSo {
 
 }
 
+extension SafeWidgetState on State {
+
+  /// Đặt trạng thái khi an toàn
+  /// Chỉ gọi `setState` khi state đã được mount vào widget
+  /// (dùng hàm này khi muốn đặt giá trị thuộc tính của các state nhưng chưa chắc chắn đã mount vào widget)
+  /// (vd: VanBanHienThiWidget: nạp text trong initState, nạp xong text thì ko chắc đã mount chưa)
+  /// Chú ý: [action] sẽ không chắc chắn sẽ được thực thi.
+  void datTrangThaiKhiAnToan({void Function()? action}) {
+    BuildContext? ctx;
+    try {
+      ctx = context;
+    } catch (_) {
+      ctx = null;
+    }
+    if (ctx != null && ctx.mounted) {
+      // ignore_for_file: invalid_use_of_protected_member
+      setState(action ?? (){});
+    }
+  }
+
+}
+
 /// Tổng hợp các hàm lặt vặt
 class LinhTinh {
 
   /// Dừng nhập văn bản
   static void dungNhapVanBan() {
     FocusManager.instance.primaryFocus?.unfocus();
+  }
+
+  static Uri taoDuongDan({required PhanLoaiDuongDan phanLoai, required String duongDan}) => Uri(scheme: phanLoai.name, path: duongDan);
+
+  static UiImage taoWidgetAnh(Uri duongDan) {
+    if (duongDan.scheme == PhanLoaiDuongDan.assets.name) {
+      return UiImage.asset(duongDan.path);
+    }
+    return UiImage.file(File(duongDan.path));
   }
 
   /// Kiểm tra xem mã có đúng chuẩn ISBN hay ko (13 chữ số, tiền tố, giá trị kiểm tra)

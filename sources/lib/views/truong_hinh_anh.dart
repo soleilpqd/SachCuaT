@@ -16,11 +16,9 @@
   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:sach_cua_t/models/dulieu.dart';
+import 'package:sach_cua_t/utils/common.dart';
 import 'package:sach_cua_t/utils/vanbanhienthi.dart';
 import 'package:sach_cua_t/views/dieu_khien_co_so.dart';
 import 'package:sach_cua_t/views/van_ban_hien_thi_widget.dart';
@@ -35,7 +33,7 @@ enum ThuocTinhTruongHinhAnh {
 class DieuKhienTruongHinhAnh extends DieuKhienCoSo {
 
   /// CONSTRUCTOR
-  DieuKhienTruongHinhAnh({XFile? hinhAnh, super.khaDung, super.laDieuKhienMoi}) : super(thuocTinhBanDau: {ThuocTinhTruongHinhAnh.hinhAnh.name: hinhAnh});
+  DieuKhienTruongHinhAnh({Uri? hinhAnh, super.khaDung, super.laDieuKhienMoi}) : super(thuocTinhBanDau: {ThuocTinhTruongHinhAnh.hinhAnh.name: hinhAnh});
 
   @override
   List<String> dsThuocTinhGiaTri() => [ThuocTinhTruongHinhAnh.hinhAnh.name];
@@ -44,9 +42,9 @@ class DieuKhienTruongHinhAnh extends DieuKhienCoSo {
   List<String> dsThuocTinh() => ThuocTinhTruongHinhAnh.values.chuyenDoiSangDS(khac: super.dsThuocTinh());
 
   /// Hình ảnh
-  XFile? get hinhAnh => this[ThuocTinhTruongHinhAnh.hinhAnh.name];
+  Uri? get hinhAnh => this[ThuocTinhTruongHinhAnh.hinhAnh.name];
   /// Hình ảnh
-  set hinhAnh(XFile? gt) => this[ThuocTinhTruongHinhAnh.hinhAnh.name] = gt;
+  set hinhAnh(Uri? gt) => this[ThuocTinhTruongHinhAnh.hinhAnh.name] = gt;
 
 }
 
@@ -56,7 +54,7 @@ class DieuKhienTruongHinhAnh extends DieuKhienCoSo {
 class TruongHinhAnh extends GiaoDienCoSo<DieuKhienTruongHinhAnh> {
 
   /// Hàm xử lý khi không bật được camera (quyền, phần cứng...)
-  final Function(BuildContext) khiKhongCoMayAnh;
+  final Function() khiKhongCoMayAnh;
   /// Bộ đệm văn bản hiển thị (dùng cho tiêu đề)
   final BoDemVbht? dem;
 
@@ -78,7 +76,7 @@ class _TrangThaiTruongHinhAnh extends TrangThaiCoSo<TruongHinhAnh> {
         color: widget.dieuKhien?.hinhAnh == null ? Colors.grey : Colors.white,
       ),
       widget.dieuKhien?.hinhAnh != null ?
-        UiImage.file(File(widget.dieuKhien!.hinhAnh!.path)) :
+        LinhTinh.taoWidgetAnh(widget.dieuKhien!.hinhAnh!) :
         Icon(
           Icons.camera_alt,
           size: 60,
@@ -113,10 +111,10 @@ class _TrangThaiTruongHinhAnh extends TrangThaiCoSo<TruongHinhAnh> {
     try {
       file = await picker.pickImage(source: ImageSource.camera);
     } catch (error) {
-      widget.khiKhongCoMayAnh(context);
+      widget.khiKhongCoMayAnh();
     }
     if (file != null) {
-      widget.dieuKhien?.hinhAnh = file;
+      widget.dieuKhien?.hinhAnh = LinhTinh.taoDuongDan(phanLoai: PhanLoaiDuongDan.file, duongDan: file.path);
     }
   }
 

@@ -24,32 +24,48 @@ class VanBanHienThiNoiBat extends StatelessWidget {
 
   /// Văn bản nổi bật
   final VanBanNoiBat vanBan;
+  final TextOverflow tuDongCat;
 
   /// Constructor
-  const VanBanHienThiNoiBat({super.key, required this.vanBan});
+  const VanBanHienThiNoiBat({super.key, required this.vanBan, this.tuDongCat = TextOverflow.ellipsis});
 
   /// Xây dựng các đoạn văn bản
-  List<Text> _xayDungCacDoanVanBan() {
-    List<Text> ketQua = [];
+  List<TextSpan> _xayDungCacDoanVanBan() {
+    List<TextSpan> ketQua = [];
+    TextSpan doanVb = const TextSpan();
+
     if (vanBan.dsViTriKd.isEmpty) {
-      ketQua.add(Text(vanBan.vanBanDayDu));
+      doanVb = TextSpan(text: vanBan.vanBanDayDu);
+      ketQua.add(doanVb);
       return ketQua;
     }
     int vtHt = 0;
     for (final vt in vanBan.dsViTriKd) {
       if (vt > vtHt) {
-        ketQua.add(Text(vanBan.vanBanDayDu.substring(vtHt, vt)));
+        doanVb = TextSpan(text: vanBan.vanBanDayDu.substring(vtHt, vt));
+        ketQua.add(doanVb);
       }
       vtHt = vt + vanBan.vanBanNoiBat.length;
-      ketQua.add(Text(vanBan.vanBanDayDu.substring(vt, vtHt), style: const TextStyle(backgroundColor: Colors.yellow)));
+      doanVb = TextSpan(text: vanBan.vanBanDayDu.substring(vt, vtHt), style: const TextStyle(backgroundColor: Colors.yellow));
+      ketQua.add(doanVb);
     }
     if (vtHt < vanBan.vanBanDayDu.length) {
-      ketQua.add(Text(vanBan.vanBanDayDu.substring(vtHt)));
+      doanVb = TextSpan(text: vanBan.vanBanDayDu.substring(vtHt));
+      ketQua.add(doanVb);
     }
     return ketQua;
   }
 
   @override
-  Widget build(BuildContext context) => Row(children: _xayDungCacDoanVanBan());
+  Widget build(BuildContext context) {
+    final List<TextSpan> cacDoan = _xayDungCacDoanVanBan();
+    final TextSpan doanChinh = TextSpan(
+      children: cacDoan,
+      style: const TextStyle(
+        color: Colors.black
+      )
+    );
+    return RichText(text: doanChinh, overflow: tuDongCat);
+  }
 
 }
