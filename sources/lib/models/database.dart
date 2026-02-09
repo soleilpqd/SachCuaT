@@ -74,20 +74,21 @@ class CoSoDuLieu {
       _thoiDiemThamChieu = now;
       LuuTruCauHinh().luuThoiDiemThamChieu(now);
     }
-
+    // Cơ sở dữ liệu
     final duongDanCoSo = await getDatabasesPath();
     final duongDanCSDL = join(duongDanCoSo, tenDB);
     print("DB: $duongDanCSDL");
     final csdlTonTai = await databaseExists(duongDanCSDL);
     // final dbExisted = false; // DEBUG: overwrite
-    if (!csdlTonTai) {
-      try {
+    try {
         await Directory(duongDanCoSo).create(recursive: true);
       } catch (_) {}
-      final ByteData data = await rootBundle.load(join("assets", tenDB));
-      final List<int> bytes = data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
+    final ByteData data = await rootBundle.load(join("assets", tenDB));
+    final List<int> bytes = data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
+    if (!csdlTonTai) {
       await File(duongDanCSDL).writeAsBytes(bytes);
     }
+    // Thư mục lưu ảnh
     _thuMucAnhSach = join(duongDanCoSo, "sach");
     final dirAnhSach = Directory(_thuMucAnhSach);
     if (!await dirAnhSach.exists()) {
@@ -96,6 +97,39 @@ class CoSoDuLieu {
       } catch (_) {}
     }
     _db = await openDatabase(duongDanCSDL, version: _dbVersion);
+    _kiemTraDuLieuChuan(bytes, duongDanCoSo);
+  }
+
+  /// Cập nhật lại dữ liệu chuẩn (văn bản hiển thị) từ DB gốc trong bundle
+  void _kiemTraDuLieuChuan(List<int> duLieuGoc, String duongDanCoSo) async {
+    const tenDBGoc = "sachcuat_tam.db";
+    final duongDanCSDL = join(duongDanCoSo, tenDBGoc);
+    final tepCSDL = File(duongDanCSDL);
+    await tepCSDL.writeAsBytes(duLieuGoc);
+    final Database dbGoc = await openDatabase(duongDanCSDL);
+    final List<Map<String, Object?>> coKiemTra = await dbGoc.query(
+      BANG_VB_HIEN_THI,
+      where: "\"tu_khoa\" = ?",
+      whereArgs: ["_"]
+    );
+    for (final co in coKiemTra) {
+      final String? coHienTai = await truyVanVanBanHienThi(co["tu_khoa"] as String, co["phan_loai"] as String);
+      if (coHienTai != (co["noi_dung"] as String)) {
+        await _db!.delete(BANG_VB_HIEN_THI, where: "\"phan_loai\" = ?", whereArgs: [co["phan_loai"]]);
+        final List<Map<String, Object?>> cacTuKhoaGoc = await dbGoc.query(
+          BANG_VB_HIEN_THI,
+          where: "\"phan_loai\" = ?",
+          whereArgs: [co["phan_loai"]]
+        );
+        for (final tkGoc in cacTuKhoaGoc) {
+          await _db!.insert(BANG_VB_HIEN_THI, tkGoc);
+        }
+      }
+    }
+    dbGoc.close();
+    try {
+      tepCSDL.delete();
+    } catch (_) {}
   }
 
   /// Đóng DB
