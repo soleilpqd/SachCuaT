@@ -39,6 +39,7 @@ class Sach {
   List<String> dichGia = [];
   List<String> viTri = [];
   Map<String, String> nhan = {};
+  List<String> nhanLuonHien = [];
   List<String> danhDau = [];
 
   static Sach taoDuLieuGia({int chiSo = 0}) {
@@ -58,6 +59,24 @@ class Sach {
     ketQua.hinhAnh = LinhTinh.taoDuongDan(phanLoai: PhanLoaiDuongDan.assets, duongDan: "assets/book.jpg");
     ketQua.hinhThuNho = LinhTinh.taoDuongDan(phanLoai: PhanLoaiDuongDan.assets, duongDan: "assets/book.jpg");
     return ketQua;
+  }
+
+  void inThongTinChiTiet() {
+    print("SACH:");
+    print("       ma so: $maSo");
+    print("         ten: '$ten'");
+    print("        ISBN: '$isbn'");
+    print("     tac gia: '$tacGia'");
+    print("    dich gia: '$dichGia'");
+    print("         NXB: '$nhaXuatBan'");
+    print("      vi tri: '$viTri'");
+    print("         tap: $tap");
+    print("    hinh anh: '${hinhAnh?.toString()}'");
+    print("    hinh nho: '${hinhThuNho?.toString()}'");
+    print("        xong: '$daHoanThanh'");
+    print("        nhan: '$nhan'");
+    print("  nhan lHien: '$nhanLuonHien'");
+    print("    danh dau: '$danhDau'");
   }
 
 }
@@ -86,7 +105,8 @@ class SachNhieuTap extends DuLieuCoso {
 
 /// Nhãn sách
 class NhanSach extends DuLieuCoso {
-  int kieu = -1;
+  String? giaTri;
+  int luonHien = -1;
 }
 
 /// Vị trí lưu trữ sách
@@ -98,8 +118,8 @@ class ViTriSach extends DuLieuCoso {
 class DanhDauSach {
   int maSo = -1;
   int maSach = -1;
-  String trang = "";
-  ImgImage? image;
+  String noiDung = "";
+  // ImgImage? image; TODO: later
 }
 
 class NhomSach {

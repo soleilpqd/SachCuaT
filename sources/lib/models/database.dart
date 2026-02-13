@@ -197,7 +197,7 @@ class CoSoDuLieu {
   /// Nạp thông tin sách
   Future<bool> napThongTinSach(Sach thongTin) async {
     assert(_db != null, "CSDL chưa được khởi tạo.");
-    assert(thongTin.maSo != null, "Thiếu mã sách để cập nhật.");
+    assert(thongTin.maSo != null, "Thiếu mã sách.");
     final duLieu = await _db!.query(BANG_SACH, where: "\"ma\" = ?", whereArgs: [thongTin.maSo!]);
     if (duLieu.isNotEmpty) {
       final banGhiDau = duLieu.first;
@@ -278,6 +278,7 @@ WHERE "$BANG_NXB_SACH"."sach" = ?;
   Future<void> themNxbCuaSach(Sach sach, NhaXuatBan nxb) async {
     assert(_db != null, "CSDL chưa được khởi tạo.");
     assert(sach.maSo != null, "Thiếu mã sách.");
+    assert(nxb.maSo >= 0, "Thiếu mã số NXB");
     await _db!.insert(BANG_NXB_SACH, {"sach": sach.maSo!, "nxb": nxb.maSo});
   }
 
@@ -285,6 +286,7 @@ WHERE "$BANG_NXB_SACH"."sach" = ?;
   Future<void> xoaNxbCuaSach(Sach sach, NhaXuatBan nxb) async {
     assert(_db != null, "CSDL chưa được khởi tạo.");
     assert(sach.maSo != null, "Thiếu mã sách.");
+    assert(nxb.maSo >= 0, "Thiếu mã số NXB");
     await _db!.delete(BANG_NXB_SACH, where: "\"sach\" = ? AND \"nxb\" = ?", whereArgs: [sach.maSo, nxb.maSo]);
   }
 
@@ -339,6 +341,7 @@ WHERE "$BANG_TAC_GIA_SACH"."sach" = ?;
   Future<void> themTacGiaCuaSach(Sach sach, TacGia tacGia) async {
     assert(_db != null, "CSDL chưa được khởi tạo.");
     assert(sach.maSo != null, "Thiếu mã sách.");
+    assert(tacGia.maSo >= 0, "Thiếu mã tác giả.");
     await _db!.insert(BANG_TAC_GIA_SACH, {"sach": sach.maSo!, "tac_gia": tacGia.maSo});
   }
 
@@ -346,6 +349,7 @@ WHERE "$BANG_TAC_GIA_SACH"."sach" = ?;
   Future<void> xoaTacGiaCuaSach(Sach sach, TacGia tacGia) async {
     assert(_db != null, "CSDL chưa được khởi tạo.");
     assert(sach.maSo != null, "Thiếu mã sách.");
+    assert(tacGia.maSo >= 0, "Thiếu mã tác giả.");
     await _db!.delete(BANG_TAC_GIA_SACH, where: "\"sach\" = ? AND \"tac_gia\" = ?", whereArgs: [sach.maSo!, tacGia.maSo]);
   }
 
@@ -400,6 +404,7 @@ WHERE "$BANG_DICH_GIA_SACH"."sach" = ?;
   Future<void> themDichGiaCuaSach(Sach sach, DichGia dichGia) async {
     assert(_db != null, "CSDL chưa được khởi tạo.");
     assert(sach.maSo != null, "Thiếu mã sách.");
+    assert(dichGia.maSo >= 0, "Thiếu mã dịch giả.");
     await _db!.insert(BANG_DICH_GIA_SACH, {"sach": sach.maSo!, "dich_gia": dichGia.maSo});
   }
 
@@ -407,6 +412,7 @@ WHERE "$BANG_DICH_GIA_SACH"."sach" = ?;
   Future<void> xoaDichGiaCuaSach(Sach sach, DichGia dichGia) async {
     assert(_db != null, "CSDL chưa được khởi tạo.");
     assert(sach.maSo != null, "Thiếu mã sách.");
+    assert(dichGia.maSo >= 0, "Thiếu mã dịch giả.");
     await _db!.delete(BANG_DICH_GIA_SACH, where: "\"sach\" = ? AND \"dich_gia\" = ?", whereArgs: [sach.maSo!, dichGia.maSo]);
   }
 
@@ -437,6 +443,17 @@ WHERE "$BANG_DICH_GIA_SACH"."sach" = ?;
     });
   }
 
+  /// Xoá vị trí
+  Future<void> xoaViTri(ViTriSach vt) async {
+    assert(_db != null, "CSDL chưa được khởi tạo.");
+    assert(vt.maSo >= 0, "Thiếu mã vị trí.");
+    await _db!.delete(
+      BANG_VI_TRI,
+      where: "\"ma\" = ?",
+      whereArgs: [vt.maSo]
+    );
+  }
+
   /// Lấy danh sách các vị trí của sách
   Future<List<ViTriSach>> layDsViTriCuaSach(Sach sach) async {
     assert(_db != null, "CSDL chưa được khởi tạo.");
@@ -462,6 +479,7 @@ WHERE "$BANG_VI_TRI_SACH"."sach" = ?;
   Future<void> themViTriCuaSach(Sach sach, ViTriSach viTri) async {
     assert(_db != null, "CSDL chưa được khởi tạo.");
     assert(sach.maSo != null, "Thiếu mã sách.");
+    assert(viTri.maSo >= 0, "Thiếu mã vị trí.");
     final now = DateTime.now().millisecondsSinceEpoch;
     await _db!.insert(BANG_VI_TRI_SACH, {"sach": sach.maSo!, "vi_tri": viTri.maSo, "ngay_nhap": now});
   }
@@ -470,7 +488,8 @@ WHERE "$BANG_VI_TRI_SACH"."sach" = ?;
   Future<void> xoaViTriCuaSach(Sach sach, ViTriSach viTri) async {
     assert(_db != null, "CSDL chưa được khởi tạo.");
     assert(sach.maSo != null, "Thiếu mã sách.");
-    await _db!.delete(BANG_VI_TRI_SACH, where: "\"sach\" = ? AND \"dich_gia\" = ?", whereArgs: [sach.maSo!, viTri]);
+    assert(viTri.maSo >= 0, "Thiếu mã vị trí.");
+    await _db!.delete(BANG_VI_TRI_SACH, where: "\"sach\" = ? AND \"vi_tri\" = ?", whereArgs: [sach.maSo!, viTri.maSo]);
   }
 
   // ------
@@ -538,6 +557,8 @@ WHERE "$BANG_VI_TRI_SACH"."sach" = ?;
     await _db!.update(bang, {"chon": thoiDiemThamChieuHienTai}, where: "\"ten\" = ?", whereArgs: [tuKhoa]);
   }
 
+  // ------
+
   /// Tìm kiếm giá trị nhãn
   Future<List<VanBanNoiBat>> timKiemGiaTriNhan(String tenNhan, String tuKhoa) async {
     assert(_db != null, "CSDL chưa được khởi tạo.");
@@ -566,10 +587,183 @@ GROUP BY "$BANG_NHAN_SACH"."gia_tri";
     }
   }
 
+  /// Lấy danh sách nhãn luôn hiện
   Future<List<String>> layDSNhanLuonHien() async {
     assert(_db != null, "CSDL chưa được khởi tạo.");
     final ketQua = await _db!.query(BANG_NHAN, columns: ["ten"], where: "\"luon_hien\" > 0");
     return ketQua.map((e) => e["ten"] as String).toList();
+  }
+
+  /// Lấy danh sách nhãn có tên trong danh sách
+  Future<List<NhanSach>> layDSNhan(List<String> tenNhan) async {
+    assert(_db != null, "CSDL chưa được khởi tạo.");
+    assert(tenNhan.isNotEmpty, "Danh sách tên nhãn rỗng.");
+    String thamSo = List<String>.filled(tenNhan.length, "?").join(",");
+    final List<Map<String, Object?>> ketQua = await _db!.rawQuery(
+      """
+SELECT "$BANG_NHAN"."ma", "$BANG_NHAN"."ten", "$BANG_NHAN"."luon_hien" FROM "$BANG_NHAN"
+WHERE "$BANG_NHAN"."ten" IN ($thamSo);
+""",
+      tenNhan
+    );
+    return ketQua.map((e) {
+      final NhanSach nhan = NhanSach();
+      nhan.maSo = e["ma"] as int;
+      nhan.ten = e["ten"] as String;
+      nhan.luonHien = e["luon_hien"] as int;
+      return nhan;
+    }).toList();
+  }
+
+  /// Thêm nhãn
+  Future<void> themNhan(NhanSach nhan) async {
+    assert(_db != null, "CSDL chưa được khởi tạo.");
+    final tdht = thoiDiemThamChieuHienTai;
+    nhan.maSo = await _db!.insert(BANG_NHAN, {
+      "ten": nhan.ten,
+      "ten_kd": LinhTinh.loaiBoDautiengViet(nhan.ten),
+      "chon": tdht,
+      "luon_hien": nhan.luonHien
+    });
+  }
+
+  /// Xoá nhãn
+  Future<void> xoaNhan(NhanSach nhan) async {
+    assert(_db != null, "CSDL chưa được khởi tạo.");
+    assert(nhan.maSo >= 0, "Thiếu mã nhãn.");
+    await _db!.delete(
+      BANG_NHAN,
+      where: "\"ma\" = ?",
+      whereArgs: [nhan.maSo]
+    );
+  }
+
+  /// Lấy danh sách nhãn của sách
+  Future<List<NhanSach>> layDSNhanCuaSach(Sach sach) async {
+    assert(_db != null, "CSDL chưa được khởi tạo.");
+    assert(sach.maSo != null, "Thiếu mã sách.");
+    final List<Map<String, Object?>> ketQua = await _db!.rawQuery(
+      """
+SELECT "$BANG_NHAN"."ma", "$BANG_NHAN"."ten", "$BANG_NHAN"."luon_hien", "$BANG_NHAN_SACH"."gia_tri" FROM "$BANG_NHAN"
+INNER JOIN "$BANG_NHAN_SACH" ON "$BANG_NHAN_SACH"."nhan" = "$BANG_NHAN"."ma"
+WHERE "$BANG_NHAN_SACH"."sach" = ?;
+""",
+      [sach.maSo!]
+    );
+    return ketQua.map((e) {
+      final NhanSach nhan = NhanSach();
+      nhan.maSo = e["ma"] as int;
+      nhan.ten = e["ten"] as String;
+      nhan.giaTri = e["gia_tri"] as String;
+      nhan.luonHien = e["luon_hien"] as int;
+      return nhan;
+    }).toList();
+  }
+
+  /// Thêm nhãn cho sách
+  Future<void> themNhanChoSach(Sach sach, NhanSach nhan) async {
+    assert(_db != null, "CSDL chưa được khởi tạo.");
+    assert(sach.maSo != null, "Thiếu mã sách.");
+    assert(nhan.maSo >= 0, "Thiếu mã nhãn.");
+    final tdht = thoiDiemThamChieuHienTai;
+    await _db!.insert(BANG_NHAN_SACH, {
+      "sach": sach.maSo,
+      "nhan": nhan.maSo,
+      "gia_tri": nhan.giaTri,
+      "gia_tri_kd": LinhTinh.loaiBoDautiengViet(nhan.giaTri ?? ""),
+      "chon": tdht
+    });
+  }
+
+  /// Cập nhật giá trị nhãn của sách
+  Future<void> capNhatNhanChoSach(Sach sach, NhanSach nhan) async {
+    assert(_db != null, "CSDL chưa được khởi tạo.");
+    assert(sach.maSo != null, "Thiếu mã sách.");
+    assert(nhan.maSo >= 0, "Thiếu mã nhãn.");
+    await _db!.update(
+      BANG_NHAN_SACH,
+      {
+        "gia_tri": nhan.giaTri,
+        "gia_tri_kd": LinhTinh.loaiBoDautiengViet(nhan.giaTri ?? "")
+      },
+      where: "\"sach\" = ? AND \"nhan\" = ?",
+      whereArgs: [sach.maSo, nhan.maSo]
+    );
+  }
+
+  /// Xoá nhãn của sách
+  Future<void> xoaNhanChoSach(Sach sach, NhanSach nhan) async {
+    assert(_db != null, "CSDL chưa được khởi tạo.");
+    assert(sach.maSo != null, "Thiếu mã sách.");
+    assert(nhan.maSo >= 0, "Thiếu mã nhãn.");
+    await _db!.delete(
+      BANG_NHAN_SACH,
+      where: "\"sach\" = ? AND \"nhan\" = ?",
+      whereArgs: [sach.maSo, nhan.maSo]
+    );
+  }
+
+  Future<void> datLaiLuonHienCuaNhan() async {
+    assert(_db != null, "CSDL chưa được khởi tạo.");
+    await _db!.update(
+      BANG_NHAN,
+      { "luon_hien": 0 }
+    );
+  }
+
+  Future<void> datLuonHienCuaNhan(List<String> dsNhan) async {
+    assert(_db != null, "CSDL chưa được khởi tạo.");
+    final String thamSo = List<String>.filled(dsNhan.length, "?").join(",");
+    await _db!.update(
+      BANG_NHAN,
+      { "luon_hien": 1 },
+      where: "\"ten\" IN ($thamSo)",
+      whereArgs: dsNhan
+    );
+  }
+
+  // ------
+
+  /// Lấy danh sách đánh dấu của sách
+  Future<List<DanhDauSach>> layDSDanhDauCuaSach(Sach sach) async {
+    assert(_db != null, "CSDL chưa được khởi tạo.");
+    assert(sach.maSo != null, "Thiếu mã sách.");
+    final List<Map<String, Object?>> ketQua = await _db!.query(
+      BANG_DANH_DAU,
+      where: "\"sach\" = ?",
+      whereArgs: [sach.maSo!]
+    );
+    return ketQua.map((e) {
+      final DanhDauSach danhDau = DanhDauSach();
+      danhDau.maSo = e["ma"] as int;
+      danhDau.maSach = e["sach"] as int;
+      danhDau.noiDung = e["ghi_chu"] as String;
+      return danhDau;
+    }).toList();
+  }
+
+  /// Thêm đánh dấu cho sách
+  Future<void> themDanhDauChoSach(DanhDauSach danhDau) async {
+    assert(_db != null, "CSDL chưa được khởi tạo.");
+    assert(danhDau.maSach >= 0, "Thiếu mã sách.");
+    final tdht = thoiDiemThamChieuHienTai;
+    danhDau.maSo = await _db!.insert(BANG_DANH_DAU, {
+      "sach": danhDau.maSach,
+      "ghi_chu": danhDau.noiDung,
+      "ghi_chu_kd": LinhTinh.loaiBoDautiengViet(danhDau.noiDung),
+      "thoi_gian": tdht
+    });
+  }
+
+  /// Xoá đánh dấu của sách
+  Future<void> xoaDanhDau(DanhDauSach danhDau) async {
+    assert(_db != null, "CSDL chưa được khởi tạo.");
+    assert(danhDau.maSo >= 0, "Thiếu mã đánh dấu.");
+    await _db!.delete(
+      BANG_DANH_DAU,
+      where: "\"ma\" = ?",
+      whereArgs: [danhDau.maSo]
+    );
   }
 
   // ------

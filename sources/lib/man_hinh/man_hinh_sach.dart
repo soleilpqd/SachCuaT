@@ -806,6 +806,19 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo {
     thongTinSach.dichGia = _dsDkDichGia.where((element) => element.vanBan.isNotEmpty).map((e) => e.vanBan).toList();
     thongTinSach.nhaXuatBan = _dsDkNxb.where((element) => element.vanBan.isNotEmpty).map((e) => e.vanBan).toList();
     thongTinSach.viTri = _dsDkViTri.where((element) => element.vanBan.isNotEmpty).map((e) => e.vanBan).toList();
+    thongTinSach.danhDau = _dsDkDanhDau.where((element) => element.vanBan.isNotEmpty).map((e) => e.vanBan).toList();
+    List<String> nhanLuonHien = [];
+    Map<String, String> nhan = {};
+    for (final DieuKhienTruongVanBan dk in _dsDkNhan) {
+      if (dk.vanBan.isNotEmpty && dk.vbTieuDe.isNotEmpty) {
+        nhan[dk.vbTieuDe] = dk.vanBan;
+        if (dk.luonHienThi) {
+          nhanLuonHien.add(dk.vbTieuDe);
+        }
+      }
+    }
+    thongTinSach.nhan = nhan;
+    thongTinSach.nhanLuonHien = nhanLuonHien;
     return thongTinSach;
   }
 
@@ -813,6 +826,8 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo {
   void _luuSach() {
     _khoaManHinh();
     final Sach thongTinSach = _thongTinSachTuGiaoDien();
+    thongTinSach.inThongTinChiTiet();
+    // return;
     // TODO: nhan, danh dau, nhieu tap
     final ThaoTacLuuThongTinSach thaoTac = ThaoTacLuuThongTinSach(thongTinSach);
     thaoTac.luuThongTin().then((value) => luongManHinh?.loaiManHinh(manHinh: this));

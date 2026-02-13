@@ -46,7 +46,13 @@ extension ThuocTinhEnum on List<Enum> {
   }
 
   /// Tìm case theo tên trong danh sách
-  Enum? timThuocTinh(String giaTriTho) => firstWhere((element) => element.name == giaTriTho);
+  Enum? timThuocTinh(String giaTriTho) {
+    try {
+      return firstWhere((element) => element.name == giaTriTho);
+    } catch (_) {
+      return null;
+    }
+  }
 
 }
 

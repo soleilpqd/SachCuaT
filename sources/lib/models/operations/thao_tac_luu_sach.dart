@@ -36,7 +36,9 @@ class ThaoTacLuuThongTinSach {
     await _luuDichGiaSach();
     await _luuDvPhatHanh();
     await _luuViTri();
-    // TODO: nhan, danh dau, nhieu tap
+    await _luuNhan();
+    await _luuDanhDau();
+    await _luuNhieuTap();
   }
 
   /// Lưu thông tin chung
@@ -197,18 +199,76 @@ class ThaoTacLuuThongTinSach {
   }
 
   /// Lưu thông tin tập
-  void _luuNhieuTap() {
+  Future<void> _luuNhieuTap() async {
 
   }
 
   /// Lưu nhãn
-  void _luuNhan() {
-
+  Future<void> _luuNhan() async {
+    final CoSoDuLieu csdl = CoSoDuLieu();
+    final List<String> dsTenNhanSach = thongTinSach.nhan.keys.toList();
+    List<NhanSach> dsNhanHienCo = dsTenNhanSach.isEmpty ? [] : await csdl.layDSNhan(dsTenNhanSach);
+    // Tạo bản ghi cho nhãn mới
+    for (final String tenNhan in dsTenNhanSach) {
+      final int stt = dsNhanHienCo.indexWhere((element) => element.ten == tenNhan);
+      if (stt < 0) {
+        final NhanSach nhanMoi = NhanSach();
+        nhanMoi.ten = tenNhan;
+        nhanMoi.giaTri = thongTinSach.nhan[tenNhan];
+        await csdl.themNhan(nhanMoi);
+        dsNhanHienCo.add(nhanMoi);
+      }
+    }
+    // Cập nhật lại giá trị cho các nhãn sách đã có và tạo mới bản ghi nếu sách chưa có nhãn
+    final List<NhanSach> dsNhanCuaSachHienCo = await csdl.layDSNhanCuaSach(thongTinSach);
+    for (final NhanSach nhanMoi in dsNhanHienCo) {
+      bool coNhanCu = false;
+      for (final NhanSach nhanCu in dsNhanCuaSachHienCo) {
+        if (nhanMoi.maSo == nhanCu.maSo) {
+          coNhanCu = true;
+          if (nhanMoi.giaTri != nhanCu.giaTri) {
+            await csdl.capNhatNhanChoSach(thongTinSach, nhanMoi);
+          }
+          break;
+        }
+      }
+      if (!coNhanCu) {
+        await csdl.themNhanChoSach(thongTinSach, nhanMoi);
+      }
+    }
+    // Xoá các bản ghi nhãn sách không còn
+    for (final NhanSach nhanCu in dsNhanCuaSachHienCo) {
+      final int stt = dsNhanHienCo.indexWhere((element) => element.maSo == nhanCu.maSo);
+      if (stt < 0) {
+        await csdl.xoaNhanChoSach(thongTinSach, nhanCu);
+      }
+    }
+    // Trạng thái luôn hiện của nhãn
+    await csdl.datLaiLuonHienCuaNhan();
+    if (thongTinSach.nhanLuonHien.isNotEmpty) {
+      await csdl.datLuonHienCuaNhan(thongTinSach.nhanLuonHien);
+    }
   }
 
   /// Lưu đánh dấu
-  void _luuDanhDau() {
-
+  Future<void> _luuDanhDau() async {
+    final CoSoDuLieu csdl = CoSoDuLieu();
+    final List<DanhDauSach> dsDanhDauHt = await csdl.layDSDanhDauCuaSach(thongTinSach);
+    for (final String danhDau in thongTinSach.danhDau) {
+      final int stt = dsDanhDauHt.indexWhere((element) => element.noiDung == danhDau);
+      if (stt < 0) {
+        final DanhDauSach danhDauMoi = DanhDauSach();
+        danhDauMoi.maSach = thongTinSach.maSo ?? 0;
+        danhDauMoi.noiDung = danhDau;
+        await csdl.themDanhDauChoSach(danhDauMoi);
+      }
+    }
+    for (final DanhDauSach danhDauCu in dsDanhDauHt) {
+      final int stt = thongTinSach.danhDau.indexWhere((element) => element == danhDauCu.noiDung);
+      if (stt < 0) {
+        await csdl.xoaDanhDau(danhDauCu);
+      }
+    }
   }
 
 }
