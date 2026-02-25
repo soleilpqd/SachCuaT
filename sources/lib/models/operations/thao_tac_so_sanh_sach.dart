@@ -58,7 +58,7 @@ class ThaoTacSoSanhSach {
     if (thongTin1.hinhAnh?.path != thongTin2.hinhAnh?.path) {
       return false;
     }
-    // TODO: nhiều tập, nhãn, đánh dấu
+    // TODO: nhiều tập
     if (!_soSanhDs(thongTin1.tacGia, thongTin2.tacGia)) {
       return false;
     }
@@ -69,6 +69,24 @@ class ThaoTacSoSanhSach {
       return false;
     }
     if (!_soSanhDs(thongTin1.viTri, thongTin2.viTri)) {
+      return false;
+    }
+    if (!_soSanhDs(thongTin1.nhan.keys.toList(), thongTin2.nhan.keys.toList())) {
+      return false;
+    }
+    for (final String tenNhan in thongTin1.nhan.keys) {
+      final String? giaTri1 = thongTin1.nhan[tenNhan];
+      final String? giaTri2 = thongTin2.nhan[tenNhan];
+      if (giaTri1 != giaTri2) {
+        return false;
+      }
+      final bool luonHien1 = thongTin1.nhanLuonHien.contains(tenNhan);
+      final bool luonHien2 = thongTin2.nhanLuonHien.contains(tenNhan);
+      if (luonHien1 != luonHien2) {
+        return false;
+      }
+    }
+    if (!_soSanhDs(thongTin1.danhDau, thongTin2.danhDau)) {
       return false;
     }
     return true;

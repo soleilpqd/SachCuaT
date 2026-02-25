@@ -217,6 +217,8 @@ class ThaoTacLuuThongTinSach {
         nhanMoi.giaTri = thongTinSach.nhan[tenNhan];
         await csdl.themNhan(nhanMoi);
         dsNhanHienCo.add(nhanMoi);
+      } else {
+        dsNhanHienCo[stt].giaTri = thongTinSach.nhan[tenNhan];
       }
     }
     // Cập nhật lại giá trị cho các nhãn sách đã có và tạo mới bản ghi nếu sách chưa có nhãn

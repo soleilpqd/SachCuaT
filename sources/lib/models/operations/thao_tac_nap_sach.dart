@@ -45,7 +45,15 @@ class ThaoTacNapThongTinSach {
     thongTinSach.dichGia = (await csdl.layDsDichGiaCuaSach(thongTinSach)).map((e) => e.ten).toList();
     thongTinSach.viTri = (await csdl.layDsViTriCuaSach(thongTinSach)).map((e) => e.ten).toList();
     thongTinSach.nhaXuatBan = (await csdl.layDsNhaXuatBanCuaSach(thongTinSach)).map((e) => e.ten).toList();
-    // TODO:
+    final List<NhanSach> dsNhanSach = await csdl.layDSNhanCuaSach(thongTinSach);
+    thongTinSach.nhanLuonHien = dsNhanSach.where((element) => element.luonHien > 0).map((e) => e.ten).toList();
+    Map<String, String> nhanSach = {};
+    for (final nhan in dsNhanSach) {
+      nhanSach[nhan.ten] = nhan.giaTri ?? "";
+    }
+    thongTinSach.nhan = nhanSach;
+    thongTinSach.danhDau = (await csdl.layDSDanhDauCuaSach(thongTinSach)).map((e) => e.noiDung).toList();
+    // TODO: tap
     daXong = true;
     thanhCong = true;
     return true;

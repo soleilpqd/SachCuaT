@@ -31,7 +31,7 @@ class DieuKhienManHinhMoDau extends DieuKhienManHinh {
 
   /// Khi nhấn nút Thêm sách
   void _khiNhanThemSach() {
-    final DieuKhienManHinhSach mhSach = DieuKhienManHinhSach();
+    final DieuKhienManHinhSach mhSach = DieuKhienManHinhSach(maSach: 1);
     luongManHinh?.themManHinh(manHinh: mhSach);
   }
 

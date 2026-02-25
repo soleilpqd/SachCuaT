@@ -97,6 +97,7 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo {
   /// Công cụ nạp thông tin sách từ CSDL
   ThaoTacNapThongTinSach? _thaoTacNap;
   final DieuKhienCoSo _dkLuuChieu = DieuKhienCoSo();
+  final DieuKhienCoSo _dkDkXuatBan = DieuKhienCoSo();
   final DieuKhienTruongBatTat _dkDaDocXong = DieuKhienTruongBatTat();
   final DieuKhienTruongHinhAnh _dkHinhAnh = DieuKhienTruongHinhAnh();
   final DieuKhienTruongVanBan _dkTenSach = DieuKhienTruongVanBan(goiYNoiDung: GoiYCSDL(bang: CoSoDuLieu.BANG_SACH));
@@ -168,6 +169,7 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo {
     super.manHinhBiLoaiBoKhoiLuong();
     _lamSachTatCaDauVao();
     _dkLuuChieu.dispose();
+    _dkDkXuatBan.dispose();
     _dkSuaTap.dispose();
     _dkTenSach.dispose();
     _dkISBN.dispose();
@@ -195,11 +197,21 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo {
   /// Khi nhấn nút Quay lại
   void _khiNhanQuayLai() {
     if (_thaoTacNap?.thongTinSach != null) {
+      Sach thongTinTrenManHinh = _thongTinSachTuGiaoDien();
       final ThaoTacSoSanhSach soSanh = ThaoTacSoSanhSach(
         thongTin1: _thaoTacNap!.thongTinSach,
-        thongTin2: _thongTinSachTuGiaoDien()
+        thongTin2: thongTinTrenManHinh
       );
-      if (!soSanh.soSanh()) {
+      bool ketQuaSoSanh = soSanh.soSanh();
+      if (ketQuaSoSanh) {
+        for (final muc in _dsNhanLuonHien) {
+          if (!thongTinTrenManHinh.nhanLuonHien.contains(muc)) {
+            ketQuaSoSanh = false;
+            break;
+          }
+        }
+      }
+      if (!ketQuaSoSanh) {
         HopThoai.hienThiHopThoaiThongBao(
           noiDung: Vbht.tuKhoa(TK.xacNhanLuu, dem: _demVbht),
           nhanCacNut: [
@@ -327,10 +339,22 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo {
 
   /// Khi nhấn nút Tra cứu lưu chiểu
   void _khiNhanTraCuuLuuChieu() {
-    // TODO: tra cuu luu chieu theo ten sach + ko nhap du lieu
+    _moWebCucXuatBan(url: HangSo.urlLuuChieu, tieuDe: TK.luuChieu);
+  }
+
+  /// Khi nhấn nút Tra cứu lưu chiểu
+  void _khiNhanTraCuuDKXB() {
+    _moWebCucXuatBan(url: HangSo.urlDKXuatBan, tieuDe: TK.dkxb);
+  }
+
+  void _moWebCucXuatBan({required String url, required TK tieuDe}) {
+    String urlCuoi = url;
+    if (_dkTenSach.vanBan.isNotEmpty) {
+      urlCuoi += "?query=${Uri.encodeComponent(_dkTenSach.vanBan)}";
+    }
     final DieuKhienManHinhWeb dkMhWeb = DieuKhienManHinhWeb(
-      url: HangSo.urlLuuChieu,
-      tieuDe: Vbht.tuKhoa(TK.luuChieu, dem: _demVbht),
+      url: urlCuoi,
+      tieuDe: Vbht.tuKhoa(tieuDe, dem: _demVbht),
       khiChonSach: _khiChonSachTuLuuChieu
     );
     luongManHinh?.themManHinh(manHinh: dkMhWeb);
@@ -376,7 +400,6 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo {
     // }
     // _kiemTraTinhLienTucCacTap();
 
-    // TODO: khởi tạo danh sách nhãn (luôn hiện + giá trị của sách)
     _khoiTaoDSNhan().then((_) {
       if (maSach != null) {
         _thaoTacNap?.napThongTin().then((value) {
@@ -395,6 +418,19 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo {
           }
         });
       } else {
+        if (_dsNhanLuonHien.isNotEmpty) {
+          int dem = 0;
+          for (final muc in _dsNhanLuonHien) {
+            DieuKhienTruongVanBan dkVb = DieuKhienTruongVanBan(goiYNoiDung: _goiYGiaTriNhan, goiYTieuDe: _goiYTenNhan, luonHienThi: true);
+            dkVb.debugInfo = "NN $dem";
+            dkVb.vanBan = "";
+            dkVb.vbTieuDe = muc;
+            dkVb.trangThaiNutBenPhai = null;
+            dkVb.themTheoDoi(this);
+            _dsDkNhan.add(dkVb);
+            dem += 1;
+          }
+        }
         _cauHinhLaiDauVao();
         trangThaiWidgetManHinh?.capNhatGiaoDienCuaManHinh(dieuKhienManHinh: this);
       }
@@ -573,6 +609,7 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo {
       dkVb.debugInfo = "TG $dem";
       dkVb.vanBan = muc;
       dkVb.trangThaiNutBenPhai = 0;
+      dkVb.themTheoDoi(this);
       _dsDkTacGia.add(dkVb);
       dem += 1;
     }
@@ -580,6 +617,7 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo {
     dkRong.debugInfo = "TG $dem";
     dkRong.vanBan = "";
     dkRong.trangThaiNutBenPhai = null;
+    dkRong.themTheoDoi(this);
     _dsDkTacGia.add(dkRong);
 
     dem = 0;
@@ -588,6 +626,7 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo {
       dkVb.debugInfo = "DG $dem";
       dkVb.vanBan = muc;
       dkVb.trangThaiNutBenPhai = 0;
+      dkVb.themTheoDoi(this);
       _dsDkDichGia.add(dkVb);
       dem += 1;
     }
@@ -595,6 +634,7 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo {
     dkRong.debugInfo = "DG $dem";
     dkRong.vanBan = "";
     dkRong.trangThaiNutBenPhai = null;
+    dkRong.themTheoDoi(this);
     _dsDkDichGia.add(dkRong);
 
     dem = 0;
@@ -603,6 +643,7 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo {
       dkVb.debugInfo = "NXB $dem";
       dkVb.vanBan = muc;
       dkVb.trangThaiNutBenPhai = 0;
+      dkVb.themTheoDoi(this);
       _dsDkNxb.add(dkVb);
       dem += 1;
     }
@@ -610,6 +651,7 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo {
     dkRong.debugInfo = "NXB $dem";
     dkRong.vanBan = "";
     dkRong.trangThaiNutBenPhai = null;
+    dkRong.themTheoDoi(this);
     _dsDkNxb.add(dkRong);
 
     dem = 0;
@@ -618,6 +660,7 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo {
       dkVb.debugInfo = "VT $dem";
       dkVb.vanBan = muc;
       dkVb.trangThaiNutBenPhai = 0;
+      dkVb.themTheoDoi(this);
       _dsDkViTri.add(dkVb);
       dem += 1;
     }
@@ -625,8 +668,70 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo {
     dkRong.debugInfo = "VT $dem";
     dkRong.vanBan = "";
     dkRong.trangThaiNutBenPhai = null;
+    dkRong.themTheoDoi(this);
     _dsDkViTri.add(dkRong);
-    // TODO: nhan, danh dau, tap
+
+    dem = 0;
+    for (final muc in sach.nhan.keys) {
+      final String giaTriMuc = sach.nhan[muc] ?? "";
+      DieuKhienTruongVanBan dkVb = DieuKhienTruongVanBan(
+        goiYNoiDung: _goiYGiaTriNhan,
+        goiYTieuDe: _goiYTenNhan,
+        luonHienThi: sach.nhanLuonHien.contains(muc)
+      );
+      dkVb.debugInfo = "NN $dem";
+      dkVb.vanBan = giaTriMuc;
+      dkVb.vbTieuDe = muc;
+      dkVb.trangThaiNutBenPhai = null;
+      dkVb.themTheoDoi(this);
+      _dsDkNhan.add(dkVb);
+      dem += 1;
+    }
+    for (final muc in _dsNhanLuonHien) {
+      if (!sach.nhanLuonHien.contains(muc)) {
+        DieuKhienTruongVanBan dkVb = DieuKhienTruongVanBan(
+          goiYNoiDung: _goiYGiaTriNhan,
+          goiYTieuDe: _goiYTenNhan,
+          luonHienThi: true
+        );
+        dkVb.debugInfo = "NN $dem";
+        dkVb.vanBan = "";
+        dkVb.vbTieuDe = muc;
+        dkVb.trangThaiNutBenPhai = null;
+        dkVb.themTheoDoi(this);
+        _dsDkNhan.add(dkVb);
+        dem += 1;
+      }
+    }
+    dkRong = DieuKhienTruongVanBan(
+      goiYNoiDung: _goiYGiaTriNhan,
+      goiYTieuDe: _goiYTenNhan
+    );
+    dkRong.debugInfo = "DD $dem";
+    dkRong.vanBan = "";
+    dkRong.vbTieuDe = "";
+    dkRong.trangThaiNutBenPhai = null;
+    dkRong.themTheoDoi(this);
+    _dsDkNhan.add(dkRong);
+
+    dem = 0;
+    for (final muc in sach.danhDau) {
+      DieuKhienTruongVanBan dkVb = DieuKhienTruongVanBan();
+      dkVb.debugInfo = "DD $dem";
+      dkVb.vanBan = muc;
+      dkVb.trangThaiNutBenPhai = 0;
+      dkVb.themTheoDoi(this);
+      _dsDkDanhDau.add(dkVb);
+      dem += 1;
+    }
+    dkRong = DieuKhienTruongVanBan();
+    dkRong.debugInfo = "DD $dem";
+    dkRong.vanBan = "";
+    dkRong.trangThaiNutBenPhai = null;
+    dkRong.themTheoDoi(this);
+    _dsDkDanhDau.add(dkRong);
+
+    // TODO: tap
   }
 
   /// Sắp xếp lại thứ tự tập
@@ -679,6 +784,7 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo {
   void _khoaManHinh() {
     List<DieuKhienCoSo> tatCaDieuKhien = [
       _dkLuuChieu,
+      _dkDkXuatBan,
       _dkTenSach,
       _dkISBN,
       _dkHinhAnh,
@@ -812,9 +918,9 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo {
     for (final DieuKhienTruongVanBan dk in _dsDkNhan) {
       if (dk.vanBan.isNotEmpty && dk.vbTieuDe.isNotEmpty) {
         nhan[dk.vbTieuDe] = dk.vanBan;
-        if (dk.luonHienThi) {
-          nhanLuonHien.add(dk.vbTieuDe);
-        }
+      }
+      if (dk.vbTieuDe.isNotEmpty && dk.luonHienThi) {
+        nhanLuonHien.add(dk.vbTieuDe);
       }
     }
     thongTinSach.nhan = nhan;
@@ -828,7 +934,7 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo {
     final Sach thongTinSach = _thongTinSachTuGiaoDien();
     thongTinSach.inThongTinChiTiet();
     // return;
-    // TODO: nhan, danh dau, nhieu tap
+    // TODO: nhieu tap
     final ThaoTacLuuThongTinSach thaoTac = ThaoTacLuuThongTinSach(thongTinSach);
     thaoTac.luuThongTin().then((value) => luongManHinh?.loaiManHinh(manHinh: this));
   }
@@ -994,21 +1100,28 @@ class _TrangThaiNoiDungManHinhSach extends TrangThaiWidgetCuaDieuKhien<_NoiDungM
         icon: Icons.arrow_forward,
         dieuKhien: dkMh._dkLuuChieu,
       ),
+      // Đăng ký xuất bản
+      1 => TruongNutBam(
+        khiNhan: dkMh._khiNhanTraCuuDKXB,
+        tieuDe: Vbht.tuKhoa(TK.traCuuDKXB, dem: dkMh._demVbht),
+        icon: Icons.arrow_forward,
+        dieuKhien: dkMh._dkDkXuatBan,
+      ),
       // Đã đọc xong
-      1 => TruongBatTat(tieuDe: Vbht.tuKhoa(TK.daDocXong, dem: dkMh._demVbht), trinhDieuKhien: dkMh._dkDaDocXong),
+      2 => TruongBatTat(tieuDe: Vbht.tuKhoa(TK.daDocXong, dem: dkMh._demVbht), trinhDieuKhien: dkMh._dkDaDocXong),
       // Hình chụp
-      2 => TruongHinhAnh(
+      3 => TruongHinhAnh(
         trinhDieuKhien: dkMh._dkHinhAnh,
         khiKhongCoMayAnh: dkMh._khiKhongCoMayAnh,
         dem: dkMh._demVbht,
       ),
       // Tên sách
-      3 => TruongVanBan(
+      4 => TruongVanBan(
         tieuDe: Vbht.tuKhoa(TK.tenSach, dem: dkMh._demVbht),
         trinhDieuKhien: dkMh._dkTenSach,
       ),
       // Mã ISBN
-      4 => TruongVanBan(
+      5 => TruongVanBan(
         tieuDe: Vbht.tuKhoa(TK.isbn, dem: dkMh._demVbht),
         cauHinh: CauHinhTruongVanBan(
           kieuBanPhim: TextInputType.number,

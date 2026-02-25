@@ -29,6 +29,7 @@ enum PhanLoaiDuongDan {
 class HangSo {
 
   static const String urlLuuChieu = "https://ppdvn.gov.vn/web/guest/tra-cuu-luu-chieu";
+  static const String urlDKXuatBan = "https://ppdvn.gov.vn/web/guest/ke-hoach-xuat-ban";
   static const Map<String, String> tiengVietKhongDau = {
     "a": "àáảãạâầấẩẫậăằắẳẵặ",
     "e": "èéẻẽẹêềếểễệ",

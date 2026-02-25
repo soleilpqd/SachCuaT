@@ -25,6 +25,8 @@ enum TK {
   sachCuaT,
   /// Lưu chiểu
   luuChieu,
+  /// Đăng ký xuất bản
+  dkxb,
   /// Đã đọc xong
   daDocXong,
   /// Tên sách
@@ -43,6 +45,8 @@ enum TK {
   sachMoi,
   /// Tra cứu lưu chiểu
   traCuuLuuChieu,
+  /// Tra cứu Đăng ký xuất bản
+  traCuuDKXB,
   /// ISBN
   isbn,
   /// Tác giả

@@ -61,7 +61,7 @@ class DieuKhienManHinhWeb extends DieuKhienManHinh {
     required this.tieuDe,
     this.khiChonSach,
     bool? coTheTrichXuat
-  }) : batTrichXuat = coTheTrichXuat ?? (url == HangSo.urlLuuChieu) {
+  }) : batTrichXuat = coTheTrichXuat ?? (url == HangSo.urlLuuChieu || url == HangSo.urlDKXuatBan) {
     widgetCuaManHinh = _ManHinhWeb(dkManHinh: this);
     _webController.setJavaScriptMode(JavaScriptMode.unrestricted);
     _webController.setNavigationDelegate(NavigationDelegate(
