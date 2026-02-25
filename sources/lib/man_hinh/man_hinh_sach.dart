@@ -451,7 +451,6 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo {
     _dkGhiChuTap.thongBaoLoi = null;
     _dkSoTap.thongBaoLoi = null;
     _lamSachDSDauvao(_dsDkTacGia, tatCa: true);
-    _lamSachDSDauvao(_dsDkTacGia, tatCa: true);
     _lamSachDSDauvao(_dsDkDichGia, tatCa: true);
     _lamSachDSDauvao(_dsDkNxb, tatCa: true);
     _lamSachDSDauvao(_dsDkViTri, tatCa: true);
@@ -475,7 +474,7 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo {
       _lamSachDSDauvao(_dsDkViTri, tatCa: false, khongLap: false, debugInfo: "VT", goiYNoiDung: _goiYViTri);
     }
     if (nguon == null || _dsDkDanhDau.contains(nguon)) {
-      _lamSachDSDauvao(_dsDkDanhDau, tatCa: false, debugInfo: "Dau");
+      _lamSachDSDauvao(_dsDkDanhDau, tatCa: false, debugInfo: "DD");
     }
     if (nguon == null || _dsDkNhan.contains(nguon)) {
       _lamSachDSDauvao(_dsDkNhan, tatCa: false, debugInfo: "Nhan", goiYNoiDung: _goiYGiaTriNhan, goiYTieuDe: _goiYTenNhan);
@@ -679,7 +678,7 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo {
         goiYTieuDe: _goiYTenNhan,
         luonHienThi: sach.nhanLuonHien.contains(muc)
       );
-      dkVb.debugInfo = "NN $dem";
+      dkVb.debugInfo = "Nhan $dem";
       dkVb.vanBan = giaTriMuc;
       dkVb.vbTieuDe = muc;
       dkVb.trangThaiNutBenPhai = null;
@@ -694,7 +693,7 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo {
           goiYTieuDe: _goiYTenNhan,
           luonHienThi: true
         );
-        dkVb.debugInfo = "NN $dem";
+        dkVb.debugInfo = "Nhan $dem";
         dkVb.vanBan = "";
         dkVb.vbTieuDe = muc;
         dkVb.trangThaiNutBenPhai = null;
@@ -707,7 +706,7 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo {
       goiYNoiDung: _goiYGiaTriNhan,
       goiYTieuDe: _goiYTenNhan
     );
-    dkRong.debugInfo = "DD $dem";
+    dkRong.debugInfo = "Nhan $dem";
     dkRong.vanBan = "";
     dkRong.vbTieuDe = "";
     dkRong.trangThaiNutBenPhai = null;
