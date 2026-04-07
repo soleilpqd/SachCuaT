@@ -186,7 +186,7 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo {
   @override
   void dieuKhienCoSoThayDoiThuocTinh(DieuKhienCoSo nguon, Map<String, dynamic> cacGiaTri) {
     super.dieuKhienCoSoThayDoiThuocTinh(nguon, cacGiaTri);
-  if (cacGiaTri.keys.contains(ThuocTinhTruongVanBan.trangThaiNhap.name)) {
+    if (cacGiaTri.keys.contains(ThuocTinhTruongVanBan.trangThaiNhap.name)) {
       _truongVanBanThayDoiFocus(nguon as DieuKhienTruongVanBan);
     }
     if (nguon == _dkHienThiDSTapDayDu) {
@@ -1051,7 +1051,7 @@ class _TrangThaiNoiDungManHinhSach extends TrangThaiWidgetCuaDieuKhien<_NoiDungM
     final DieuKhienManHinhSach dkMh = widget.dieuKhienManHinh;
     final _PhanDoanManHinhSach? phanDoan = _PhanDoanManHinhSach.khoiTao(doan);
     return switch (phanDoan) {
-      _PhanDoanManHinhSach.chung => 5,
+      _PhanDoanManHinhSach.chung => 6,
       _PhanDoanManHinhSach.coBan => dkMh._dsDkTacGia.length + dkMh._dsDkDichGia.length + dkMh._dsDkNxb.length,
       _PhanDoanManHinhSach.viTri => dkMh._dsDkViTri.length,
       _PhanDoanManHinhSach.danhDau => dkMh._dsDkDanhDau.length,
@@ -1195,6 +1195,8 @@ class _TrangThaiNoiDungManHinhSach extends TrangThaiWidgetCuaDieuKhien<_NoiDungM
 
   List<Widget> _xayDungWidgetsMucNhieuTap() {
     final DieuKhienManHinhSach dkMh = widget.dieuKhienManHinh;
+    List<ThongTinHienThiTruongSach> dsTruongSach = TruongSach.thongTinMacDinh();
+    dsTruongSach.add(ThongTinHienThiTruongSach(truong: ThongTinSachDeHienThi.soTap));
     List<Widget> ketQua = [];
     ketQua.add(
       TruongNutBam(
@@ -1250,7 +1252,7 @@ class _TrangThaiNoiDungManHinhSach extends TrangThaiWidgetCuaDieuKhien<_NoiDungM
             );
           } else {
             ketQua.add(
-              TruongSach(sach: muc, hienThiSoTap: true)
+              TruongSach(sach: muc, thongTinCanHienThi: dsTruongSach)
             );
           }
         }
@@ -1273,7 +1275,7 @@ class _TrangThaiNoiDungManHinhSach extends TrangThaiWidgetCuaDieuKhien<_NoiDungM
         }
         if (viTrisachHienTai > 0) {
           ketQua.add(
-            TruongSach(sach: dkMh._dsCacTap[viTrisachHienTai - 1], hienThiSoTap: true)
+            TruongSach(sach: dkMh._dsCacTap[viTrisachHienTai - 1], thongTinCanHienThi: dsTruongSach)
           );
         }
         ketQua.add(
@@ -1288,7 +1290,7 @@ class _TrangThaiNoiDungManHinhSach extends TrangThaiWidgetCuaDieuKhien<_NoiDungM
         );
         if (viTrisachHienTai < dkMh._dsCacTap.length - 1) {
           ketQua.add(
-            TruongSach(sach: dkMh._dsCacTap[viTrisachHienTai + 1], hienThiSoTap: true)
+            TruongSach(sach: dkMh._dsCacTap[viTrisachHienTai + 1], thongTinCanHienThi: dsTruongSach)
           );
         }
         if (viTrisachHienTai < dkMh._dsCacTap.length - 2) {

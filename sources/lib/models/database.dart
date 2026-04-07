@@ -323,6 +323,15 @@ class CoSoDuLieu {
     return ketQua == 1;
   }
 
+  void _ganDLVaoSach(Map<String, Object?> banGhi, Sach thongTin) {
+    thongTin.maSo = banGhi["ma"] as int;
+    thongTin.ten = banGhi["ten"] as String;
+    thongTin.daHoanThanh = (banGhi["xong"] as int) != 0;
+    thongTin.isbn = banGhi["isbn"] as String;
+    thongTin.tap = banGhi["tap"] as int?;
+    thongTin.maNhieuTap = banGhi["chuoi"] as int?;
+  }
+
   /// Nạp thông tin sách
   Future<bool> napThongTinSach(Sach thongTin) async {
     assert(_db != null, "CSDL chưa được khởi tạo.");
@@ -330,11 +339,7 @@ class CoSoDuLieu {
     final duLieu = await _query(BANG_SACH, where: "\"ma\" = ?", whereArgs: [thongTin.maSo!]);
     if (duLieu.isNotEmpty) {
       final banGhiDau = duLieu.first;
-      thongTin.ten = banGhiDau["ten"] as String;
-      thongTin.daHoanThanh = (banGhiDau["xong"] as int) != 0;
-      thongTin.isbn = banGhiDau["isbn"] as String;
-      thongTin.tap = banGhiDau["tap"] as int?;
-      thongTin.maNhieuTap = banGhiDau["chuoi"] as int?;
+      _ganDLVaoSach(banGhiDau, thongTin);
       return true;
     }
     return false;
@@ -355,16 +360,22 @@ class CoSoDuLieu {
 
   // ------
 
+  List<NhaXuatBan> _ganDLVaoNxb(List<Map<String, Object?>> duLieu) {
+    return duLieu.map((muc) {
+      final NhaXuatBan kq = NhaXuatBan();
+      kq.maSo = muc["ma"] as int;
+      kq.ten = muc["ten"] as String;
+      kq.maLuuChieu = muc["ma_luu_chieu"] as String?;
+      return kq;
+    }).toList();
+  }
+
   /// Tìm đơn vị phát hành theo tên
   Future<NhaXuatBan?> timNhaXuatBan(String ten) async {
     assert(_db != null, "CSDL chưa được khởi tạo.");
     final List<Map<String, Object?>> ketQua = await _query(BANG_NXB, where: "\"ten\" = ?", whereArgs: [ten]);
     if (ketQua.isNotEmpty) {
-      final nxb = NhaXuatBan();
-      nxb.maSo = ketQua.first["ma"] as int;
-      nxb.ten = ketQua.first["ten"] as String;
-      nxb.maLuuChieu = ketQua.first["ma_luu_chieu"] as String?;
-      return nxb;
+      return _ganDLVaoNxb([ketQua.first]).first;
     }
     return null;
   }
@@ -394,13 +405,7 @@ WHERE "$BANG_NXB_SACH"."sach" = ?;
 """,
       [sach.maSo!]
     );
-    return ketQua.map((e) {
-      final NhaXuatBan nxb = NhaXuatBan();
-      nxb.maSo = e["ma"] as int;
-      nxb.ten = e["ten"] as String;
-      nxb.maLuuChieu = e["ma_luu_chieu"] as String?;
-      return nxb;
-    }).toList();
+    return _ganDLVaoNxb(ketQua);
   }
 
   /// Lưu đơn vị phát hành của sách
@@ -421,15 +426,22 @@ WHERE "$BANG_NXB_SACH"."sach" = ?;
 
   // ------
 
+  /// Chuyển dữ liệu từ CSDL vào object
+  List<TacGia> _ganDLVaoTacGia(List<Map<String, Object?>> duLieu) {
+    return duLieu.map((muc) {
+      final TacGia kq = TacGia();
+      kq.maSo = muc["ma"] as int;
+      kq.ten = muc["ten"] as String;
+      return kq;
+    }).toList();
+  }
+
   /// Tìm tác giả theo tên
   Future<TacGia?> timTacGia(String ten) async {
     assert(_db != null, "CSDL chưa được khởi tạo.");
     final List<Map<String, Object?>> ketQua = await _query(BANG_TAC_GIA, where: "\"ten\" = ?", whereArgs: [ten]);
     if (ketQua.isNotEmpty) {
-      final TacGia tacGia = TacGia();
-      tacGia.maSo = ketQua.first["ma"] as int;
-      tacGia.ten = ketQua.first["ten"] as String;
-      return tacGia;
+      return _ganDLVaoTacGia([ketQua.first]).first;
     }
     return null;
   }
@@ -458,12 +470,7 @@ WHERE "$BANG_TAC_GIA_SACH"."sach" = ?;
 """,
       [sach.maSo!]
     );
-    return ketQua.map((e) {
-      final TacGia tg = TacGia();
-      tg.maSo = e["ma"] as int;
-      tg.ten = e["ten"] as String;
-      return tg;
-    }).toList();
+    return _ganDLVaoTacGia(ketQua);
   }
 
     /// Lưu tác giả của sách
@@ -484,15 +491,21 @@ WHERE "$BANG_TAC_GIA_SACH"."sach" = ?;
 
   // ------
 
+  List<DichGia> _ganDLVaoDichGia(List<Map<String, Object?>> duLieu) {
+    return duLieu.map((muc) {
+      final DichGia kq = DichGia();
+      kq.maSo = muc["ma"] as int;
+      kq.ten = muc["ten"] as String;
+      return kq;
+    }).toList();
+  }
+
   /// Tìm dịch giả
   Future<DichGia?> timDichGia(String ten) async {
     assert(_db != null, "CSDL chưa được khởi tạo.");
     final List<Map<String, Object?>> ketQua = await _query(BANG_DICH_GIA, where: "\"ten\" = ?", whereArgs: [ten]);
     if (ketQua.isNotEmpty) {
-      final DichGia dichGia = DichGia();
-      dichGia.maSo = ketQua.first["ma"] as int;
-      dichGia.ten = ketQua.first["ten"] as String;
-      return dichGia;
+      return _ganDLVaoDichGia([ketQua.first]).first;
     }
     return null;
   }
@@ -521,12 +534,7 @@ WHERE "$BANG_DICH_GIA_SACH"."sach" = ?;
 """,
       [sach.maSo!]
     );
-    return ketQua.map((e) {
-      final DichGia dg = DichGia();
-      dg.maSo = e["ma"] as int;
-      dg.ten = e["ten"] as String;
-      return dg;
-    }).toList();
+    return _ganDLVaoDichGia(ketQua);
   }
 
     /// Lưu dịch giả của sách
@@ -547,15 +555,22 @@ WHERE "$BANG_DICH_GIA_SACH"."sach" = ?;
 
   // ------
 
+  List<ViTriSach> _ganDLVaoViTriSach(List<Map<String, Object?>> duLieu) {
+    return duLieu.map((muc) {
+      final ViTriSach kq = ViTriSach();
+      kq.maSo = muc["ma"] as int;
+      kq.ten = muc["ten"] as String;
+      kq.thoiGian = (muc["ngay_nhap"] as int?) ?? -1;
+      return kq;
+    }).toList();
+  }
+
   /// Tìm vị trí
   Future<ViTriSach?> timViTri(String ten) async {
     assert(_db != null, "CSDL chưa được khởi tạo.");
     final List<Map<String, Object?>> ketQua = await _query(BANG_VI_TRI, where: "\"ten\" = ?", whereArgs: [ten]);
     if (ketQua.isNotEmpty) {
-      final ViTriSach vt = ViTriSach();
-      vt.maSo = ketQua.first["ma"] as int;
-      vt.ten = ketQua.first["ten"] as String;
-      return vt;
+      return _ganDLVaoViTriSach([ketQua.first]).first;
     }
     return null;
   }
@@ -595,13 +610,7 @@ WHERE "$BANG_VI_TRI_SACH"."sach" = ?;
 """,
       [sach.maSo!]
     );
-    return ketQua.map((e) {
-      final ViTriSach vt = ViTriSach();
-      vt.maSo = e["ma"] as int;
-      vt.ten = e["ten"] as String;
-      vt.thoiGian = e["ngay_nhap"] as int;
-      return vt;
-    }).toList();
+    return _ganDLVaoViTriSach(ketQua);
   }
 
     /// Lưu vị trí của sách
@@ -677,7 +686,7 @@ WHERE "$BANG_VI_TRI_SACH"."sach" = ?;
       where: "\"ten\" LIKE ? OR \"ten_kd\" LIKE ?",
       whereArgs: ["%$tuKhoa%", "%$tkKd%"]
     );
-    return ketQua.map((e) => VanBanNoiBat(vanBanDayDu: e["ten"] as String, vanBanNoiBat: tuKhoa, daChon: e["chon"] as int?)).toList();
+    return ketQua.map((muc) => VanBanNoiBat(vanBanDayDu: muc["ten"] as String, vanBanNoiBat: [tuKhoa], daChon: muc["chon"] as int?)).toList();
   }
 
   /// Lưu thời điểm đã chọn gợi ý vào bảng [bang]
@@ -699,9 +708,9 @@ INNER JOIN "$BANG_NHAN" ON "$BANG_NHAN_SACH"."nhan" = "$BANG_NHAN"."ma"
 WHERE "$BANG_NHAN"."ten" = ? AND ("$BANG_NHAN_SACH"."gia_tri" LIKE ? OR "$BANG_NHAN_SACH"."gia_tri_kd" LIKE ?)
 GROUP BY "$BANG_NHAN_SACH"."gia_tri";
 """,
-      [tenNhan, tuKhoa, tkKd]
+      [tenNhan, "%$tuKhoa%", "%$tkKd%"]
     );
-    return ketQua.map((e) => VanBanNoiBat(vanBanDayDu: e["gia_tri"] as String, vanBanNoiBat: tuKhoa, daChon: e["chon"] as int?)).toList();
+    return ketQua.map((muc) => VanBanNoiBat(vanBanDayDu: muc["gia_tri"] as String, vanBanNoiBat: [tuKhoa], daChon: muc["chon"] as int?)).toList();
   }
 
   Future<void> luuThoiDiemChonGiaTriNhan(String tenNhan, String tuKhoa) async {
@@ -720,7 +729,18 @@ GROUP BY "$BANG_NHAN_SACH"."gia_tri";
   Future<List<String>> layDSNhanLuonHien() async {
     assert(_db != null, "CSDL chưa được khởi tạo.");
     final ketQua = await _query(BANG_NHAN, columns: ["ten"], where: "\"luon_hien\" > 0");
-    return ketQua.map((e) => e["ten"] as String).toList();
+    return ketQua.map((muc) => muc["ten"] as String).toList();
+  }
+
+  List<NhanSach> _ganDLVaoNhan(List<Map<String, Object?>> duLieu) {
+    return duLieu.map((muc) {
+      final NhanSach kq = NhanSach();
+      kq.maSo = muc["ma"] as int;
+      kq.ten = muc["ten"] as String;
+      kq.giaTri = muc["gia_tri"] as String?;
+      kq.luonHien = (muc["luon_hien"] as int?) ?? 0;
+      return kq;
+    }).toList();
   }
 
   /// Lấy danh sách nhãn có tên trong danh sách
@@ -735,13 +755,7 @@ WHERE "$BANG_NHAN"."ten" IN ($thamSo);
 """,
       tenNhan
     );
-    return ketQua.map((e) {
-      final NhanSach nhan = NhanSach();
-      nhan.maSo = e["ma"] as int;
-      nhan.ten = e["ten"] as String;
-      nhan.luonHien = e["luon_hien"] as int;
-      return nhan;
-    }).toList();
+    return _ganDLVaoNhan(ketQua);
   }
 
   /// Thêm nhãn
@@ -779,14 +793,7 @@ WHERE "$BANG_NHAN_SACH"."sach" = ?;
 """,
       [sach.maSo!]
     );
-    return ketQua.map((e) {
-      final NhanSach nhan = NhanSach();
-      nhan.maSo = e["ma"] as int;
-      nhan.ten = e["ten"] as String;
-      nhan.giaTri = e["gia_tri"] as String?;
-      nhan.luonHien = e["luon_hien"] as int;
-      return nhan;
-    }).toList();
+    return _ganDLVaoNhan(ketQua);
   }
 
   /// Thêm nhãn cho sách
@@ -863,11 +870,11 @@ WHERE "$BANG_NHAN_SACH"."sach" = ?;
       whereArgs: [sach.maSo!],
       orderBy: "\"thoi_gian\""
     );
-    return ketQua.map((e) {
+    return ketQua.map((muc) {
       final DanhDauSach danhDau = DanhDauSach();
-      danhDau.maSo = e["ma"] as int;
-      danhDau.maSach = e["sach"] as int;
-      danhDau.noiDung = e["ghi_chu"] as String;
+      danhDau.maSo = muc["ma"] as int;
+      danhDau.maSach = muc["sach"] as int;
+      danhDau.noiDung = muc["ghi_chu"] as String;
       return danhDau;
     }).toList();
   }
@@ -901,6 +908,267 @@ WHERE "$BANG_NHAN_SACH"."sach" = ?;
   /// TODO: xoá sách
   Future<void> xoaSach(int maSach) async {
 
+  }
+
+  // ------ Tìm kiếm
+
+  /// Tìm kiếm theo từ khoá từ 1 bảng
+  Future<List<Map<String, Object?>>> _timKiemTheoTuKhoa({
+    required String bang,
+    required String tuKhoa,
+    String truong = "ten",
+    List<String>? dieuKienAnd,
+    List<Object?>? dieuKienAndArgs
+  }) async {
+    assert(_db != null, "CSDL chưa được khởi tạo.");
+    final String tuKhoaKd = LinhTinh.loaiBoDautiengViet(tuKhoa);
+    String where = "";
+    List<Object?> args = [];
+    if (tuKhoa.isNotEmpty) {
+      where = "\"$truong\" LIKE ? OR \"${truong}_kd\" LIKE ?";
+      args = ["%$tuKhoa%", "%$tuKhoaKd%"];
+    }
+    if (dieuKienAnd != null && dieuKienAnd.isNotEmpty) {
+      if (where.isNotEmpty) {
+        where = "($where) AND";
+      }
+      int stt = 0;
+      for (final String dk in dieuKienAnd) {
+        if (stt == dieuKienAnd.length -  1) {
+          where += " $dk";
+        } else {
+          where += " $dk AND";
+        }
+        stt += 1;
+      }
+      where = where.trim();
+      if (dieuKienAndArgs != null) {
+        args.addAll(dieuKienAndArgs);
+      }
+    }
+    if (where.isEmpty) {
+      return [];
+    }
+    final List<Map<String, Object?>> ketQua = await _query(
+      bang,
+      distinct: true,
+      where: where,
+      whereArgs: args
+    );
+    final List<VanBanNoiBat> dsSapXep = ketQua.map((muc) => VanBanNoiBat(vanBanDayDu: muc[truong] as String, vanBanNoiBat: [tuKhoa], duLieuDinhKem: muc)).toList();
+    dsSapXep.sapXep();
+    return dsSapXep.map((muc) => muc.duLieuDinhKem as Map<String, Object?>).toList();
+  }
+
+  /// Tìm kiếm tác giả
+  Future<List<TacGia>> timKiemTacGia(String tuKhoa) async {
+    final List<Map<String, Object?>> ketQua = await _timKiemTheoTuKhoa(
+      bang: BANG_TAC_GIA,
+      tuKhoa: tuKhoa
+    );
+    return _ganDLVaoTacGia(ketQua);
+  }
+
+  /// Tìm kiếm dịch giả
+  Future<List<DichGia>> timKiemDichGia(String tuKhoa) async {
+    final List<Map<String, Object?>> ketQua = await _timKiemTheoTuKhoa(
+      bang: BANG_DICH_GIA,
+      tuKhoa: tuKhoa
+    );
+    return _ganDLVaoDichGia(ketQua);
+  }
+
+  /// Tìm kiếm nhà xuất bản
+  Future<List<NhaXuatBan>> timKiemNXB(String tuKhoa) async {
+    final List<Map<String, Object?>> ketQua = await _timKiemTheoTuKhoa(
+      bang: BANG_NXB,
+      tuKhoa: tuKhoa
+    );
+    return _ganDLVaoNxb(ketQua);
+  }
+
+  /// Tìm kiếm vị trí sách
+  Future<List<ViTriSach>> timKiemViTriSach(String tuKhoa) async {
+    final List<Map<String, Object?>> ketQua = await _timKiemTheoTuKhoa(
+      bang: BANG_VI_TRI,
+      tuKhoa: tuKhoa
+    );
+    return _ganDLVaoViTriSach(ketQua);
+  }
+
+  /// Tìm kiếm tên nhãn
+  Future<List<NhanSach>> timKiemTenNhan(String tuKhoa) async {
+    final List<Map<String, Object?>> ketQua = await _timKiemTheoTuKhoa(
+      bang: BANG_NHAN,
+      tuKhoa: tuKhoa
+    );
+    return _ganDLVaoNhan(ketQua);
+  }
+
+  /// Tìm kiếm giá trị nhãn
+  Future<List<String>> timKiemGtNhan(String tuKhoa, NhanSach nhan) async {
+    final List<Map<String, Object?>> ketQua = await _timKiemTheoTuKhoa(
+      bang: BANG_NHAN_SACH,
+      tuKhoa: tuKhoa,
+      truong: "gia_tri",
+      dieuKienAnd: ["\"nhan\" = ?"],
+      dieuKienAndArgs: [nhan.maSo]
+    );
+    return ketQua.map((muc) {
+      return muc["gia_tri"] as String;
+    }).toList();
+  }
+
+  /// Tìm kiếm Sách nhiều tập
+  Future<List<SachNhieuTap>> timKiemSachNhieuTap(String tuKhoa) async {
+    final List<Map<String, Object?>> ketQua = await _timKiemTheoTuKhoa(
+      bang: BANG_NHIEU_TAP,
+      tuKhoa: tuKhoa,
+      truong: "ghi_chu"
+    );
+    return ketQua.map((muc) {
+      final SachNhieuTap kq = SachNhieuTap();
+      kq.maSo = muc["ma"] as int;
+      kq.ten = muc["ghi_chu"] as String;
+      return kq;
+    }).toList();
+  }
+
+  /// Xây dựng điều kiện tìm sách
+  void _xayDungDieuKienTimSach(
+    List<int>? danhSach,
+    List<String> whereStatements, List<Object?> whereArgs, List<String> joinStatements,
+    String tenBang, String truong
+  ) {
+    if (danhSach != null && danhSach.isNotEmpty) {
+      int stt = 0;
+      for (final muc in danhSach) {
+        final String tenAs = "\"${tenBang}_$stt\"";
+        joinStatements.add("INNER JOIN \"$tenBang\" AS $tenAs ON \"$BANG_SACH\".\"ma\" = $tenAs.\"sach\"");
+        whereStatements.add("$tenAs.\"$truong\" = ?");
+        whereArgs.add(muc);
+        stt += 1;
+      }
+    }
+  }
+
+  /// Gán giá trị dữ liệu vào object
+  List<Sach> _chuyenDoiDuLieuSach(List<Map<String, Object?>> banGhi) {
+    return banGhi.map((muc) {
+      final Sach kq = Sach();
+      _ganDLVaoSach(muc, kq);
+      return kq;
+    }).toList();
+  }
+
+  /// Thực hiện tìm kiếm sách
+  Future<List<Sach>> _thucHienTimKiemSach(
+    List<int>? tacGia,
+    List<int>? dichGia,
+    List<int>? nxb,
+    List<int>? viTri,
+    List<NhanSach>? nhan,
+    int? nhieuTap,
+    List<String> whereStatements, List<Object?> whereArgs, List<String> joinStatements
+  ) async {
+    _xayDungDieuKienTimSach(tacGia, whereStatements, whereArgs, joinStatements, BANG_TAC_GIA_SACH, "tac_gia");
+    _xayDungDieuKienTimSach(dichGia, whereStatements, whereArgs, joinStatements, BANG_DICH_GIA_SACH, "dich_gia");
+    _xayDungDieuKienTimSach(nxb, whereStatements, whereArgs, joinStatements, BANG_NXB_SACH, "nxb");
+    _xayDungDieuKienTimSach(viTri, whereStatements, whereArgs, joinStatements, BANG_VI_TRI_SACH, "vi_tri");
+    if (nhan != null && nhan.isNotEmpty) {
+      int stt = 0;
+      for (final muc in nhan) {
+        final String tenAs = "\"${BANG_NHAN_SACH}_$stt\"";
+        joinStatements.add("INNER JOIN \"$BANG_NHAN_SACH\" AS $tenAs ON \"$BANG_SACH\".\"ma\" = $tenAs.\"sach\"");
+        whereStatements.add("$tenAs.\"nhan\" = ?");
+        whereArgs.add(muc.maSo);
+        if (muc.giaTri != null && muc.giaTri!.isNotEmpty) {
+          final String gtKd = LinhTinh.loaiBoDautiengViet(muc.giaTri!);
+          whereStatements.add("($tenAs.\"gia_tri\" LIKE ? OR $tenAs.\"gia_tri_kd\" LIKE ?)");
+          whereArgs.add("%${muc.giaTri!}%");
+          whereArgs.add("%$gtKd%");
+        } else {
+          whereStatements.add("$tenAs.\"gia_tri\" != \"\"");
+        }
+        stt += 1;
+      }
+    }
+    if (nhieuTap != null) {
+      whereStatements.add("\"$BANG_SACH\".\"chuoi\" = ?");
+      whereArgs.add(nhieuTap);
+    }
+    if (whereStatements.isEmpty) { return []; }
+    String sqlStatement = "SELECT \"$BANG_SACH\".* FROM \"$BANG_SACH\"";
+    if (joinStatements.isNotEmpty) {
+      sqlStatement += "\n${joinStatements.join("\n")}";
+    }
+    sqlStatement += "\nWHERE ${whereStatements.join(" AND ")}";
+    sqlStatement += "\nGROUP BY \"$BANG_SACH\".\"ma\";";
+    List<Map<String, Object?>> ketQua = await _rawQuery(sqlStatement, whereArgs);
+    return _chuyenDoiDuLieuSach(ketQua);
+  }
+
+  /// Tìm kiếm sách theo từ khoá hoặc các bộ lọc
+  Future<List<Sach>> timKiemSach({
+    required String tuKhoa,
+    List<int>? tacGia,
+    List<int>? dichGia,
+    List<int>? nxb,
+    List<int>? viTri,
+    List<NhanSach>? nhan,
+    int? nhieuTap
+  }) async {
+    List<String> whereStatements = [];
+    List<Object?> whereArgs = [];
+    List<String> joinStatements = [];
+    if (tuKhoa.isNotEmpty) {
+      final String tkKd = LinhTinh.loaiBoDautiengViet(tuKhoa);
+      whereStatements.add("(\"$BANG_SACH\".\"ten\" LIKE ? OR \"$BANG_SACH\".\"ten_kd\" LIKE ?)");
+      whereArgs.add("%$tuKhoa%");
+      whereArgs.add("%$tkKd%");
+    }
+    return await _thucHienTimKiemSach(tacGia, dichGia, nxb, viTri, nhan, nhieuTap, whereStatements, whereArgs, joinStatements);
+  }
+
+  /// Tìm kiếm sách theo ISBN và các bộ lọc
+  Future<List<Sach>> timKiemSachTheoISBN({
+    required String tuKhoa,
+    List<int>? tacGia,
+    List<int>? dichGia,
+    List<int>? nxb,
+    List<int>? viTri,
+    List<NhanSach>? nhan,
+    int? nhieuTap
+  }) async {
+    if (tuKhoa.isEmpty) { return []; }
+    List<String> whereStatements = [];
+    List<Object?> whereArgs = [];
+    List<String> joinStatements = [];
+    whereStatements.add("\"$BANG_SACH\".\"isbn\" LIKE ?");
+    whereArgs.add("%$tuKhoa%");
+    return await _thucHienTimKiemSach(tacGia, dichGia, nxb, viTri, nhan, nhieuTap, whereStatements, whereArgs, joinStatements);
+  }
+
+  /// Tìm kiếm sách theo Đánh dấu và các bộ lọc
+  Future<List<Sach>> timKiemSachTheoDanhDau({
+    required String tuKhoa,
+    List<int>? tacGia,
+    List<int>? dichGia,
+    List<int>? nxb,
+    List<int>? viTri,
+    List<NhanSach>? nhan,
+    int? nhieuTap
+  }) async {
+    if (tuKhoa.isEmpty) { return []; }
+    List<String> whereStatements = [];
+    List<Object?> whereArgs = [];
+    List<String> joinStatements = [];
+    joinStatements.add("INNER JOIN \"$BANG_DANH_DAU\" ON \"$BANG_SACH\".\"ma\" = \"$BANG_DANH_DAU\".\"sach\"");
+    final String tkKd = LinhTinh.loaiBoDautiengViet(tuKhoa);
+    whereStatements.add("(\"$BANG_DANH_DAU\".\"ghi_chu\" LIKE ? OR \"$BANG_DANH_DAU\".\"ghi_chu_kd\" LIKE ?)");
+    whereArgs.add("%$tuKhoa%");
+    whereArgs.add("%$tkKd%");
+    return await _thucHienTimKiemSach(tacGia, dichGia, nxb, viTri, nhan, nhieuTap, whereStatements, whereArgs, joinStatements);
   }
 
 }

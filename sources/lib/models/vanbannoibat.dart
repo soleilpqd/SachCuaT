@@ -25,32 +25,53 @@ class VanBanNoiBat {
   /// Văn bản đầy đủ
   final String vanBanDayDu;
   /// Văn bản nổi bật
-  final String vanBanNoiBat;
+  final List<String> vanBanNoiBat;
   /// Thời điểm đã chọn
   final int? daChon;
   /// Danh sách vị trí văn bản nổi bật trong văn bản đầy đủ
   /// chính xác
-  final List<int> dsViTriCx = [];
+  final List<(int, int)> dsViTriCx = [];
   /// Danh sách vị trí văn bản nổi bật trong văn bản đầy đủ
   /// Không dấu
-  final List<int> dsViTriKd = [];
+  final List<(int, int)> dsViTriKd = [];
+  /// Dữ liệu đính kèm (dùng sắp xếp kết quả tìm kiếm)
+  final dynamic duLieuDinhKem;
+
+  static (int, int) _timViTriNoiBatNhoNhat(String vbDayDu, List<String> vbNoiBat) {
+    (int, int) ketQua = (-1, -1);
+    int stt = 0;
+    for (final String vbNb in vbNoiBat) {
+      if (vbNb.isEmpty) {
+        continue;
+      }
+      final int vt = vbDayDu.indexOf(vbNb);
+      if (vt >= 0) {
+        if (ketQua.$1 < 0 || ketQua.$1 > vt) {
+          ketQua = (vt, stt);
+        }
+      }
+      stt += 1;
+    }
+    return ketQua;
+  }
 
   /// Xây dựng vị trí của văn bản nổi bật trong văn bản đầy đủ
-  static List<int> xayDungViTriNoiBat(String vbDayDu, String vbNoiBat) {
+  static List<(int, int)> xayDungViTriNoiBat(String vbDayDu, List<String> vbNoiBat) {
     String dem = vbDayDu;
-    List<int> ketQua = [];
+    List<(int, int)> ketQua = [];
     if (vbDayDu.isEmpty || vbNoiBat.isEmpty) {
       return ketQua;
     }
     int vtHt = 0;
     VongLapGioiHan.lap((_) {
       if (dem.isEmpty) { return false; }
-      final int vt = dem.indexOf(vbNoiBat);
-      if (vt >= 0) {
-        vtHt += vt;
-        ketQua.add(vtHt);
-        vtHt += vbNoiBat.length;
-        dem = dem.substring(vt + vbNoiBat.length);
+      final (int, int) vt = _timViTriNoiBatNhoNhat(dem, vbNoiBat);
+      if (vt.$1 >= 0) {
+        vtHt += vt.$1;
+        final String vbNb = vbNoiBat[vt.$2];
+        ketQua.add((vtHt, vbNb.length));
+        vtHt += vbNb.length;
+        dem = dem.substring(vt.$1 + vbNb.length);
       } else {
         dem = "";
         return false;
@@ -60,11 +81,18 @@ class VanBanNoiBat {
     return ketQua;
   }
 
-  VanBanNoiBat({required this.vanBanDayDu, required this.vanBanNoiBat, this.daChon}) {
+  VanBanNoiBat({required this.vanBanDayDu, required this.vanBanNoiBat, this.daChon, this.duLieuDinhKem}) {
     dsViTriCx.addAll(VanBanNoiBat.xayDungViTriNoiBat(vanBanDayDu, vanBanNoiBat));
     final String vbDd = LinhTinh.loaiBoDautiengViet(vanBanDayDu);
-    final String vbNb = LinhTinh.loaiBoDautiengViet(vanBanNoiBat);
-    if (vbDd == vanBanDayDu && vbNb == vanBanNoiBat) {
+    final List<String> vbNb = vanBanNoiBat.map((e) => LinhTinh.loaiBoDautiengViet(e)).toList();
+    bool vbNbLaKd = true;
+    for (int stt = 0; stt < vbNb.length; stt += 1) {
+      if (vbNb[stt] != vanBanNoiBat[stt]) {
+        vbNbLaKd = false;
+        break;
+      }
+    }
+    if (vbDd == vanBanDayDu && vbNbLaKd) {
       dsViTriKd.addAll(dsViTriCx);
     } else {
       dsViTriKd.addAll(VanBanNoiBat.xayDungViTriNoiBat(vbDd, vbNb));
@@ -76,11 +104,11 @@ class VanBanNoiBat {
 /// Sắp xếp danh sách văn bản nổi bật
 extension SapXepDSVbNoiBat on List<VanBanNoiBat> {
 
-  int _soSanh2ViTri(List<int> dsvt1, List<int> dsvt2) {
+  int _soSanh2ViTri(List<(int, int)> dsvt1, List<(int, int)> dsvt2) {
     int cmp = 0;
     if (dsvt1.isNotEmpty && dsvt2.isNotEmpty) {
-      final int vt1 = dsvt1.first;
-      final int vt2 = dsvt2.first;
+      final int vt1 = dsvt1.first.$1;
+      final int vt2 = dsvt2.first.$1;
       cmp = vt1.compareTo(vt2);
       if (cmp != 0) {
         return cmp;
@@ -91,7 +119,7 @@ extension SapXepDSVbNoiBat on List<VanBanNoiBat> {
       return -cmp;
     }
     for (int idx = 0; idx < dsvt1.length; idx += 1) {
-      cmp = dsvt1[idx].compareTo(dsvt2[idx]);
+      cmp = dsvt1[idx].$1.compareTo(dsvt2[idx].$1);
       if (cmp != 0) {
         return cmp;
       }

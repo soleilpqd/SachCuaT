@@ -25,9 +25,10 @@ class VanBanHienThiNoiBat extends StatelessWidget {
   /// Văn bản nổi bật
   final VanBanNoiBat vanBan;
   final TextOverflow tuDongCat;
+  final Color mauNen;
 
   /// Constructor
-  const VanBanHienThiNoiBat({super.key, required this.vanBan, this.tuDongCat = TextOverflow.ellipsis});
+  const VanBanHienThiNoiBat({super.key, required this.vanBan, this.tuDongCat = TextOverflow.ellipsis, this.mauNen = Colors.yellow});
 
   /// Xây dựng các đoạn văn bản
   List<TextSpan> _xayDungCacDoanVanBan() {
@@ -41,12 +42,12 @@ class VanBanHienThiNoiBat extends StatelessWidget {
     }
     int vtHt = 0;
     for (final vt in vanBan.dsViTriKd) {
-      if (vt > vtHt) {
-        doanVb = TextSpan(text: vanBan.vanBanDayDu.substring(vtHt, vt));
+      if (vt.$1 > vtHt) {
+        doanVb = TextSpan(text: vanBan.vanBanDayDu.substring(vtHt, vt.$1));
         ketQua.add(doanVb);
       }
-      vtHt = vt + vanBan.vanBanNoiBat.length;
-      doanVb = TextSpan(text: vanBan.vanBanDayDu.substring(vt, vtHt), style: const TextStyle(backgroundColor: Colors.yellow));
+      vtHt = vt.$1 + vt.$2;
+      doanVb = TextSpan(text: vanBan.vanBanDayDu.substring(vt.$1, vtHt), style: TextStyle(backgroundColor: mauNen));
       ketQua.add(doanVb);
     }
     if (vtHt < vanBan.vanBanDayDu.length) {

@@ -16,6 +16,7 @@
   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:sach_cua_t/utils/vanbanhienthi.dart';
 import 'package:sach_cua_t/views/dieu_khien_co_so.dart';
@@ -37,8 +38,19 @@ class ManHinhCoSo extends StatelessWidget {
   final DieuKhienCoSo? dkNutQuayLai;
   /// Hàm xử lý khi nhấn nút quay lại (bỏ qua nếu `nutTrai != null`)
   final Function()? khiNhanQuayLai;
+  /// Khi nhấn vào tiêu đề
+  final Function()? khiNhanTieuDe;
 
-  const ManHinhCoSo({super.key, required this.tieuDe, this.nutTrai, this.nutPhai, required this.noiDung, this.dkNutQuayLai, this.khiNhanQuayLai});
+  const ManHinhCoSo({
+    super.key,
+    required this.tieuDe,
+    this.nutTrai,
+    this.nutPhai,
+    required this.noiDung,
+    this.dkNutQuayLai,
+    this.khiNhanQuayLai,
+    this.khiNhanTieuDe
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +60,10 @@ class ManHinhCoSo extends StatelessWidget {
     }
     return Scaffold(
         appBar: AppBar(
-          title: VbhtWidget(text: tieuDe),
+          title: GestureDetector(
+            onTap: khiNhanTieuDe,
+            child: VbhtWidget(text: tieuDe)
+          ),
           actions: nutPhai != null ? [nutPhai!] : null,
           leading: nTrai
         ),

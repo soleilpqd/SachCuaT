@@ -266,12 +266,18 @@ class CauHinhTruongVanBan {
   final bool tuDongKichHoatNhap;
   /// Kiểm soát ký tự nhập vào
   final List<TextInputFormatter>? kiemSoatNhapLieu;
+  /// Kiểu nút Enter
+  final TextInputAction? kieuNutEnter;
+  /// Khi nhấn nút Enter
+  final void Function(String)? khiNhanEnter;
 
   const CauHinhTruongVanBan({
     this.kieuBanPhim = TextInputType.text,
     this.soKyTuToiDa,
     this.kiemSoatNhapLieu,
-    this.tuDongKichHoatNhap = false
+    this.tuDongKichHoatNhap = false,
+    this.kieuNutEnter,
+    this.khiNhanEnter
   });
 
 }
@@ -353,7 +359,7 @@ class _TrangThaiTruongVanBan extends TrangThaiCoSo<TruongVanBan> {
     final goiY = laPhanNoiDung ? widget.dieuKhien?.goiYNoiDung : widget.dieuKhien?.goiYTieuDe;
     final String noiBat = (laPhanNoiDung ? widget.dieuKhien?.vanBan : widget.dieuKhien?.vbTieuDe) ?? "";
     // print("DEBUG LAYNOIBAT $laPhanNoiDung");
-    return goiY?.layVanBanNoiBat(dayDu, noiBat) ?? VanBanNoiBat(vanBanDayDu: dayDu, vanBanNoiBat: noiBat);
+    return goiY?.layVanBanNoiBat(dayDu, noiBat) ?? VanBanNoiBat(vanBanDayDu: dayDu, vanBanNoiBat: [noiBat]);
   }
 
   @override
@@ -455,15 +461,14 @@ class _TrangThaiTruongVanBan extends TrangThaiCoSo<TruongVanBan> {
               focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).primaryColor))
             ),
             keyboardType: cauHinh.kieuBanPhim,
+            textInputAction: cauHinh.kieuNutEnter,
             controller: textEditingController,
-            focusNode: focusNode,
+            focusNode: fNode,
             readOnly: !widget.dieuKhien!.khaDung,
             maxLength: cauHinh.soKyTuToiDa,
             inputFormatters: cauHinh.kiemSoatNhapLieu,
             autofocus: cauHinh.tuDongKichHoatNhap,
-            onFieldSubmitted: (value) {
-              // onFieldSubmitted();
-            }
+            onFieldSubmitted: cauHinh.khiNhanEnter
           )
         );
       },

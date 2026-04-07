@@ -23,38 +23,87 @@ import 'package:sach_cua_t/models/vanbannoibat.dart';
 import 'package:sach_cua_t/utils/common.dart';
 import 'package:sach_cua_t/views/van_ban_hien_thi_noi_bat.dart';
 
+/// Trường thông tin sách cẩn hiển thị
+enum ThongTinSachDeHienThi {
+  tenSach,
+  isbn,
+  danhDau,
+  tacGia,
+  dichGia,
+  nxb,
+  soTap,
+  nhan,
+  viTri,
+  nhieuTap
+}
+
+/// Thông tin sách cần hiển thị
+class ThongTinHienThiTruongSach {
+  /// Trường thông tin
+  final ThongTinSachDeHienThi truong;
+  /// Cần làm nổi bật từ khoá?
+  final List<String>? tuKhoaNoiBat;
+  /// Chế độ làm nổi bật chính hay phụ
+  final bool laNoiBatChinh;
+
+  ThongTinHienThiTruongSach({required this.truong, this.tuKhoaNoiBat, this.laNoiBatChinh = true});
+
+}
+
 class TruongSach extends StatelessWidget {
 
-  final Sach sach;
-  final String? tuKhoaNoiBat;
-  final bool hienThiSoTap;
+  static List<ThongTinHienThiTruongSach> thongTinMacDinh() => [
+    ThongTinHienThiTruongSach(truong: ThongTinSachDeHienThi.tenSach),
+    ThongTinHienThiTruongSach(truong: ThongTinSachDeHienThi.tacGia),
+    ThongTinHienThiTruongSach(truong: ThongTinSachDeHienThi.dichGia),
+    ThongTinHienThiTruongSach(truong: ThongTinSachDeHienThi.nxb)
+  ];
 
-  const TruongSach({super.key, required this.sach, required this.hienThiSoTap, this.tuKhoaNoiBat});
+  final Sach sach;
+  final List<ThongTinHienThiTruongSach> thongTinCanHienThi;
+
+  const TruongSach({super.key, required this.sach, required this.thongTinCanHienThi});
 
   @override
   Widget build(BuildContext context) {
-    final String tenSach = sach.ten;
-    final String tenTacGia = sach.tacGia.join("; ");
-    final String tenDichGia = sach.dichGia.join("; ");
-    final String tenNXB = sach.nhaXuatBan.join("; ");
     String soTap = "";
+    final bool hienThiSoTap = thongTinCanHienThi.indexWhere((element) => element.truong == ThongTinSachDeHienThi.soTap) >= 0;
     if (hienThiSoTap && sach.tap != null && sach.tap! > 0) {
       soTap = "#${sach.tap!}";
     }
-    String vbNb = tuKhoaNoiBat ?? "";
     UiImage? hinhAnh;
     if (sach.hinhThuNho != null) {
       hinhAnh = LinhTinh.taoWidgetAnh(sach.hinhThuNho!);
+    } else {
+      hinhAnh = LinhTinh.taoWidgetAnh(LinhTinh.taoDuongDan(phanLoai: PhanLoaiDuongDan.assets, duongDan: "assets/book.jpg"));
     }
-    List<Widget> children = [VanBanHienThiNoiBat(vanBan: VanBanNoiBat(vanBanDayDu: tenSach, vanBanNoiBat: vbNb))];
-    if (soTap.isNotEmpty) {
-      children.add(Text(soTap));
+    List<Widget> children = [];
+    Color mauChinh = Colors.yellow;
+    Color mauPhu = Colors.lightGreenAccent;
+    for (final muc in thongTinCanHienThi) {
+      String giaTri =
+      switch (muc.truong) {
+        ThongTinSachDeHienThi.tenSach => sach.ten,
+        ThongTinSachDeHienThi.isbn => sach.isbn,
+        ThongTinSachDeHienThi.tacGia => sach.tacGia.join("; "),
+        ThongTinSachDeHienThi.dichGia => sach.dichGia.join("; "),
+        ThongTinSachDeHienThi.nxb => sach.nhaXuatBan.join("; "),
+        ThongTinSachDeHienThi.soTap => soTap,
+        ThongTinSachDeHienThi.danhDau => sach.danhDau.join("; "),
+        ThongTinSachDeHienThi.nhan => sach.nhan.entries.map((e) => "${e.key}: ${e.value}").join("; "),
+        ThongTinSachDeHienThi.viTri => sach.viTri.join("; "),
+        ThongTinSachDeHienThi.nhieuTap => sach.nhieuTap ?? ""
+      };
+      if (giaTri.isNotEmpty) {
+        children.add(VanBanHienThiNoiBat(
+          vanBan: VanBanNoiBat(
+            vanBanDayDu: giaTri,
+            vanBanNoiBat: muc.tuKhoaNoiBat ?? []
+          ),
+          mauNen: muc.laNoiBatChinh ? mauChinh : mauPhu
+        ));
+      }
     }
-    children.addAll([
-      VanBanHienThiNoiBat(vanBan: VanBanNoiBat(vanBanDayDu: tenTacGia, vanBanNoiBat: vbNb)),
-      VanBanHienThiNoiBat(vanBan: VanBanNoiBat(vanBanDayDu: tenDichGia, vanBanNoiBat: vbNb)),
-      VanBanHienThiNoiBat(vanBan: VanBanNoiBat(vanBanDayDu: tenNXB, vanBanNoiBat: vbNb))
-    ]);
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

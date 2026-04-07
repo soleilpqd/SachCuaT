@@ -20,6 +20,7 @@ import 'package:flutter/material.dart';
 import 'package:man_hinh_ung_dung/man_hinh_ung_dung.dart';
 import 'package:sach_cua_t/man_hinh/man_hinh_co_so.dart';
 import 'package:sach_cua_t/man_hinh/man_hinh_sach.dart';
+import 'package:sach_cua_t/man_hinh/man_hinh_tim_kiem.dart';
 import 'package:sach_cua_t/utils/hopthoai.dart';
 import 'package:sach_cua_t/utils/vanbanhienthi.dart';
 
@@ -31,7 +32,7 @@ class DieuKhienManHinhMoDau extends DieuKhienManHinh {
 
   /// Khi nhấn nút Thêm sách
   void _khiNhanThemSach() {
-    final DieuKhienManHinhSach mhSach = DieuKhienManHinhSach(maSach: 1);
+    final DieuKhienManHinhSach mhSach = DieuKhienManHinhSach();
     luongManHinh?.themManHinh(manHinh: mhSach);
   }
 
@@ -39,6 +40,8 @@ class DieuKhienManHinhMoDau extends DieuKhienManHinh {
 
   /// Khi nhấn nút Tìm kiếm
   void _khiNhanTimKiem() {
+    final DieuKhienManHinhTimKiem mhTimKiem = DieuKhienManHinhTimKiem();
+    luongManHinh?.themManHinh(manHinh: mhTimKiem);
     // HopThoai.hienThiHopThoaiThongBao(
     //   noiDung: Vbht.trucTiep("Thông báo dài loằng ngoằng. Xin chào. Tạm biệt!"),
     //   nhanCacNut: [Vbht.tuKhoa(TK.dong), Vbht.tuKhoa(TK.luu)],

@@ -41,6 +41,7 @@ class Sach {
   Map<String, String> nhan = {};
   List<String> nhanLuonHien = [];
   List<String> danhDau = [];
+  String? nhieuTap;
 
   static Sach taoDuLieuGia({int chiSo = 0}) {
     Sach ketQua = Sach();
@@ -58,6 +59,9 @@ class Sach {
     ketQua.tap = chiSo;
     ketQua.hinhAnh = LinhTinh.taoDuongDan(phanLoai: PhanLoaiDuongDan.assets, duongDan: "assets/book.jpg");
     ketQua.hinhThuNho = LinhTinh.taoDuongDan(phanLoai: PhanLoaiDuongDan.assets, duongDan: "assets/book.jpg");
+    ketQua.danhDau.add("Danh dau 01");
+    ketQua.nhieuTap = "Nhieu tap 01";
+    ketQua.nhan = {"Nhan sach 01": "Gia tri nhan 01"};
     return ketQua;
   }
 
@@ -89,29 +93,74 @@ abstract class DuLieuCoso {
 /// Nhà xuất bản, đơn vị phát hành
 class NhaXuatBan extends DuLieuCoso {
   String? maLuuChieu;
+
+  static NhaXuatBan taoDuLieuGia({int chiSo = 0}) {
+    NhaXuatBan ketQua = NhaXuatBan();
+    ketQua.maSo = chiSo;
+    ketQua.ten = "NXB 0$chiSo";
+    return ketQua;
+  }
 }
 
 /// Tác giả
 class TacGia extends DuLieuCoso {
+
+  static TacGia taoDuLieuGia({int chiSo = 0}) {
+    TacGia ketQua = TacGia();
+    ketQua.maSo = chiSo;
+    ketQua.ten = "Tac gia 0$chiSo";
+    return ketQua;
+  }
+
 }
 
 /// Dịch giả
 class DichGia extends DuLieuCoso {
+
+  static DichGia taoDuLieuGia({int chiSo = 0}) {
+    DichGia ketQua = DichGia();
+    ketQua.maSo = chiSo;
+    ketQua.ten = "Dich gia 0$chiSo";
+    return ketQua;
+  }
+
 }
 
 /// Chuỗi sách nhiều tập
 class SachNhieuTap extends DuLieuCoso {
+
+  static SachNhieuTap taoDuLieuGia({int chiSo = 0}) {
+    SachNhieuTap ketQua = SachNhieuTap();
+    ketQua.maSo = chiSo;
+    ketQua.ten = "Nhieu tap 0$chiSo";
+    return ketQua;
+  }
+
 }
 
 /// Nhãn sách
 class NhanSach extends DuLieuCoso {
   String? giaTri;
   int luonHien = -1;
+
+  static NhanSach taoDuLieuGia({int chiSo = 0}) {
+    NhanSach ketQua = NhanSach();
+    ketQua.maSo = chiSo;
+    ketQua.ten = "Nhan sach 0$chiSo";
+    return ketQua;
+  }
 }
 
 /// Vị trí lưu trữ sách
 class ViTriSach extends DuLieuCoso {
   int thoiGian = -1;
+
+  static ViTriSach taoDuLieuGia({int chiSo = 0}) {
+    ViTriSach ketQua = ViTriSach();
+    ketQua.maSo = chiSo;
+    ketQua.ten = "Vi tri 0$chiSo";
+    return ketQua;
+  }
 }
 
 /// Đánh dấu (Bookmark)
@@ -120,9 +169,4 @@ class DanhDauSach {
   int maSach = -1;
   String noiDung = "";
   // ImgImage? image; TODO: later
-}
-
-class NhomSach {
-  int maSo = -1;
-  String ghiChu = "";
 }

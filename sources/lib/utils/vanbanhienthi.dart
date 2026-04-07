@@ -101,18 +101,38 @@ enum TK {
   namTrongChuoi,
   /// Ghi chú chuỗi sách
   ghiChuChuoi,
-  /// Tập còn thiếu
+  /// Tập còn thiếu (Các tập còn thiếu: #_)
   tapConThieu,
   /// Luôn hiển thị
   luonHienThi,
   /// Tập số
   tapSo,
-  /// Hiển thị danh sách tập đầy đủ
+  /// Hiển thị danh sách tập đầy đủ (Hiển thị đầy đủ #_ tập)
   hienThiDSTapDayDu,
   /// Tìm kiếm,
   timKiem,
-  /// Tìm kiếm chính xác
-  timKiemChinhXac,
+  /// Số lượng kết quả (Số lượng kết quả: #_)
+  soLuongKetQua,
+  /// Thống kê
+  thongKe,
+  /// Tên nhãn
+  tenNhan,
+  /// Giá trị nhãn
+  giaTriNhan,
+  /// Lọc theo tác giả (Tác giả: #_)
+  locTacGia,
+  /// Lọc theo dịch giả (Dịch giả: #_)
+  locDichGia,
+  /// Lọc theo đơn vị phát hành (Phát hành: #_)
+  locNxb,
+  /// Lọc theo vị trí sách (Vị trí: #_)
+  locViTri,
+  /// Lọc theo tên nhãn (Nhãn `#_` có giá trị)
+  locTenNhan,
+  /// Lọc theo tên và giá trị nhãn (Nhãn `#_`=`#_`)
+  locGiaTriNhan,
+  /// Lọc theo nhiều tập (Chuỗi sách: #_)
+  locNhieuTap,
   ;
 }
 

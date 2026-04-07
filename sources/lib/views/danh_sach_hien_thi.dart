@@ -37,6 +37,8 @@ class DieuKhienDanhSachHienThi {
   /// Khoảng trống phái dưới cho mục ở đoạn [doan] dòng [dong]
   final double? Function(int doan, int dong) khoangCachPhiaDuoi;
 
+  final ScrollController _dkCuon = ScrollController();
+
   _TrangThaiDanhSachHienThi? _doiTuongDieuKhien;
 
   DieuKhienDanhSachHienThi({
@@ -49,8 +51,14 @@ class DieuKhienDanhSachHienThi {
     required this.khoangCachPhiaDuoi
   });
 
+  /// Nạp lại danh sách trên màn hình
   void napLaiDanhSach({List<int>? cacPhanDoan}) {
     _doiTuongDieuKhien?.napLai(cacPhanDoan);
+  }
+
+  /// Cuộn lên đầu
+  void cuonLenDau({Duration? duration}) {
+    _dkCuon.animateTo(0, duration: duration ?? const Duration(milliseconds: 100), curve: Curves.bounceOut);
   }
 
   void dispose() {
@@ -92,6 +100,7 @@ class _TrangThaiDanhSachHienThi extends State<DanhSachHienThi> {
   @override
   Widget build(BuildContext context) {
     return ListView(
+      controller: widget.dieuKhien._dkCuon,
       padding: const EdgeInsets.all(5),
       children: _xayDungCacWidgetCon()
     );
