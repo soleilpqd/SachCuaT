@@ -88,6 +88,7 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo {
   /// Mã sách gán từ màn hình trước.
   /// Null là tạo sách mới.
   final int? maSach;
+  final bool chiDoc;
   /// Bộ đệm Vbht cho toàn màn hình
   final BoDemVbht _demVbht = BoDemVbht();
   /// Điều khiển nút Lưu (bên phải Top bar)
@@ -133,7 +134,7 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo {
   // --- Vòng đời
 
   /// Constructor
-  DieuKhienManHinhSach({this.maSach}) {
+  DieuKhienManHinhSach({this.maSach, this.chiDoc = false}) {
     widgetCuaManHinh = _ManHinhSach(dkMh: this);
     CoSoDuLieu().truyVanDSNxb().then((value) => _dsNxb = value);
     LuuTruCauHinh().layHienThiDSTapDayDu().then((value) => _dkHienThiDSTapDayDu.giaTri = value ?? false);
@@ -596,15 +597,25 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo {
 
   /// Khởi tạo màn hình theo thông tin sách (chế độ sửa)
   void _khoiTaoManHinhTheoThongTinSach() {
+    _dkLuuChieu.khaDung = !chiDoc;
+    _dkDkXuatBan.khaDung = !chiDoc;
+    _dkGhiChuTap.khaDung = !chiDoc;
+    _dkSuaTap.khaDung = !chiDoc;
+    _dkSoTap.khaDung = !chiDoc;
+    _dkHienThiDSTapDayDu.khaDung = !chiDoc;
     Sach sach = _thaoTacNap!.thongTinSach;
     _dkDaDocXong.giaTri = sach.daHoanThanh;
+    _dkDaDocXong.khaDung = !chiDoc;
     _dkHinhAnh.hinhAnh = sach.hinhAnh;
+    _dkHinhAnh.khaDung = !chiDoc;
     _dkTenSach.vanBan = sach.ten;
+    _dkTenSach.khaDung = !chiDoc;
     _dkISBN.vanBan = sach.isbn;
+    _dkISBN.khaDung = !chiDoc;
 
     int dem = 0;
     for (final muc in sach.tacGia) {
-      DieuKhienTruongVanBan dkVb = DieuKhienTruongVanBan();
+      DieuKhienTruongVanBan dkVb = DieuKhienTruongVanBan(khaDung: !chiDoc);
       dkVb.debugInfo = "TG $dem";
       dkVb.vanBan = muc;
       dkVb.trangThaiNutBenPhai = 0;
@@ -612,7 +623,7 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo {
       _dsDkTacGia.add(dkVb);
       dem += 1;
     }
-    DieuKhienTruongVanBan dkRong = DieuKhienTruongVanBan();
+    DieuKhienTruongVanBan dkRong = DieuKhienTruongVanBan(khaDung: !chiDoc);
     dkRong.debugInfo = "TG $dem";
     dkRong.vanBan = "";
     dkRong.trangThaiNutBenPhai = null;
@@ -621,7 +632,7 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo {
 
     dem = 0;
     for (final muc in sach.dichGia) {
-      DieuKhienTruongVanBan dkVb = DieuKhienTruongVanBan();
+      DieuKhienTruongVanBan dkVb = DieuKhienTruongVanBan(khaDung: !chiDoc);
       dkVb.debugInfo = "DG $dem";
       dkVb.vanBan = muc;
       dkVb.trangThaiNutBenPhai = 0;
@@ -629,7 +640,7 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo {
       _dsDkDichGia.add(dkVb);
       dem += 1;
     }
-    dkRong = DieuKhienTruongVanBan();
+    dkRong = DieuKhienTruongVanBan(khaDung: !chiDoc);
     dkRong.debugInfo = "DG $dem";
     dkRong.vanBan = "";
     dkRong.trangThaiNutBenPhai = null;
@@ -638,7 +649,7 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo {
 
     dem = 0;
     for (final muc in sach.nhaXuatBan) {
-      DieuKhienTruongVanBan dkVb = DieuKhienTruongVanBan();
+      DieuKhienTruongVanBan dkVb = DieuKhienTruongVanBan(khaDung: !chiDoc);
       dkVb.debugInfo = "NXB $dem";
       dkVb.vanBan = muc;
       dkVb.trangThaiNutBenPhai = 0;
@@ -646,7 +657,7 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo {
       _dsDkNxb.add(dkVb);
       dem += 1;
     }
-    dkRong = DieuKhienTruongVanBan();
+    dkRong = DieuKhienTruongVanBan(khaDung: !chiDoc);
     dkRong.debugInfo = "NXB $dem";
     dkRong.vanBan = "";
     dkRong.trangThaiNutBenPhai = null;
@@ -655,7 +666,7 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo {
 
     dem = 0;
     for (final muc in sach.viTri) {
-      DieuKhienTruongVanBan dkVb = DieuKhienTruongVanBan(goiYNoiDung: _goiYViTri);
+      DieuKhienTruongVanBan dkVb = DieuKhienTruongVanBan(goiYNoiDung: _goiYViTri, khaDung: !chiDoc);
       dkVb.debugInfo = "VT $dem";
       dkVb.vanBan = muc;
       dkVb.trangThaiNutBenPhai = 0;
@@ -663,7 +674,7 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo {
       _dsDkViTri.add(dkVb);
       dem += 1;
     }
-    dkRong = DieuKhienTruongVanBan(goiYNoiDung: _goiYViTri);
+    dkRong = DieuKhienTruongVanBan(goiYNoiDung: _goiYViTri, khaDung: !chiDoc);
     dkRong.debugInfo = "VT $dem";
     dkRong.vanBan = "";
     dkRong.trangThaiNutBenPhai = null;
@@ -676,13 +687,15 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo {
       DieuKhienTruongVanBan dkVb = DieuKhienTruongVanBan(
         goiYNoiDung: _goiYGiaTriNhan,
         goiYTieuDe: _goiYTenNhan,
-        luonHienThi: sach.nhanLuonHien.contains(muc)
+        luonHienThi: sach.nhanLuonHien.contains(muc),
+        khaDung: !chiDoc
       );
       dkVb.debugInfo = "Nhan $dem";
       dkVb.vanBan = giaTriMuc;
       dkVb.vbTieuDe = muc;
       dkVb.trangThaiNutBenPhai = null;
       dkVb.themTheoDoi(this);
+      dkVb.khaDung = !chiDoc;
       _dsDkNhan.add(dkVb);
       dem += 1;
     }
@@ -691,20 +704,23 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo {
         DieuKhienTruongVanBan dkVb = DieuKhienTruongVanBan(
           goiYNoiDung: _goiYGiaTriNhan,
           goiYTieuDe: _goiYTenNhan,
-          luonHienThi: true
+          luonHienThi: true,
+          khaDung: !chiDoc
         );
         dkVb.debugInfo = "Nhan $dem";
         dkVb.vanBan = "";
         dkVb.vbTieuDe = muc;
         dkVb.trangThaiNutBenPhai = null;
         dkVb.themTheoDoi(this);
+        dkVb.khaDung = !chiDoc;
         _dsDkNhan.add(dkVb);
         dem += 1;
       }
     }
     dkRong = DieuKhienTruongVanBan(
       goiYNoiDung: _goiYGiaTriNhan,
-      goiYTieuDe: _goiYTenNhan
+      goiYTieuDe: _goiYTenNhan,
+      khaDung: !chiDoc
     );
     dkRong.debugInfo = "Nhan $dem";
     dkRong.vanBan = "";
@@ -715,7 +731,7 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo {
 
     dem = 0;
     for (final muc in sach.danhDau) {
-      DieuKhienTruongVanBan dkVb = DieuKhienTruongVanBan();
+      DieuKhienTruongVanBan dkVb = DieuKhienTruongVanBan(khaDung: !chiDoc);
       dkVb.debugInfo = "DD $dem";
       dkVb.vanBan = muc;
       dkVb.trangThaiNutBenPhai = 0;
@@ -723,7 +739,7 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo {
       _dsDkDanhDau.add(dkVb);
       dem += 1;
     }
-    dkRong = DieuKhienTruongVanBan();
+    dkRong = DieuKhienTruongVanBan(khaDung: !chiDoc);
     dkRong.debugInfo = "DD $dem";
     dkRong.vanBan = "";
     dkRong.trangThaiNutBenPhai = null;
@@ -952,7 +968,7 @@ class _ManHinhSach extends StatelessWidget {
       tieuDe: Vbht.tuKhoa(dkMh.maSach == null ? TK.sachMoi : TK.thongTinSach, dem: dkMh._demVbht),
       khiNhanQuayLai: dkMh._khiNhanQuayLai,
       dkNutQuayLai: dkMh._dkNutQuayLai,
-      nutPhai: NutBamBieuTuong(icon: Icons.save, khiNhan: dkMh._khiNhanLuu, dieuKhien: dkMh._dkNutLuu),
+      nutPhai: dkMh.chiDoc && dkMh.maSach != null ? null : NutBamBieuTuong(icon: Icons.save, khiNhan: dkMh._khiNhanLuu, dieuKhien: dkMh._dkNutLuu),
       noiDung: _NoiDungManHinhSach(dieuKhienManHinh: dkMh)
     );
   }

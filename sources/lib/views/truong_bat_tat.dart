@@ -79,8 +79,8 @@ class _TrangThaiTruongBatTat extends TrangThaiCoSo<TruongBatTat> {
     Color mainColor = (widget.dieuKhien?.khaDung ?? true) ? Theme.of(context).primaryColor : Colors.grey;
     List<Widget> dsCacO = [
       NutBamTieuDe(
-        onPressed: _khiNhanTieuDe,
-        child: VbhtWidget(text: widget.tieuDe)
+        onPressed: widget.dieuKhien!.khaDung ? _khiNhanTieuDe : null,
+        child: VbhtWidget(text: widget.tieuDe, style: widget.dieuKhien!.khaDung ? null : const TextStyle(color: Colors.grey))
       ),
       Checkbox(
         value: widget.dieuKhien!.giaTri,

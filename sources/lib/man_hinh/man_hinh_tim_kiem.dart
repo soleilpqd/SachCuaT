@@ -23,7 +23,7 @@ import 'package:man_hinh_ung_dung/luong_man_hinh.dart';
 import 'package:man_hinh_ung_dung/man_hinh_ung_dung.dart';
 import 'package:sach_cua_t/man_hinh/man_hinh_co_so.dart';
 import 'package:sach_cua_t/man_hinh/man_hinh_sach.dart';
-import 'package:sach_cua_t/models/database.dart';
+import 'package:sach_cua_t/man_hinh/man_hinh_thong_ke.dart';
 import 'package:sach_cua_t/models/dulieu.dart';
 import 'package:sach_cua_t/models/operations/thao_tac_tim_kiem.dart';
 import 'package:sach_cua_t/models/vanbannoibat.dart';
@@ -36,9 +36,6 @@ import 'package:sach_cua_t/views/truong_sach.dart';
 import 'package:sach_cua_t/views/truong_tieu_de.dart';
 import 'package:sach_cua_t/views/truong_van_ban.dart';
 import 'package:sach_cua_t/views/van_ban_hien_thi_noi_bat.dart';
-import 'package:sach_cua_t/views/van_ban_hien_thi_widget.dart';
-
-// TODO: màn hình danh sách sách
 
 /// Các phân đoạn kết quả tìm kiếm
 enum _PhanDoanManHinhTimKiem {
@@ -107,8 +104,6 @@ class _LocTimKiem {
   _LocTimKiem({required this.kieuLoc, required this.giaTriLoc, required this.duLieu});
 
 }
-
-// TODO: thống kê sách
 
 /// Điều khiển màn hình tìm kiếm
 class DieuKhienManHinhTimKiem extends DieuKhienManHinh with TheoDoiDieuKhienCoSo {
@@ -293,7 +288,8 @@ class DieuKhienManHinhTimKiem extends DieuKhienManHinh with TheoDoiDieuKhienCoSo
 
   /// Khi nhấn dòng Thống kê trên danh sách kết quả tìm kiếm Tên sách
   void _khiNhanThongKe() {
-    print("Khi nhan thong ke");
+    final DieuKhienManHinhThongKe mhThongKe = DieuKhienManHinhThongKe(dsSach: _kqTenSach);
+    luongManHinh?.themManHinh(manHinh: mhThongKe);
   }
 
   /// Khi nhấn 1 dòng kết quả tìm kiếm Tên sách
@@ -413,7 +409,7 @@ class _ManHinhTimKiem extends StatelessWidget {
 
 }
 
-class _NoiDungManHinhTimKiem extends  WidgetCuaDieuKhienManHinh<DieuKhienManHinhTimKiem> {
+class _NoiDungManHinhTimKiem extends WidgetCuaDieuKhienManHinh<DieuKhienManHinhTimKiem> {
 
   const _NoiDungManHinhTimKiem({required super.dieuKhienManHinh});
 
@@ -441,9 +437,7 @@ class _TrangThaiNoiDungMhTimKiem extends TrangThaiWidgetCuaDieuKhien<_NoiDungMan
   }
 
   @override
-  Widget build(BuildContext context) {
-    return DanhSachHienThi(dieuKhien: _dkDSHienThi);
-  }
+  Widget build(BuildContext context) => DanhSachHienThi(dieuKhien: _dkDSHienThi);
 
   @override
   void capNhatGiaoDienCuaManHinh({required DieuKhienManHinh dieuKhienManHinh, ThamSoDieuKhienWidgetManHinh? duLieuDinhKem}) {
@@ -461,9 +455,7 @@ class _TrangThaiNoiDungMhTimKiem extends TrangThaiWidgetCuaDieuKhien<_NoiDungMan
   }
 
   /// Số phân đoạn trên màn hình
-  int _soPhanDoan() {
-    return _PhanDoanManHinhTimKiem.tongSo();
-  }
+  int _soPhanDoan() => _PhanDoanManHinhTimKiem.tongSo();
 
   /// Số dòng của phần đoạn [doan]
   int _soMucCuaPhanDoan(int doan) {
