@@ -28,11 +28,13 @@ class ThaoTacNapThongTinSach {
   bool daXong = false;
   /// Kết quả nạp dữ liệu
   bool thanhCong = false;
+  /// Danh sách sách thuộc chuỗi
+  List<Sach>? dsSachTrongChuoi;
 
   /// Constructor
   ThaoTacNapThongTinSach(this.thongTinSach);
 
-  Future<bool> napThongTin() async {
+  Future<bool> napThongTin({bool timSachTrongChuoi = false}) async {
     final CoSoDuLieu csdl = CoSoDuLieu();
     final bool kq = await csdl.napThongTinSach(thongTinSach);
     if (!kq) {
@@ -53,7 +55,19 @@ class ThaoTacNapThongTinSach {
     }
     thongTinSach.nhan = nhanSach;
     thongTinSach.danhDau = (await csdl.layDSDanhDauCuaSach(thongTinSach)).map((e) => e.noiDung).toList();
-    // TODO: tap
+    dsSachTrongChuoi = null;
+    if (thongTinSach.maNhieuTap != null) {
+      SachNhieuTap? chuoi = await csdl.timChuoiSachNhieuTap(thongTinSach.maNhieuTap!);
+      if (chuoi != null) {
+        thongTinSach.nhieuTap = chuoi.ten;
+        if (timSachTrongChuoi) {
+          dsSachTrongChuoi = await csdl.layDanhSachSachThuocChuoi(thongTinSach.maNhieuTap!);
+          dsSachTrongChuoi?.removeWhere((muc) => muc.maSo == thongTinSach.maSo);
+        }
+      } else {
+        thongTinSach.maNhieuTap = null;
+      }
+    }
     daXong = true;
     thanhCong = true;
     return true;

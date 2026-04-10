@@ -20,7 +20,6 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:man_hinh_ung_dung/man_hinh_ung_dung.dart';
-import 'package:man_hinh_ung_dung/widget_luong_man_hinh_xep_lop.dart';
 import 'package:sach_cua_t/man_hinh/man_hinh_co_so.dart';
 import 'package:sach_cua_t/utils/common.dart';
 import 'package:sach_cua_t/utils/hopthoai.dart';
@@ -53,6 +52,7 @@ class DieuKhienManHinhWeb extends DieuKhienManHinh {
   Map<String, String> dsNXB = {};
   /// Danh sách Sách đã trích xuất
   List<List<String>> dsSach = [];
+  final GlobalKey _webViewKey = GlobalKey();
 
   DieuKhienManHinhTuDuoiDay? _dkHopThoaiChonSach;
 
@@ -229,8 +229,7 @@ class DieuKhienManHinhWeb extends DieuKhienManHinh {
   void _dongHopThoaiChonSach(Map<String, String>? thongTinSach) {
     if (_dkHopThoaiChonSach != null) {
       _dkHopThoaiChonSach!.luongManHinh?.loaiManHinh(
-        manHinh: _dkHopThoaiChonSach!,
-        thamSo: {WidgetLuongManHinhXepLop.kKeyThamSoChoPhepHoatHinh: false},
+        manHinh: _dkHopThoaiChonSach!
       );
       _dkHopThoaiChonSach = null;
       if (thongTinSach != null) {
@@ -280,7 +279,6 @@ class DieuKhienManHinhWeb extends DieuKhienManHinh {
         )
       ),
       khiDong: () => _dongHopThoaiChonSach(null),
-      coHieuUng: false // Hiệu ứng chuyển động không tốt với view nền là Webview
     );
   }
 
@@ -304,7 +302,7 @@ class _ManHinhWeb extends StatelessWidget  {
           khiNhan: dkManHinh._khiNhanNutTrichXuat,
           dieuKhien: dkManHinh._dkNutTrichXuat
         ) : null,
-      noiDung: WebViewWidget(controller: dkManHinh._webController)
+      noiDung: WebViewWidget(key: dkManHinh._webViewKey, controller: dkManHinh._webController)
     );
   }
 

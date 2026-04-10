@@ -77,6 +77,9 @@ class DieuKhienTruongVanBan extends DieuKhienCoSo {
   /// Đối tượng tạo danh sách gợi ý
   final GoiYVanBan? goiYTieuDe;
   final GoiYVanBan? goiYNoiDung;
+  // Key
+  final GlobalKey _keyTieuDe = GlobalKey();
+  final GlobalKey _keyNoiDung = GlobalKey();
   /// Quản lý focus
   final FocusNode dauMoiNhapTieuDe = FocusNode();
   final FocusNode dauMoiNhapNoiDung = FocusNode();
@@ -372,6 +375,7 @@ class _TrangThaiTruongVanBan extends TrangThaiCoSo<TruongVanBan> {
         Expanded(
           flex: 1,
           child: _xayDungONhap(
+            key: widget.dieuKhien!._keyTieuDe,
             cauHinh: widget.cauHinhTieuDe!,
             txtCtrl: widget.dieuKhien!.quanLyNhapTieuDe,
             fNode: widget.dieuKhien!.dauMoiNhapTieuDe,
@@ -381,6 +385,7 @@ class _TrangThaiTruongVanBan extends TrangThaiCoSo<TruongVanBan> {
         Expanded(
           flex: 3,
           child: _xayDungONhap(
+            key: widget.dieuKhien!._keyNoiDung,
             cauHinh: widget.cauHinh,
             txtCtrl: widget.dieuKhien!.quanLyNhapNoiDung,
             fNode: widget.dieuKhien!.dauMoiNhapNoiDung,
@@ -392,6 +397,7 @@ class _TrangThaiTruongVanBan extends TrangThaiCoSo<TruongVanBan> {
       mainChildren.add(VbhtWidget(text: widget.tieuDe ?? Vbht.trucTiep(""), textAlign: TextAlign.left));
       // Text input
       mainChildren.add(_xayDungONhap(
+        key: widget.dieuKhien!._keyNoiDung,
         cauHinh: widget.cauHinh,
         txtCtrl: widget.dieuKhien!.quanLyNhapNoiDung,
         fNode: widget.dieuKhien!.dauMoiNhapNoiDung,
@@ -442,6 +448,7 @@ class _TrangThaiTruongVanBan extends TrangThaiCoSo<TruongVanBan> {
 
   Widget _xayDungONhap({
     required CauHinhTruongVanBan cauHinh,
+    required Key key,
     required TextEditingController txtCtrl,
     required FocusNode fNode,
     required bool laONhapChinh
@@ -454,6 +461,7 @@ class _TrangThaiTruongVanBan extends TrangThaiCoSo<TruongVanBan> {
         return SizedBox(
           height: cauHinh.soKyTuToiDa == null ? 30 : 50,
           child: TextFormField(
+            key: key,
             style: TextStyle(fontWeight: laONhapChinh ? FontWeight.normal : FontWeight.bold),
             decoration: InputDecoration(
               contentPadding: const EdgeInsets.fromLTRB(5, 0, 5, 0),
@@ -463,7 +471,7 @@ class _TrangThaiTruongVanBan extends TrangThaiCoSo<TruongVanBan> {
             keyboardType: cauHinh.kieuBanPhim,
             textInputAction: cauHinh.kieuNutEnter,
             controller: textEditingController,
-            focusNode: fNode,
+            focusNode: focusNode,
             readOnly: !widget.dieuKhien!.khaDung,
             maxLength: cauHinh.soKyTuToiDa,
             inputFormatters: cauHinh.kiemSoatNhapLieu,

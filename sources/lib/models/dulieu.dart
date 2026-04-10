@@ -129,6 +129,8 @@ class DichGia extends DuLieuCoso {
 /// Chuỗi sách nhiều tập
 class SachNhieuTap extends DuLieuCoso {
 
+  List<Sach> dsSach = [];
+
   static SachNhieuTap taoDuLieuGia({int chiSo = 0}) {
     SachNhieuTap ketQua = SachNhieuTap();
     ketQua.maSo = chiSo;

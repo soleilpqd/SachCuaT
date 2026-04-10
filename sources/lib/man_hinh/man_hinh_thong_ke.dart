@@ -17,7 +17,6 @@
  */
 
 import 'package:flutter/material.dart';
-import 'package:man_hinh_ung_dung/luong_man_hinh.dart';
 import 'package:man_hinh_ung_dung/man_hinh_ung_dung.dart';
 import 'package:sach_cua_t/man_hinh/man_hinh_co_so.dart';
 import 'package:sach_cua_t/man_hinh/man_hinh_liet_ke_sach.dart';
@@ -94,6 +93,8 @@ class DieuKhienManHinhThongKe extends DieuKhienManHinh {
   /// Danh sách các chuỗi sách nhiều tập
   final List<_MucThongKe<String>> _kqSachNhieuTap = [];
 
+  final ScrollController _dkCuon = ScrollController();
+
   DieuKhienManHinhThongKe({required this.dsSach}) {
     widgetCuaManHinh = _ManHinhThongKe(dkMh: this);
     _phanTich();
@@ -138,7 +139,7 @@ class DieuKhienManHinhThongKe extends DieuKhienManHinh {
 
   /// Khi nhấn Tiêu đề của màn hình
   void _khiNhanTieuDeMh() {
-    trangThaiWidgetManHinh?.capNhatGiaoDienCuaManHinh(dieuKhienManHinh: this, duLieuDinhKem: {"lenDau": true});
+    _dkCuon.cuonLenDau();
   }
 
   /// Khi nhấn Nút quay lại (<)
@@ -187,7 +188,7 @@ class DieuKhienManHinhThongKe extends DieuKhienManHinh {
 }
 
 /// Giao diện màn hình thống kê
-class _ManHinhThongKe extends StatelessWidget {
+class _ManHinhThongKe extends StatelessWidget with ListViewTheoPhanDoan {
 
   final DieuKhienManHinhThongKe dkMh;
 
@@ -198,62 +199,22 @@ class _ManHinhThongKe extends StatelessWidget {
     tieuDe: Vbht.tuKhoa(TK.thongKe, dem: dkMh.demVbht),
     khiNhanQuayLai: dkMh._khiNhanQuayLai,
     khiNhanTieuDe: dkMh._khiNhanTieuDeMh,
-    noiDung: _NoiDungManHinhThongKe(dieuKhienManHinh: dkMh)
+    noiDung: xayDungListView(context, scrollCtrl: dkMh._dkCuon)
   );
 
-}
-
-class _NoiDungManHinhThongKe extends WidgetCuaDieuKhienManHinh<DieuKhienManHinhThongKe> {
-
-  const _NoiDungManHinhThongKe({required super.dieuKhienManHinh});
+  @override
+  int soLuongPhanDoan() => _PhanDoanManHinhThongKe.tongSo();
 
   @override
-  State<StatefulWidget> createState() => _TrangThaiNoiDungMhThongKe();
-
-}
-
-class _TrangThaiNoiDungMhThongKe extends TrangThaiWidgetCuaDieuKhien<_NoiDungManHinhThongKe> {
-
-  late DieuKhienDanhSachHienThi _dkDSHienThi;
-
-  _TrangThaiNoiDungMhThongKe() {
-    _dkDSHienThi = DieuKhienDanhSachHienThi(
-      soLuongPhanDoan: _soPhanDoan,
-      soMucCuaPhanDoan: _soMucCuaPhanDoan,
-      tieuDeChoDoan: _tieuDeChoDoan,
-      widgetsCuaCaDoan: _xayDungToanBoWidgetsCuaDoan,
-      widgetCuaMuc: _xayDungWidgetCuaMuc,
-      khoangCachPhiaTren: _khoangTrongTrenChoMuc,
-      khoangCachPhiaDuoi: _khoangTrongDuoiChoMuc
-    );
-  }
-
-  @override
-  void capNhatGiaoDienCuaManHinh({required DieuKhienManHinh dieuKhienManHinh, ThamSoDieuKhienWidgetManHinh? duLieuDinhKem}) {
-    final bool? cuonLenDau = duLieuDinhKem?["lenDau"];
-    if (cuonLenDau != null && cuonLenDau) {
-      _dkDSHienThi.cuonLenDau();
-      return;
-    }
-    _dkDSHienThi.napLaiDanhSach();
-  }
-
-  @override
-  Widget build(BuildContext context) => DanhSachHienThi(dieuKhien: _dkDSHienThi);
-
-  /// Số phân đoạn trên màn hình
-  int _soPhanDoan() => _PhanDoanManHinhThongKe.tongSo();
-
-  /// Số dòng của phần đoạn [doan]
-  int _soMucCuaPhanDoan(int doan) {
+  int soMucCuaPhanDoan(int doan) {
     return switch (_PhanDoanManHinhThongKe.khoiTao(doan)) {
       _PhanDoanManHinhThongKe.tong => 1,
-      _PhanDoanManHinhThongKe.tacGia => widget.dieuKhienManHinh._kqTacGia.length,
-      _PhanDoanManHinhThongKe.dichGia => widget.dieuKhienManHinh._kqDichGia.length,
-      _PhanDoanManHinhThongKe.nxb => widget.dieuKhienManHinh._kqNxb.length,
-      _PhanDoanManHinhThongKe.viTri => widget.dieuKhienManHinh._kqViTri.length,
-      _PhanDoanManHinhThongKe.nhan => widget.dieuKhienManHinh._kqNhan.length,
-      _PhanDoanManHinhThongKe.nhieuTap => widget.dieuKhienManHinh._kqSachNhieuTap.length,
+      _PhanDoanManHinhThongKe.tacGia => dkMh._kqTacGia.length,
+      _PhanDoanManHinhThongKe.dichGia => dkMh._kqDichGia.length,
+      _PhanDoanManHinhThongKe.nxb => dkMh._kqNxb.length,
+      _PhanDoanManHinhThongKe.viTri => dkMh._kqViTri.length,
+      _PhanDoanManHinhThongKe.nhan => dkMh._kqNhan.length,
+      _PhanDoanManHinhThongKe.nhieuTap => dkMh._kqSachNhieuTap.length,
       _PhanDoanManHinhThongKe.chanTrang => 1,
       _ => 0
     };
@@ -261,13 +222,12 @@ class _TrangThaiNoiDungMhThongKe extends TrangThaiWidgetCuaDieuKhien<_NoiDungMan
 
   /// Xây dựng trường tiêu đề
   TruongTieuDe _xayDungTruongTieuDe({required TK chinh, required TK phu, required String thamSo}) => TruongTieuDe(
-    tieuDeChinh: Vbht.tuKhoa(chinh, dem: widget.dieuKhienManHinh.demVbht),
-    tieuDePhu: Vbht.tuKhoa(phu, dem: widget.dieuKhienManHinh.demVbht, ts: [thamSo])
+    tieuDeChinh: Vbht.tuKhoa(chinh, dem: dkMh.demVbht),
+    tieuDePhu: Vbht.tuKhoa(phu, dem: dkMh.demVbht, ts: [thamSo])
   );
 
-  /// Dòng tiêu đề cho phân đoạn [doan]
-  TruongTieuDe? _tieuDeChoDoan(int doan) {
-    final DieuKhienManHinhThongKe dkMh = widget.dieuKhienManHinh;
+  @override
+  TruongTieuDe? tieuDeChoDoan(int doan) {
     final _PhanDoanManHinhThongKe? phanDoan = _PhanDoanManHinhThongKe.khoiTao(doan);
     return switch (phanDoan) {
       _PhanDoanManHinhThongKe.tong => _xayDungTruongTieuDe(
@@ -309,41 +269,41 @@ class _TrangThaiNoiDungMhThongKe extends TrangThaiWidgetCuaDieuKhien<_NoiDungMan
     };
   }
 
-  /// Not used
-  List<Widget>? _xayDungToanBoWidgetsCuaDoan(int doan) => null;
+  @override
+  List<Widget>? widgetsCuaCaDoan(int doan) => null;
 
-  /// Widget cho mục tại phân đoạn [doan] và dòng [dong]
-  Widget? _xayDungWidgetCuaMuc(int doan, int dong) {
+  @override
+  Widget? widgetCuaMuc(int doan, int dong) {
     return switch (_PhanDoanManHinhThongKe.khoiTao(doan)) {
       _PhanDoanManHinhThongKe.tacGia => _xayDungDongKetQua(
-        danhSach: widget.dieuKhienManHinh._kqTacGia,
+        danhSach: dkMh._kqTacGia,
         stt: dong,
-        khiNhan: widget.dieuKhienManHinh._khiNhanKqTacGia
+        khiNhan: dkMh._khiNhanKqTacGia
       ),
       _PhanDoanManHinhThongKe.dichGia => _xayDungDongKetQua(
-        danhSach: widget.dieuKhienManHinh._kqDichGia,
+        danhSach: dkMh._kqDichGia,
         stt: dong,
-        khiNhan: widget.dieuKhienManHinh._khiNhanKqDichGia
+        khiNhan: dkMh._khiNhanKqDichGia
       ),
       _PhanDoanManHinhThongKe.nxb => _xayDungDongKetQua(
-        danhSach: widget.dieuKhienManHinh._kqNxb,
+        danhSach: dkMh._kqNxb,
         stt: dong,
-        khiNhan: widget.dieuKhienManHinh._khiNhanKqNxb
+        khiNhan: dkMh._khiNhanKqNxb
       ),
       _PhanDoanManHinhThongKe.viTri => _xayDungDongKetQua(
-        danhSach: widget.dieuKhienManHinh._kqViTri,
+        danhSach: dkMh._kqViTri,
         stt: dong,
-        khiNhan: widget.dieuKhienManHinh._khiNhanKqViTri
+        khiNhan: dkMh._khiNhanKqViTri
       ),
       _PhanDoanManHinhThongKe.nhan => _xayDungDongKetQua(
-        danhSach: widget.dieuKhienManHinh._kqNhan,
+        danhSach: dkMh._kqNhan,
         stt: dong,
-        khiNhan: widget.dieuKhienManHinh._khiNhanKqNhan
+        khiNhan: dkMh._khiNhanKqNhan
       ),
       _PhanDoanManHinhThongKe.nhieuTap => _xayDungDongKetQua(
-        danhSach: widget.dieuKhienManHinh._kqSachNhieuTap,
+        danhSach: dkMh._kqSachNhieuTap,
         stt: dong,
-        khiNhan: widget.dieuKhienManHinh._khiNhanKqNhieuTap
+        khiNhan: dkMh._khiNhanKqNhieuTap
       ),
       _ => null
     };
@@ -362,8 +322,8 @@ class _TrangThaiNoiDungMhThongKe extends TrangThaiWidgetCuaDieuKhien<_NoiDungMan
       onTap: () => khiNhan.call(stt)
   );
 
-  /// Khoảng trống phía trên cho mục
-  double? _khoangTrongTrenChoMuc(int doan, int dong) {
+  @override
+  double? khoangCachPhiaTren(int doan, int dong) {
     return switch (_PhanDoanManHinhThongKe.khoiTao(doan)) {
       _PhanDoanManHinhThongKe.tong => null,
       _PhanDoanManHinhThongKe.chanTrang => 50.0,
@@ -371,8 +331,8 @@ class _TrangThaiNoiDungMhThongKe extends TrangThaiWidgetCuaDieuKhien<_NoiDungMan
     };
   }
 
-  /// Khoảng trống phía dưới cho mục
-  double? _khoangTrongDuoiChoMuc(int doan, int dong) {
+  @override
+  double? khoangCachPhiaDuoi(int doan, int dong) {
     return switch (_PhanDoanManHinhThongKe.khoiTao(doan)) {
       _PhanDoanManHinhThongKe.tong => null,
       _PhanDoanManHinhThongKe.chanTrang => 50.0,

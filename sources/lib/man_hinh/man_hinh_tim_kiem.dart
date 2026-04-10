@@ -118,6 +118,7 @@ class DieuKhienManHinhTimKiem extends DieuKhienManHinh with TheoDoiDieuKhienCoSo
   final DieuKhienTruongVanBan dkTuKhoa = DieuKhienTruongVanBan();
 
   final ThaoTacTimKiem _congCuTimKiem = ThaoTacTimKiem();
+  final ScrollController _dkCuon = ScrollController();
   // Kết quả tìm kiếm
   List<Sach> _kqTenSach = [];
   List<Sach> _kqISBN = [];
@@ -129,6 +130,7 @@ class DieuKhienManHinhTimKiem extends DieuKhienManHinh with TheoDoiDieuKhienCoSo
   List<NhanSach> _kqTenNhan = [];
   List<String> _kqGiaTriNhan = [];
   List<SachNhieuTap> _kqSachNhieuTap = [];
+  bool _canTimLai = false;
 
   DieuKhienManHinhTimKiem({this.khiChonSach, List<int>? sachLoaiTru}) {
     widgetCuaManHinh = _ManHinhTimKiem(dkMh: this);
@@ -153,7 +155,10 @@ class DieuKhienManHinhTimKiem extends DieuKhienManHinh with TheoDoiDieuKhienCoSo
   @override
   void manHinhDaThanhManHinhChinhTrongLuong() {
     super.manHinhDaThanhManHinhChinhTrongLuong();
-    _batDauTim();
+    if (_canTimLai) {
+      _canTimLai = false;
+      _batDauTim();
+    }
   }
 
   @override
@@ -196,7 +201,7 @@ class DieuKhienManHinhTimKiem extends DieuKhienManHinh with TheoDoiDieuKhienCoSo
       khiXongTatCa: () {
         // CoSoDuLieu().ghiLog = false;
         dkTuKhoa.khaDung = true;
-        trangThaiWidgetManHinh?.capNhatGiaoDienCuaManHinh(dieuKhienManHinh: this, duLieuDinhKem: {"lenDau": true});
+        _dkCuon.cuonLenDau();
       }
     );
     List<TacGia> locTacGia = [];
@@ -267,7 +272,7 @@ class DieuKhienManHinhTimKiem extends DieuKhienManHinh with TheoDoiDieuKhienCoSo
 
   /// Khi nhấn Tiêu đề của màn hình
   void _khiNhanTieuDeMh() {
-    trangThaiWidgetManHinh?.capNhatGiaoDienCuaManHinh(dieuKhienManHinh: this, duLieuDinhKem: {"lenDau": true});
+    _dkCuon.cuonLenDau();
   }
 
   /// Khi nhấn Nút quay lại (<)
@@ -384,7 +389,8 @@ class DieuKhienManHinhTimKiem extends DieuKhienManHinh with TheoDoiDieuKhienCoSo
     if (khiChonSach != null) {
       luongManHinh?.loaiManHinh(manHinh: this, khiHoanThanh: () => khiChonSach!.call(sach));
     } else {
-      final DieuKhienManHinhSach mhSach = DieuKhienManHinhSach(maSach: sach.maSo);
+      _canTimLai = false;
+      final DieuKhienManHinhSach mhSach = DieuKhienManHinhSach(maSach: sach.maSo, khiLuuSach: () => _canTimLai = true);
       luongManHinh?.themManHinh(manHinh: mhSach);
     }
   }
@@ -418,47 +424,25 @@ class _NoiDungManHinhTimKiem extends WidgetCuaDieuKhienManHinh<DieuKhienManHinhT
 
 }
 
-class _TrangThaiNoiDungMhTimKiem extends TrangThaiWidgetCuaDieuKhien<_NoiDungManHinhTimKiem> {
-
-  late DieuKhienDanhSachHienThi _dkDSHienThi;
+class _TrangThaiNoiDungMhTimKiem extends TrangThaiWidgetCuaDieuKhien<_NoiDungManHinhTimKiem> with ListViewTheoPhanDoan {
 
   String get tuKhoa => widget.dieuKhienManHinh.dkTuKhoa.vanBan.trim();
 
-  _TrangThaiNoiDungMhTimKiem() {
-    _dkDSHienThi = DieuKhienDanhSachHienThi(
-      soLuongPhanDoan: _soPhanDoan,
-      soMucCuaPhanDoan: _soMucCuaPhanDoan,
-      tieuDeChoDoan: _tieuDeChoDoan,
-      widgetsCuaCaDoan: _xayDungToanBoWidgetsCuaDoan,
-      widgetCuaMuc: _xayDungWidgetCuaMuc,
-      khoangCachPhiaTren: _khoangTrongTrenChoMuc,
-      khoangCachPhiaDuoi: _khoangTrongDuoiChoMuc
-    );
-  }
+  _TrangThaiNoiDungMhTimKiem();
 
   @override
-  Widget build(BuildContext context) => DanhSachHienThi(dieuKhien: _dkDSHienThi);
+  Widget build(BuildContext context) => xayDungListView(context, scrollCtrl: widget.dieuKhienManHinh._dkCuon);
 
   @override
   void capNhatGiaoDienCuaManHinh({required DieuKhienManHinh dieuKhienManHinh, ThamSoDieuKhienWidgetManHinh? duLieuDinhKem}) {
-    // final String? nhapVanBan = duLieuDinhKem?["nhapVanBan"];
-    // if (nhapVanBan != null) {
-    //   FocusScope.of(context).requestFocus(widget.dieuKhienManHinh.dkTuKhoa.dauMoiNhapNoiDung);
-    //   return;
-    // }
-    final bool? cuonLenDau = duLieuDinhKem?["lenDau"];
-    if (cuonLenDau != null && cuonLenDau) {
-      _dkDSHienThi.cuonLenDau();
-      return;
-    }
-    _dkDSHienThi.napLaiDanhSach();
+    setState(() {});
   }
 
-  /// Số phân đoạn trên màn hình
-  int _soPhanDoan() => _PhanDoanManHinhTimKiem.tongSo();
+  @override
+  int soLuongPhanDoan() => _PhanDoanManHinhTimKiem.tongSo();
 
-  /// Số dòng của phần đoạn [doan]
-  int _soMucCuaPhanDoan(int doan) {
+  @override
+  int soMucCuaPhanDoan(int doan) {
     return switch (_PhanDoanManHinhTimKiem.khoiTao(doan)) {
       _PhanDoanManHinhTimKiem.tuKhoa => 1,
       _PhanDoanManHinhTimKiem.boLoc => widget.dieuKhienManHinh._locTimKiem.length,
@@ -482,8 +466,8 @@ class _TrangThaiNoiDungMhTimKiem extends TrangThaiWidgetCuaDieuKhien<_NoiDungMan
     tieuDePhu: Vbht.tuKhoa(phu, dem: widget.dieuKhienManHinh.demVbht, ts: [thamSo])
   );
 
-  /// Dòng tiêu đề cho phân đoạn [doan]
-  TruongTieuDe? _tieuDeChoDoan(int doan) {
+  @override
+  TruongTieuDe? tieuDeChoDoan(int doan) {
     final DieuKhienManHinhTimKiem dkMh = widget.dieuKhienManHinh;
     final _PhanDoanManHinhTimKiem? phanDoan = _PhanDoanManHinhTimKiem.khoiTao(doan);
     return switch (phanDoan) {
@@ -541,11 +525,11 @@ class _TrangThaiNoiDungMhTimKiem extends TrangThaiWidgetCuaDieuKhien<_NoiDungMan
     };
   }
 
-  /// Not used
-  List<Widget>? _xayDungToanBoWidgetsCuaDoan(int doan) => null;
+  @override
+  List<Widget>? widgetsCuaCaDoan(int doan) => null;
 
-  /// Widget cho mục tại phân đoạn [doan] và dòng [dong]
-  Widget? _xayDungWidgetCuaMuc(int doan, int dong) {
+  @override
+  Widget? widgetCuaMuc(int doan, int dong) {
     return switch (_PhanDoanManHinhTimKiem.khoiTao(doan)) {
       _PhanDoanManHinhTimKiem.tuKhoa => _xayDungONhapTuKhoa(),
       _PhanDoanManHinhTimKiem.boLoc => _xayDungNhanBoLoc(dong),
@@ -771,8 +755,8 @@ class _TrangThaiNoiDungMhTimKiem extends TrangThaiWidgetCuaDieuKhien<_NoiDungMan
     required void Function(int) khiNhan
   }) => _xayDungDongKetQuaTenCuThe(stt: stt, ten: danhSach[stt].ten, khiNhan: khiNhan);
 
-  /// Khoảng trống phía trên cho mục
-  double? _khoangTrongTrenChoMuc(int doan, int dong) {
+  @override
+  double? khoangCachPhiaTren(int doan, int dong) {
     const double khoangTrongCoSo = 10.0;
     return switch (_PhanDoanManHinhTimKiem.khoiTao(doan)) {
       _PhanDoanManHinhTimKiem.tacGia ||
@@ -787,8 +771,8 @@ class _TrangThaiNoiDungMhTimKiem extends TrangThaiWidgetCuaDieuKhien<_NoiDungMan
     };
   }
 
-  /// Khoảng trống phía dưới cho mục
-  double? _khoangTrongDuoiChoMuc(int doan, int dong) {
+  @override
+  double? khoangCachPhiaDuoi(int doan, int dong) {
     const double khoangTrongCoSo = 10.0;
     return switch (_PhanDoanManHinhTimKiem.khoiTao(doan)) {
       _PhanDoanManHinhTimKiem.tacGia ||

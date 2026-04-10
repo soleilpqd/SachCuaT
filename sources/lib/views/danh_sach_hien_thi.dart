@@ -19,88 +19,40 @@
 import 'package:flutter/material.dart';
 import 'package:sach_cua_t/views/truong_tieu_de.dart';
 
-/// Điều khiển danh sách hiển thị
-class DieuKhienDanhSachHienThi {
-
-  /// Số lượng phân đoạn
-  final int Function() soLuongPhanDoan;
-  /// Số mục của phân đoạn [doan]
-  final int Function(int doan) soMucCuaPhanDoan;
-  /// TruongTieuDe tiêu đề cho đoạn [doan]
-  final TruongTieuDe? Function(int doan) tieuDeChoDoan;
-  /// Các widget cho phân đoạn [doan]. Nếu kết quả khác null thì bỏ qua `soMucCuaPhanDoan`, `widgetCuaMuc`, `khoangCachPhiaTren`, `khoangCachPhiaDuoi`
-  final List<Widget>? Function(int doan) widgetsCuaCaDoan;
-  /// Widget cho mục ở đoạn [doan] dòng [dong]
-  final Widget? Function(int doan, int dong) widgetCuaMuc;
-  /// Khoảng trống phía trên cho mục ở đoạn [doan] dòng [dong]
-  final double? Function(int doan, int dong) khoangCachPhiaTren;
-  /// Khoảng trống phái dưới cho mục ở đoạn [doan] dòng [dong]
-  final double? Function(int doan, int dong) khoangCachPhiaDuoi;
-
-  final ScrollController _dkCuon = ScrollController();
-
-  _TrangThaiDanhSachHienThi? _doiTuongDieuKhien;
-
-  DieuKhienDanhSachHienThi({
-    required this.soLuongPhanDoan,
-    required this.soMucCuaPhanDoan,
-    required this.tieuDeChoDoan,
-    required this.widgetsCuaCaDoan,
-    required this.widgetCuaMuc,
-    required this.khoangCachPhiaTren,
-    required this.khoangCachPhiaDuoi
-  });
-
-  /// Nạp lại danh sách trên màn hình
-  void napLaiDanhSach({List<int>? cacPhanDoan}) {
-    _doiTuongDieuKhien?.napLai(cacPhanDoan);
-  }
+extension Scrolling on ScrollController {
 
   /// Cuộn lên đầu
-  void cuonLenDau({Duration? duration}) {
-    _dkCuon.animateTo(0, duration: duration ?? const Duration(milliseconds: 100), curve: Curves.bounceOut);
-  }
-
-  void dispose() {
-    _doiTuongDieuKhien = null;
+  void cuonLenDau({Duration? thoiGianChuyenDong}) {
+    animateTo(0, duration: thoiGianChuyenDong ?? const Duration(milliseconds: 100), curve: Curves.bounceOut);
   }
 
 }
 
-class DanhSachHienThi extends StatefulWidget {
+/// ListView theo phân đoạn
+mixin ListViewTheoPhanDoan {
 
-  final DieuKhienDanhSachHienThi dieuKhien;
+  /// Số lượng phân đoạn
+  int soLuongPhanDoan();
+  /// Số mục của phân đoạn [doan]
+  int soMucCuaPhanDoan(int doan);
+  /// TruongTieuDe tiêu đề cho đoạn [doan]
+  TruongTieuDe? tieuDeChoDoan(int doan);
+  /// Các widget cho phân đoạn [doan]. Nếu kết quả khác null thì bỏ qua `soMucCuaPhanDoan`, `widgetCuaMuc`, `khoangCachPhiaTren`, `khoangCachPhiaDuoi`
+  List<Widget>? widgetsCuaCaDoan(int doan);
+  /// Widget cho mục ở đoạn [doan] dòng [dong]
+  Widget? widgetCuaMuc(int doan, int dong);
+  /// Khoảng trống phía trên cho mục ở đoạn [doan] dòng [dong]
+  double? khoangCachPhiaTren(int doan, int dong);
+  /// Khoảng trống phái dưới cho mục ở đoạn [doan] dòng [dong]
+  double? khoangCachPhiaDuoi(int doan, int dong);
 
-  const DanhSachHienThi({super.key, required this.dieuKhien});
-
-  @override
-  State<StatefulWidget> createState() => _TrangThaiDanhSachHienThi();
-
-}
-
-class _TrangThaiDanhSachHienThi extends State<DanhSachHienThi> {
-
-  @override
-  void initState() {
-    super.initState();
-    widget.dieuKhien._doiTuongDieuKhien = this;
-  }
-
-  @override
-  void didUpdateWidget(covariant DanhSachHienThi oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.dieuKhien._doiTuongDieuKhien == this) {
-      oldWidget.dieuKhien._doiTuongDieuKhien = null;
-    }
-    widget.dieuKhien._doiTuongDieuKhien = this;
-  }
-
-  void napLai(List<int>? cacPhanDoan) => setState(() {});
-
-  @override
-  Widget build(BuildContext context) {
+  /// Xây dựng list view
+  /// [key] và [scrollCtrl] nên được lưu tại điều khiển màn hình
+  /// để ListView giữ được offset sau mỗi lần setState
+  ListView xayDungListView(BuildContext context, {Key? key, ScrollController? scrollCtrl}) {
     return ListView(
-      controller: widget.dieuKhien._dkCuon,
+      key: key,
+      controller: scrollCtrl,
       padding: const EdgeInsets.all(5),
       children: _xayDungCacWidgetCon()
     );
@@ -108,19 +60,19 @@ class _TrangThaiDanhSachHienThi extends State<DanhSachHienThi> {
 
   List<Widget> _xayDungCacWidgetCon() {
     List<Widget> children = [];
-    final int soDoan = widget.dieuKhien.soLuongPhanDoan.call();
+    final int soDoan = soLuongPhanDoan();
     for (int doan = 0; doan < soDoan; doan += 1) {
-      final List<Widget>? toanBoWidgets = widget.dieuKhien.widgetsCuaCaDoan.call(doan);
+      final List<Widget>? toanBoWidgets = widgetsCuaCaDoan(doan);
       int soMuc = 0;
       if (toanBoWidgets != null) {
         soMuc = toanBoWidgets.length;
       } else {
-        soMuc = widget.dieuKhien.soMucCuaPhanDoan.call(doan);
+        soMuc = soMucCuaPhanDoan(doan);
       }
       if (soMuc == 0) {
         continue;
       }
-      final TruongTieuDe? tieuDe = widget.dieuKhien.tieuDeChoDoan.call(doan);
+      final TruongTieuDe? tieuDe = tieuDeChoDoan(doan);
       if (tieuDe != null) {
         children.add(tieuDe);
       }
@@ -128,15 +80,15 @@ class _TrangThaiDanhSachHienThi extends State<DanhSachHienThi> {
         children.addAll(toanBoWidgets);
       } else {
         for (int muc = 0; muc < soMuc; muc += 1) {
-          double? khoangTrong = widget.dieuKhien.khoangCachPhiaTren.call(doan, muc);
+          double? khoangTrong = khoangCachPhiaTren(doan, muc);
           if (khoangTrong != null && khoangTrong > 0) {
             children.add(SizedBox(height: khoangTrong));
           }
-          final Widget? widMuc = widget.dieuKhien.widgetCuaMuc.call(doan, muc);
+          final Widget? widMuc = widgetCuaMuc(doan, muc);
           if (widMuc != null) {
             children.add(widMuc);
           }
-          khoangTrong = widget.dieuKhien.khoangCachPhiaDuoi.call(doan, muc);
+          khoangTrong = khoangCachPhiaDuoi(doan, muc);
           if (khoangTrong != null && khoangTrong > 0) {
             children.add(SizedBox(height: khoangTrong));
           }

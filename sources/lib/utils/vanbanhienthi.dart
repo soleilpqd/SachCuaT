@@ -133,6 +133,10 @@ enum TK {
   locGiaTriNhan,
   /// Lọc theo nhiều tập (Chuỗi sách: #_)
   locNhieuTap,
+  /// Xoá sách
+  xoaSach,
+  /// Xác nhận xoá
+  xacNhanXoa
   ;
 }
 

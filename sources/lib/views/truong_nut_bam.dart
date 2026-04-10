@@ -31,12 +31,15 @@ class TruongNutBam extends GiaoDienCoSo<DieuKhienCoSo> {
   final Vbht tieuDe;
   /// Hình biểu tượng
   final IconData icon;
+  /// Phong cách cần chú ý (Đỏ)
+  final bool canChuY;
 
   const TruongNutBam({
     super.key,
     required this.khiNhan,
     required this.tieuDe,
     required this.icon,
+    this.canChuY = false,
     super.dieuKhien
   });
 
@@ -50,13 +53,13 @@ class _TrangThaiTruongNutBam extends TrangThaiCoSo<TruongNutBam> {
   @override
   Widget build(BuildContext context) {
     final bool khaDung = widget.dieuKhien?.khaDung ?? true;
-    final Color color = khaDung ? Theme.of(context).primaryColor : Colors.grey;
+    final Color color = khaDung ? (widget.canChuY ? Colors.red : Theme.of(context).primaryColor) : Colors.grey;
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
         NutBamTieuDe(
           onPressed: khaDung ? widget.khiNhan : null,
-          child: VbhtWidget(text: widget.tieuDe)
+          child: VbhtWidget(text: widget.tieuDe, style: widget.canChuY ? TextStyle(color: color) : null)
         ),
         NutBamBieuTuongTieuDe(
           onPressed: khaDung ? widget.khiNhan : null,

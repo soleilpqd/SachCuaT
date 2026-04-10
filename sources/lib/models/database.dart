@@ -902,6 +902,80 @@ WHERE "$BANG_NHAN_SACH"."sach" = ?;
       whereArgs: [danhDau.maSo]
     );
   }
+  // ------
+
+  /// Gán dữ liệu cho object SachNhieuTap
+  List<SachNhieuTap> _ganDLVaoChuoiSachNhieuTap(List<Map<String, Object?>> duLieu) {
+    return duLieu.map((muc) {
+      final SachNhieuTap kq = SachNhieuTap();
+      kq.maSo = muc["ma"] as int;
+      kq.ten = muc["ghi_chu"] as String;
+      return kq;
+    }).toList();
+  }
+
+  /// Nạp thông tin cho chuỗi sách nhiều tập
+  Future<SachNhieuTap?> timChuoiSachNhieuTap(int maSo) async {
+    assert(_db != null, "CSDL chưa được khởi tạo.");
+    List<Map<String, Object?>> ketQua = await _query(
+      BANG_NHIEU_TAP,
+      where: "\"ma\" = ?",
+      whereArgs: [maSo]
+    );
+    if (ketQua.isNotEmpty) {
+      return _ganDLVaoChuoiSachNhieuTap([ketQua.first]).first;
+    }
+    return null;
+  }
+
+  /// Thêm mới chuỗi sách nhiều tập
+  Future<void> themChuoiSachNhieuTap(SachNhieuTap chuoi) async {
+    assert(_db != null, "CSDL chưa được khởi tạo.");
+    chuoi.maSo = await _insert(
+      BANG_NHIEU_TAP,
+      {
+        "ghi_chu": chuoi.ten,
+        "ghi_chu_kd": LinhTinh.loaiBoDautiengViet(chuoi.ten)
+      }
+    );
+  }
+
+  /// Thêm mới chuỗi sách nhiều tập
+  Future<void> suaChuoiSachNhieuTap(SachNhieuTap chuoi) async {
+    assert(_db != null, "CSDL chưa được khởi tạo.");
+    assert(chuoi.maSo >= 0, "Thiếu mã chuỗi sách.");
+    chuoi.maSo = await _update(
+      BANG_NHIEU_TAP,
+      {
+        "ghi_chu": chuoi.ten,
+        "ghi_chu_kd": LinhTinh.loaiBoDautiengViet(chuoi.ten)
+      },
+      where: "\"ma\" = ?",
+      whereArgs: [chuoi.maSo]
+    );
+  }
+
+  /// Lấy danh sách sách thuộc chuỗi
+  Future<List<Sach>> layDanhSachSachThuocChuoi(int maChuoi) async {
+    assert(_db != null, "CSDL chưa được khởi tạo.");
+    List<Map<String, Object?>> ketQua = await _query(
+      BANG_SACH,
+      where: "\"chuoi\" = ?",
+      whereArgs: [maChuoi]
+    );
+    return _chuyenDoiDuLieuSach(ketQua);
+  }
+
+  /// Xoá chuỗi sách nhiều tập
+  Future<void> xoaChuoiSachNhieuTap(SachNhieuTap chuoi) async {
+    assert(_db != null, "CSDL chưa được khởi tạo.");
+    assert(chuoi.maSo >= 0, "Thiếu mã chuỗi sách.");
+    await _delete(
+      BANG_NHIEU_TAP,
+      where: "\"ma\" = ?",
+      whereArgs: [chuoi.maSo]
+    );
+  }
 
   // ------
 
@@ -1026,12 +1100,7 @@ WHERE "$BANG_NHAN_SACH"."sach" = ?;
       tuKhoa: tuKhoa,
       truong: "ghi_chu"
     );
-    return ketQua.map((muc) {
-      final SachNhieuTap kq = SachNhieuTap();
-      kq.maSo = muc["ma"] as int;
-      kq.ten = muc["ghi_chu"] as String;
-      return kq;
-    }).toList();
+    return _ganDLVaoChuoiSachNhieuTap(ketQua);
   }
 
   /// Xây dựng điều kiện tìm sách

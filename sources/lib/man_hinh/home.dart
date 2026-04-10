@@ -19,8 +19,6 @@
 import 'package:flutter/material.dart';
 import 'package:sach_cua_t/man_hinh/man_hinh_co_so.dart';
 import 'package:sach_cua_t/man_hinh/man_hinh_sach.dart';
-import 'package:sach_cua_t/models/vov.dart';
-import 'package:sach_cua_t/models/vtv.dart';
 import 'package:sach_cua_t/utils/vanbanhienthi.dart';
 
 enum MucMenuChinh {
@@ -46,7 +44,7 @@ class HomePage extends StatefulWidget {
   State<StatefulWidget> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> with KhuonMauQuanLyManHinh {
+class _HomePageState extends State<HomePage> {
 
   var _trangHienTai = MucMenuChinh.menuGoc;
 
@@ -59,16 +57,16 @@ class _HomePageState extends State<HomePage> with KhuonMauQuanLyManHinh {
     // VanBanHienThi().printAll();
     /// Khởi tạo thông tin hệ thống
     // HeThongMay.duyNhat.layThongTinHienThi();
-    DaiPhatThanh.duyNhat.addListener(_theoDoiDaiPhatThanh);
-    DaiTruyenHinh.duyNhat.datManHinhDauTien(_xacDinhTieuDeMuc(_trangHienTai));
-    DaiTruyenHinh.duyNhat.addListener(_theoDoiDaiTruyenHinh);
+    // DaiPhatThanh.duyNhat.addListener(_theoDoiDaiPhatThanh);
+    // DaiTruyenHinh.duyNhat.datManHinhDauTien(_xacDinhTieuDeMuc(_trangHienTai));
+    // DaiTruyenHinh.duyNhat.addListener(_theoDoiDaiTruyenHinh);
   }
 
   @override
   void deactivate() {
     super.deactivate();
-    DaiPhatThanh.duyNhat.removeListener(_theoDoiDaiPhatThanh);
-    DaiTruyenHinh.duyNhat.removeListener(_theoDoiDaiTruyenHinh);
+    // DaiPhatThanh.duyNhat.removeListener(_theoDoiDaiPhatThanh);
+    // DaiTruyenHinh.duyNhat.removeListener(_theoDoiDaiTruyenHinh);
   }
 
   @override
@@ -115,7 +113,7 @@ class _HomePageState extends State<HomePage> with KhuonMauQuanLyManHinh {
       final mhTrc = _xacDinhTieuDeMuc(_trangHienTai);
       _trangHienTai = muc;
       final mhSau = _xacDinhTieuDeMuc(_trangHienTai);
-      DaiTruyenHinh.duyNhat.doiManHinh(mhTrc, mhSau);
+      // DaiTruyenHinh.duyNhat.doiManHinh(mhTrc, mhSau);
     });
   }
 
@@ -162,12 +160,12 @@ class _HomePageState extends State<HomePage> with KhuonMauQuanLyManHinh {
     };
   }
 
-  void _theoDoiDaiPhatThanh() {
-    print("NOTIF VOV ${DaiPhatThanh.duyNhat.thongBao}, ${DaiPhatThanh.duyNhat.maDuLieu}");
-  }
+  // void _theoDoiDaiPhatThanh() {
+  //   print("NOTIF VOV ${DaiPhatThanh.duyNhat.thongBao}, ${DaiPhatThanh.duyNhat.maDuLieu}");
+  // }
 
-  void _theoDoiDaiTruyenHinh() {
-    print("NOTIF VTV ${DaiTruyenHinh.duyNhat.manHinhTruoc} => ${DaiTruyenHinh.duyNhat.manHinhHienTai}");
-  }
+  // void _theoDoiDaiTruyenHinh() {
+  //   print("NOTIF VTV ${DaiTruyenHinh.duyNhat.manHinhTruoc} => ${DaiTruyenHinh.duyNhat.manHinhHienTai}");
+  // }
 
 }

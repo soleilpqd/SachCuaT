@@ -35,6 +35,8 @@ class HopThoai {
       required Vbht noiDung,
       /// Tiêu đề các nút
       required List<Vbht> nhanCacNut,
+      /// Các nút cần chú ý
+      List<int>? cacNutCanChuY,
       /// Hàm xử lý khi nhấn nút (context của hộp thoại, thứ tự nút (từ 0), tiêu đề nút)
       Function(int, Vbht)? khiDong
     }
@@ -42,6 +44,7 @@ class HopThoai {
     final DieuKhienManHinhThongBao hopThoaiTb = DieuKhienManHinhThongBao(
       noiDung: noiDung,
       nhanCacNut: nhanCacNut,
+      cacNutCanChuY: cacNutCanChuY,
       hanhDong: (stt) => khiDong?.call(stt, nhanCacNut[stt])
     );
     MainApp.luongMHGoc.themManHinh(manHinh: hopThoaiTb);
@@ -64,13 +67,19 @@ class HopThoai {
 
 }
 
+/// Hộp thoại thông báo
 class DieuKhienManHinhThongBao extends DieuKhienManHinh {
 
+  /// Nội dung thông báo
   final Vbht noiDung;
+  /// Nhãn các nút
   final List<Vbht> nhanCacNut;
+  /// Các nút cần chú ý (đỏ)
+  final List<int>? cacNutCanChuY;
+  /// Hành động khi nhấn vào nút có số thứ tự tương ứng
   final void Function(int)? hanhDong;
 
-  DieuKhienManHinhThongBao({required this.noiDung, required this.nhanCacNut, this.hanhDong}) {
+  DieuKhienManHinhThongBao({required this.noiDung, required this.nhanCacNut, this.cacNutCanChuY, this.hanhDong}) {
     mauNenWidgetChua = Colors.black.withAlpha(128);
     thamSoDieuKhienWidgetLuong[WidgetLuongManHinhXepLop.kKeyThamSoLopTrong] = true;
     thamSoDieuKhienWidgetLuong[WidgetLuongManHinhXepLop.kKeyThamSoHoatHinh] = xayDungLopDoMo;
@@ -94,6 +103,7 @@ class DieuKhienManHinhThongBao extends DieuKhienManHinh {
 
 }
 
+/// Giao diện màn hình hộp thoại thông báo
 class _ManHinhThongBao extends StatelessWidget {
 
   final DieuKhienManHinhThongBao dieuKhienManHinh;
@@ -112,15 +122,31 @@ class _ManHinhThongBao extends StatelessWidget {
       ),
       const SizedBox(height: 20),
     ];
+    bool nutDoc = dieuKhienManHinh.nhanCacNut.length > 2;
+    List<Widget> dsCacNut = nutDoc ? dsHienThi : [];
     int stt = 0;
     for (final muc in dieuKhienManHinh.nhanCacNut) {
-      dsHienThi.add(Container(color: Colors.grey.withAlpha(128), height: 1.0));
+      if (nutDoc) {
+        dsCacNut.add(Container(color: Colors.grey.withAlpha(128), height: 1.0));
+      } else {
+        if (stt > 0) {
+          dsCacNut.add(Container(color: Colors.grey.withAlpha(128), width: 1.0, height: 20,));
+        }
+      }
       int sttNut = stt;
-      dsHienThi.add(NutBamTieuDe(
+      bool canChuY = dieuKhienManHinh.cacNutCanChuY?.contains(sttNut) ?? false;
+      dsCacNut.add(NutBamTieuDe(
         onPressed: () => dieuKhienManHinh._khiNhanNut(sttNut),
-        child: VbhtWidget(text: muc)
+        child: VbhtWidget(text: muc, style: canChuY ? const TextStyle(color: Colors.red) : null)
       ));
       stt += 1;
+    }
+    if (!nutDoc) {
+      dsHienThi.add(Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: dsCacNut
+      ));
     }
     dsHienThi.add(const SizedBox(height: 10));
     final viewChinh = Center(
