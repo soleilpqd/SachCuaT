@@ -32,6 +32,7 @@ import 'package:sach_cua_t/models/native.dart';
 import 'package:sach_cua_t/models/operations/thao_tac_luu_sach.dart';
 import 'package:sach_cua_t/models/operations/thao_tac_nap_sach.dart';
 import 'package:sach_cua_t/models/operations/thao_tac_so_sanh_sach.dart';
+import 'package:sach_cua_t/models/operations/thao_tac_xoa_sach.dart';
 import 'package:sach_cua_t/utils/hopthoai.dart';
 import 'package:sach_cua_t/utils/vanbanhienthi.dart';
 import 'package:sach_cua_t/views/danh_sach_hien_thi.dart';
@@ -431,7 +432,9 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo {
       ],
       cacNutCanChuY: [0],
       khiDong: (stt, _) {
-        print("XOA $stt");
+        if (stt == 0) {
+          _xoaSach();
+        }
       }
     );
   }
@@ -1032,6 +1035,16 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo {
     // return;
     final ThaoTacLuuThongTinSach thaoTac = ThaoTacLuuThongTinSach(thongTinSach: thongTinSach, sachCungBo: dsCacTap);
     thaoTac.luuThongTin().then((value) {
+      khiLuuSach?.call();
+      luongManHinh?.loaiManHinh(manHinh: this);
+    });
+  }
+
+  /// Tiến hành xoá sách
+  void _xoaSach() {
+    _khoaManHinh();
+    final ThaoTacXoaThongTinSach thaoTac = ThaoTacXoaThongTinSach(maSach!);
+    thaoTac.xoa().then((_) {
       khiLuuSach?.call();
       luongManHinh?.loaiManHinh(manHinh: this);
     });

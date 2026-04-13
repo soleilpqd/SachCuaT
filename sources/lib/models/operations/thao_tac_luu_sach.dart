@@ -178,10 +178,10 @@ class ThaoTacLuuThongTinSach {
 
     for (final nxb in dsNxbCu) {
       await csdl.xoaNxbCuaSach(thongTinSach, nxb);
-      int slSach = await csdl.demSoSachCuaNXB(nxb);
-      if (slSach == 0) {
-        await csdl.xoaNxb(nxb);
-      }
+      // int slSach = await csdl.demSoSachCuaNXB(nxb);
+      // if (slSach == 0) {
+      //   await csdl.xoaNxb(nxb);
+      // }
     }
   }
 
