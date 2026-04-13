@@ -297,6 +297,7 @@ class CoSoDuLieu {
 
   // ------
 
+  /// Chuyển đổi dữ liệu từ object sang dữ liệu cho CSDL
   Map<String, Object?> _taoDLChoBangSach(Sach thongTin) => {
     "ten" : thongTin.ten,
     "ten_kd": LinhTinh.loaiBoDautiengViet(thongTin.ten),
@@ -323,6 +324,7 @@ class CoSoDuLieu {
     return ketQua == 1;
   }
 
+  /// Gán dữ liệu từ kết quả CSDL sang object
   void _ganDLVaoSach(Map<String, Object?> banGhi, Sach thongTin) {
     thongTin.maSo = banGhi["ma"] as int;
     thongTin.ten = banGhi["ten"] as String;
@@ -358,8 +360,19 @@ class CoSoDuLieu {
     await _update(bang, {"xem": thoiDiemThamChieuHienTai}, where: "\"ma\" = ?", whereArgs: [ma]);
   }
 
+    /// Đếm tổng số sách
+  Future<int> demTongSoSach() async {
+    assert(_db != null, "CSDL chưa được khởi tạo.");
+    final List<Map<String, Object?>> ketQua = await _rawQuery("SELECT COUNT(\"ma\") AS C FROM \"$BANG_SACH\";");
+    if (ketQua.isNotEmpty) {
+      return ketQua.first["C"] as int;
+    }
+    return 0;
+  }
+
   // ------
 
+  /// Gán dữ liệu từ kết quả CSDL sang object
   List<NhaXuatBan> _ganDLVaoNxb(List<Map<String, Object?>> duLieu) {
     return duLieu.map((muc) {
       final NhaXuatBan kq = NhaXuatBan();
@@ -393,6 +406,13 @@ class CoSoDuLieu {
     });
   }
 
+  /// Xoá bản ghi NXB
+  Future<void> xoaNxb(NhaXuatBan nxb) async {
+    assert(_db != null, "CSDL chưa được khởi tạo.");
+    assert(nxb.maSo >= 0, "Thiếu mã NXB.");
+    await _delete(BANG_NXB, where: "\"ma\" = ?", whereArgs: [nxb.maSo]);
+  }
+
   /// Lấy danh sách các NXB của sách
   Future<List<NhaXuatBan>> layDsNhaXuatBanCuaSach(Sach sach) async {
     assert(_db != null, "CSDL chưa được khởi tạo.");
@@ -422,6 +442,23 @@ WHERE "$BANG_NXB_SACH"."sach" = ?;
     assert(sach.maSo != null, "Thiếu mã sách.");
     assert(nxb.maSo >= 0, "Thiếu mã số NXB");
     await _delete(BANG_NXB_SACH, where: "\"sach\" = ? AND \"nxb\" = ?", whereArgs: [sach.maSo, nxb.maSo]);
+  }
+
+  /// Đếm số sách của NXB
+  Future<int> demSoSachCuaNXB(NhaXuatBan nxb) async {
+    assert(_db != null, "CSDL chưa được khởi tạo.");
+    assert(nxb.maSo >= 0, "Thiếu mã NXB.");
+    final List<Map<String, Object?>> ketQua = await _rawQuery(
+      """
+SELECT COUNT("sach") AS C FROM "$BANG_NXB_SACH"
+WHERE "nxb" = ?;
+""",
+      [nxb.maSo]
+    );
+    if (ketQua.isNotEmpty) {
+      return ketQua.first["C"] as int;
+    }
+    return 0;
   }
 
   // ------
@@ -458,6 +495,13 @@ WHERE "$BANG_NXB_SACH"."sach" = ?;
     });
   }
 
+  /// Xoá bản ghi tác giả
+  Future<void> xoaTacGia(TacGia tacGia) async {
+    assert(_db != null, "CSDL chưa được khởi tạo.");
+    assert(tacGia.maSo >= 0, "Thiếu mã tác giả.");
+    await _delete(BANG_TAC_GIA, where: "\"ma\" = ?", whereArgs: [tacGia.maSo]);
+  }
+
   /// Lấy danh sách các tác giả của sách
   Future<List<TacGia>> layDsTacGiaCuaSach(Sach sach) async {
     assert(_db != null, "CSDL chưa được khởi tạo.");
@@ -473,7 +517,7 @@ WHERE "$BANG_TAC_GIA_SACH"."sach" = ?;
     return _ganDLVaoTacGia(ketQua);
   }
 
-    /// Lưu tác giả của sách
+  /// Lưu tác giả của sách
   Future<void> themTacGiaCuaSach(Sach sach, TacGia tacGia) async {
     assert(_db != null, "CSDL chưa được khởi tạo.");
     assert(sach.maSo != null, "Thiếu mã sách.");
@@ -489,8 +533,26 @@ WHERE "$BANG_TAC_GIA_SACH"."sach" = ?;
     await _delete(BANG_TAC_GIA_SACH, where: "\"sach\" = ? AND \"tac_gia\" = ?", whereArgs: [sach.maSo!, tacGia.maSo]);
   }
 
+  /// Đếm số sách của tác giả
+  Future<int> demSoSachCuaTacGia(TacGia tacGia) async {
+    assert(_db != null, "CSDL chưa được khởi tạo.");
+    assert(tacGia.maSo >= 0, "Thiếu mã tác giả.");
+    final List<Map<String, Object?>> ketQua = await _rawQuery(
+      """
+SELECT COUNT("sach") AS C FROM "$BANG_TAC_GIA_SACH"
+WHERE "tac_gia" = ?;
+""",
+      [tacGia.maSo]
+    );
+    if (ketQua.isNotEmpty) {
+      return ketQua.first["C"] as int;
+    }
+    return 0;
+  }
+
   // ------
 
+  /// Gán dữ liệu từ kết quả CSDL sang object
   List<DichGia> _ganDLVaoDichGia(List<Map<String, Object?>> duLieu) {
     return duLieu.map((muc) {
       final DichGia kq = DichGia();
@@ -520,6 +582,13 @@ WHERE "$BANG_TAC_GIA_SACH"."sach" = ?;
       "xem": tdht,
       "chon": tdht
     });
+  }
+
+  /// Xoá bản ghi dịch giả
+  Future<void> xoaDichGia(DichGia dichGia) async {
+    assert(_db != null, "CSDL chưa được khởi tạo.");
+    assert(dichGia.maSo >= 0, "Thiếu mã dịch giả.");
+    await _delete(BANG_TAC_GIA, where: "\"ma\" = ?", whereArgs: [dichGia.maSo]);
   }
 
   /// Lấy danh sách các dịch giả của sách
@@ -553,8 +622,26 @@ WHERE "$BANG_DICH_GIA_SACH"."sach" = ?;
     await _delete(BANG_DICH_GIA_SACH, where: "\"sach\" = ? AND \"dich_gia\" = ?", whereArgs: [sach.maSo!, dichGia.maSo]);
   }
 
+  /// Đếm số sách của dịch giả
+  Future<int> demSoSachCuaDichGia(DichGia dichGia) async {
+    assert(_db != null, "CSDL chưa được khởi tạo.");
+    assert(dichGia.maSo >= 0, "Thiếu mã dịch giả.");
+    final List<Map<String, Object?>> ketQua = await _rawQuery(
+      """
+SELECT COUNT("sach") AS C FROM "$BANG_DICH_GIA_SACH"
+WHERE "dich_gia" = ?;
+""",
+      [dichGia.maSo]
+    );
+    if (ketQua.isNotEmpty) {
+      return ketQua.first["C"] as int;
+    }
+    return 0;
+  }
+
   // ------
 
+  /// Gán dữ liệu từ kết quả CSDL sang object
   List<ViTriSach> _ganDLVaoViTriSach(List<Map<String, Object?>> duLieu) {
     return duLieu.map((muc) {
       final ViTriSach kq = ViTriSach();
@@ -613,7 +700,7 @@ WHERE "$BANG_VI_TRI_SACH"."sach" = ?;
     return _ganDLVaoViTriSach(ketQua);
   }
 
-    /// Lưu vị trí của sách
+  /// Lưu vị trí của sách
   Future<void> themViTriCuaSach(Sach sach, ViTriSach viTri) async {
     assert(_db != null, "CSDL chưa được khởi tạo.");
     assert(sach.maSo != null, "Thiếu mã sách.");
@@ -628,6 +715,23 @@ WHERE "$BANG_VI_TRI_SACH"."sach" = ?;
     assert(sach.maSo != null, "Thiếu mã sách.");
     assert(viTri.maSo >= 0, "Thiếu mã vị trí.");
     await _delete(BANG_VI_TRI_SACH, where: "\"sach\" = ? AND \"vi_tri\" = ?", whereArgs: [sach.maSo!, viTri.maSo]);
+  }
+
+  /// Đếm số sách của vị trí
+  Future<int> demSoSachCuaViTri(ViTriSach viTri) async {
+    assert(_db != null, "CSDL chưa được khởi tạo.");
+    assert(viTri.maSo >= 0, "Thiếu mã vị trí.");
+    final List<Map<String, Object?>> ketQua = await _rawQuery(
+      """
+SELECT COUNT("sach") AS C FROM "$BANG_VI_TRI_SACH"
+WHERE "vi_tri" = ?;
+""",
+      [viTri.maSo]
+    );
+    if (ketQua.isNotEmpty) {
+      return ketQua.first["C"] as int;
+    }
+    return 0;
   }
 
   // ------
@@ -713,6 +817,7 @@ GROUP BY "$BANG_NHAN_SACH"."gia_tri";
     return ketQua.map((muc) => VanBanNoiBat(vanBanDayDu: muc["gia_tri"] as String, vanBanNoiBat: [tuKhoa], daChon: muc["chon"] as int?)).toList();
   }
 
+  /// Lưu thời điểm chọn giá trị nhãn
   Future<void> luuThoiDiemChonGiaTriNhan(String tenNhan, String tuKhoa) async {
     assert(_db != null, "CSDL chưa được khởi tạo.");
     final kqNhan = await _query(BANG_NHAN, columns: ["ma"], where: "\"ten\" = ?", whereArgs: [tenNhan]);
@@ -732,6 +837,7 @@ GROUP BY "$BANG_NHAN_SACH"."gia_tri";
     return ketQua.map((muc) => muc["ten"] as String).toList();
   }
 
+  /// Gán dữ liệu từ kết quả CSDL sang object
   List<NhanSach> _ganDLVaoNhan(List<Map<String, Object?>> duLieu) {
     return duLieu.map((muc) {
       final NhanSach kq = NhanSach();
@@ -839,6 +945,7 @@ WHERE "$BANG_NHAN_SACH"."sach" = ?;
     );
   }
 
+  /// Đặt lại tất cả giá trị của trường `luon_hien`
   Future<void> datLaiLuonHienCuaNhan() async {
     assert(_db != null, "CSDL chưa được khởi tạo.");
     await _update(
@@ -847,6 +954,7 @@ WHERE "$BANG_NHAN_SACH"."sach" = ?;
     );
   }
 
+  /// Đặt giá trị `luon_hien` của các nhãn
   Future<void> datLuonHienCuaNhan(List<String> dsNhan) async {
     assert(_db != null, "CSDL chưa được khởi tạo.");
     final String thamSo = List<String>.filled(dsNhan.length, "?").join(",");
@@ -856,6 +964,23 @@ WHERE "$BANG_NHAN_SACH"."sach" = ?;
       where: "\"ten\" IN ($thamSo)",
       whereArgs: dsNhan
     );
+  }
+
+  /// Đếm số giá trị của nhãn sách
+  Future<int> demSoGiaTriCuaNhan(NhanSach nhan) async {
+    assert(_db != null, "CSDL chưa được khởi tạo.");
+    assert(nhan.maSo >= 0, "Thiếu mã nhãn sách.");
+    final List<Map<String, Object?>> ketQua = await _rawQuery(
+      """
+SELECT COUNT("sach") AS C FROM "$BANG_NHAN_SACH"
+WHERE "nhan" = ?;
+""",
+      [nhan.maSo]
+    );
+    if (ketQua.isNotEmpty) {
+      return ketQua.first["C"] as int;
+    }
+    return 0;
   }
 
   // ------
@@ -967,13 +1092,55 @@ WHERE "$BANG_NHAN_SACH"."sach" = ?;
   }
 
   /// Xoá chuỗi sách nhiều tập
-  Future<void> xoaChuoiSachNhieuTap(SachNhieuTap chuoi) async {
+  Future<void> xoaChuoiSachNhieuTap(int maNhieuTap) async {
     assert(_db != null, "CSDL chưa được khởi tạo.");
-    assert(chuoi.maSo >= 0, "Thiếu mã chuỗi sách.");
     await _delete(
       BANG_NHIEU_TAP,
       where: "\"ma\" = ?",
-      whereArgs: [chuoi.maSo]
+      whereArgs: [maNhieuTap]
+    );
+  }
+
+  Future<void> luuThongTinNhieuTapCuaSach(Sach sach) async {
+    assert(_db != null, "CSDL chưa được khởi tạo.");
+    assert(sach.maSo != null, "Thiếu mã sách.");
+    await _update(
+      BANG_SACH,
+      {
+        "chuoi": sach.maNhieuTap,
+        "tap": sach.tap
+      },
+      where: "\"ma\" = ?",
+      whereArgs: [sach.maSo]
+    );
+  }
+
+  /// Đếm số giá trị của nhãn sách
+  Future<int> demSoSachChuoiNhieuTap(int maNhieuTap) async {
+    assert(_db != null, "CSDL chưa được khởi tạo.");
+    final List<Map<String, Object?>> ketQua = await _rawQuery(
+      """
+SELECT COUNT("ma") AS C FROM "$BANG_SACH"
+WHERE "chuoi" = ?;
+""",
+      [maNhieuTap]
+    );
+    if (ketQua.isNotEmpty) {
+      return ketQua.first["C"] as int;
+    }
+    return 0;
+  }
+
+  Future<void> xoaHetSachKhoiChuoi(int maNhieuTap) async {
+    assert(_db != null, "CSDL chưa được khởi tạo.");
+    await _update(
+      BANG_SACH,
+      {
+        "chuoi": null,
+        "tap": null
+      },
+      where: "\"chuoi\" = ?",
+      whereArgs: [maNhieuTap]
     );
   }
 

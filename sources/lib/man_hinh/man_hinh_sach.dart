@@ -169,6 +169,7 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo {
   @override
   void manHinhDuocThemVaoLuong() {
     super.manHinhDuocThemVaoLuong();
+    // CoSoDuLieu().ghiLog = true;
     _khoiTaoDuLieu();
   }
 
@@ -797,8 +798,12 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo {
       _dsDkDanhDau.add(dkRong);
     }
 
-    if (sach.maNhieuTap != null && sach.tap != null) {
-      _dkSoTap.vanBan = "${sach.tap!}";
+    if (sach.maNhieuTap != null) {
+      if (sach.tap != null) {
+        _dkSoTap.vanBan = "${sach.tap}";
+      } else {
+        _dkSoTap.vanBan = "";
+      }
       _dsCacTap = _thaoTacNap?.dsSachTrongChuoi ?? [];
       _khiDanhSachCacTapThayDoi();
     }
@@ -1004,6 +1009,15 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo {
     }
     thongTinSach.nhan = nhan;
     thongTinSach.nhanLuonHien = nhanLuonHien;
+    if (_dsCacTap.isNotEmpty) {
+      thongTinSach.nhieuTap = _dkGhiChuTap.vanBan;
+      thongTinSach.tap = int.tryParse(_dkSoTap.vanBan);
+      thongTinSach.maNhieuTap = _dsCacTap.first.maNhieuTap;
+    } else {
+      thongTinSach.nhieuTap = null;
+      thongTinSach.tap = null;
+      thongTinSach.maNhieuTap = null;
+    }
     return thongTinSach;
   }
 
@@ -1012,9 +1026,11 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo {
     _khoaManHinh();
     final Sach thongTinSach = _thongTinSachTuGiaoDien();
     thongTinSach.inThongTinChiTiet();
+    final List<Sach> dsCacTap = _dsCacTap.toList();
+    dsCacTap.remove(_tapHienTai);
+    // luongManHinh?.loaiManHinh(manHinh: this);
     // return;
-    // TODO: nhieu tap
-    final ThaoTacLuuThongTinSach thaoTac = ThaoTacLuuThongTinSach(thongTinSach);
+    final ThaoTacLuuThongTinSach thaoTac = ThaoTacLuuThongTinSach(thongTinSach: thongTinSach, sachCungBo: dsCacTap);
     thaoTac.luuThongTin().then((value) {
       khiLuuSach?.call();
       luongManHinh?.loaiManHinh(manHinh: this);

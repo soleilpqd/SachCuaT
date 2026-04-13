@@ -136,7 +136,9 @@ enum TK {
   /// Xoá sách
   xoaSach,
   /// Xác nhận xoá
-  xacNhanXoa
+  xacNhanXoa,
+  /// Chưa có sách nào
+  chuaCoSach
   ;
 }
 

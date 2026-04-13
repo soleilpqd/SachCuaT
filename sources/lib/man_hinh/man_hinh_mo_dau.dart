@@ -17,17 +17,35 @@
  */
 
 import 'package:flutter/material.dart';
+import 'package:man_hinh_ung_dung/luong_man_hinh.dart';
 import 'package:man_hinh_ung_dung/man_hinh_ung_dung.dart';
 import 'package:sach_cua_t/man_hinh/man_hinh_co_so.dart';
 import 'package:sach_cua_t/man_hinh/man_hinh_sach.dart';
 import 'package:sach_cua_t/man_hinh/man_hinh_tim_kiem.dart';
+import 'package:sach_cua_t/models/database.dart';
 import 'package:sach_cua_t/utils/hopthoai.dart';
 import 'package:sach_cua_t/utils/vanbanhienthi.dart';
+import 'package:sach_cua_t/views/nut_bam_bieu_tuong.dart';
+import 'package:sach_cua_t/views/van_ban_hien_thi_widget.dart';
 
 class DieuKhienManHinhMoDau extends DieuKhienManHinh {
 
+  int _tongSoSach = 0;
+  final BoDemVbht _boDemVbht = BoDemVbht();
+
   DieuKhienManHinhMoDau() {
-    widgetCuaManHinh = _ManHinhMoDau(dkMh: this);
+    widgetCuaManHinh = _ManHinhMoDau(dieuKhienManHinh: this);
+  }
+
+  @override
+  void manHinhSeThanhManHinhChinhTrongLuong() {
+    super.manHinhSeThanhManHinhChinhTrongLuong();
+    CoSoDuLieu().demTongSoSach().then((value) {
+      if (_tongSoSach != value) {
+        _tongSoSach = value;
+        trangThaiWidgetManHinh?.capNhatGiaoDienCuaManHinh(dieuKhienManHinh: this);
+      }
+    });
   }
 
   /// Khi nhấn nút Thêm sách
@@ -65,19 +83,43 @@ class DieuKhienManHinhMoDau extends DieuKhienManHinh {
 
 }
 
-class _ManHinhMoDau extends StatelessWidget {
+class _ManHinhMoDau extends WidgetCuaDieuKhienManHinh<DieuKhienManHinhMoDau> {
 
-  final DieuKhienManHinhMoDau dkMh;
+  const _ManHinhMoDau({required super.dieuKhienManHinh});
 
-  const _ManHinhMoDau({required this.dkMh});
+  @override
+  State<StatefulWidget> createState() => _TrangThaiManHinhMoDau();
+
+}
+
+class _TrangThaiManHinhMoDau extends TrangThaiWidgetCuaDieuKhien<_ManHinhMoDau> {
+
+  @override
+  void capNhatGiaoDienCuaManHinh({required DieuKhienManHinh dieuKhienManHinh, ThamSoDieuKhienWidgetManHinh? duLieuDinhKem}) {
+    setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
+    final DieuKhienManHinhMoDau dkMh = widget.dieuKhienManHinh;
     return ManHinhCoSo(
       tieuDe: Vbht.tuKhoa(TK.sachCuaT),
-      nutTrai: IconButton(onPressed: dkMh._khiNhanThemSach, icon: const Icon(Icons.add)),
-      nutPhai: IconButton(onPressed: dkMh._khiNhanTimKiem, icon: const Icon(Icons.search)),
-      noiDung: const Center(child: Text("Hello!"))
+      nutTrai: dkMh._tongSoSach > 0 ? IconButton(onPressed: dkMh._khiNhanThemSach, icon: const Icon(Icons.add)) : null,
+      nutPhai: dkMh._tongSoSach > 0 ? IconButton(onPressed: dkMh._khiNhanTimKiem, icon: const Icon(Icons.search)) : null,
+      noiDung: dkMh._tongSoSach > 0 ?
+        const Center(child: Text("Hello!")) :
+        Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            VbhtWidget(text: Vbht.tuKhoa(TK.chuaCoSach, dem: dkMh._boDemVbht), textAlign: TextAlign.center),
+            NutBamBieuTuong(
+              icon: Icons.add,
+              khiNhan: dkMh._khiNhanThemSach,
+              mauChinh: Theme.of(context).primaryColor,
+            )
+          ],
+        )
     );
   }
 

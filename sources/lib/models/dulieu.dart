@@ -75,6 +75,8 @@ class Sach {
     print("         NXB: '$nhaXuatBan'");
     print("      vi tri: '$viTri'");
     print("         tap: $tap");
+    print("     bo_sach: $nhieuTap");
+    print("ma_nhieu_tap: $maNhieuTap");
     print("    hinh anh: '${hinhAnh?.toString()}'");
     print("    hinh nho: '${hinhThuNho?.toString()}'");
     print("        xong: '$daHoanThanh'");

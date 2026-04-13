@@ -24,9 +24,11 @@ class ThaoTacLuuThongTinSach {
 
   /// Thông tin để lưu
   final Sach thongTinSach;
+  /// Sách cùng bộ
+  final List<Sach> sachCungBo;
 
   /// Constructor
-  ThaoTacLuuThongTinSach(this.thongTinSach);
+  ThaoTacLuuThongTinSach({required this.thongTinSach, required this.sachCungBo});
 
   /// Lưu thông tin
   Future<void> luuThongTin() async {
@@ -108,12 +110,16 @@ class ThaoTacLuuThongTinSach {
       }
       dsTgMoi2.add(tacGia);
     }
-    for (final tg in dsTgMoi2) {
+    for (final TacGia tg in dsTgMoi2) {
       await csdl.themTacGiaCuaSach(thongTinSach, tg);
     }
 
-    for (final tg in dsTgCu) {
+    for (final TacGia tg in dsTgCu) {
       await csdl.xoaTacGiaCuaSach(thongTinSach, tg);
+      int slSach = await csdl.demSoSachCuaTacGia(tg);
+      if (slSach == 0) {
+        await csdl.xoaTacGia(tg);
+      }
     }
   }
 
@@ -141,6 +147,10 @@ class ThaoTacLuuThongTinSach {
 
     for (final dg in dsDgCu) {
       await csdl.xoaDichGiaCuaSach(thongTinSach, dg);
+      int slSach = await csdl.demSoSachCuaDichGia(dg);
+      if (slSach == 0) {
+        await csdl.xoaDichGia(dg);
+      }
     }
   }
 
@@ -168,6 +178,10 @@ class ThaoTacLuuThongTinSach {
 
     for (final nxb in dsNxbCu) {
       await csdl.xoaNxbCuaSach(thongTinSach, nxb);
+      int slSach = await csdl.demSoSachCuaNXB(nxb);
+      if (slSach == 0) {
+        await csdl.xoaNxb(nxb);
+      }
     }
   }
 
@@ -195,12 +209,55 @@ class ThaoTacLuuThongTinSach {
 
     for (final vt in dsVtCu) {
       await csdl.xoaViTriCuaSach(thongTinSach, vt);
+      int slSach = await csdl.demSoSachCuaViTri(vt);
+      if (slSach == 0) {
+        await csdl.xoaViTri(vt);
+      }
+    }
+  }
+
+  Future<void> _lamSachNhieuTap(int maNhieuTap) async {
+    final CoSoDuLieu csdl = CoSoDuLieu();
+    final int slSach = await csdl.demSoSachChuoiNhieuTap(maNhieuTap);
+    if (slSach < 2) {
+      await csdl.xoaHetSachKhoiChuoi(maNhieuTap);
+      await csdl.xoaChuoiSachNhieuTap(maNhieuTap);
     }
   }
 
   /// Lưu thông tin tập
   Future<void> _luuNhieuTap() async {
+    final CoSoDuLieu csdl = CoSoDuLieu();
+    final Sach thongTinHt = Sach();
+    thongTinHt.maSo = thongTinSach.maSo;
+    await csdl.napThongTinSach(thongTinHt);
 
+    if (sachCungBo.isEmpty) {
+      await csdl.luuThongTinNhieuTapCuaSach(thongTinSach);
+      if (thongTinHt.maNhieuTap != null) {
+        await _lamSachNhieuTap(thongTinHt.maNhieuTap!);
+      }
+    } else {
+      if (thongTinSach.maNhieuTap == null) {
+        final SachNhieuTap chuoiMoi = SachNhieuTap();
+        chuoiMoi.ten = thongTinSach.nhieuTap ?? "";
+        await csdl.themChuoiSachNhieuTap(chuoiMoi);
+        thongTinSach.maNhieuTap = chuoiMoi.maSo;
+        for (final Sach sachTrongChuoi in sachCungBo) {
+          sachTrongChuoi.maNhieuTap = chuoiMoi.maSo;
+          await csdl.luuThongTinNhieuTapCuaSach(sachTrongChuoi);
+        }
+      } else {
+        final SachNhieuTap chuoiCu = SachNhieuTap();
+        chuoiCu.maSo = thongTinSach.maNhieuTap ?? 0;
+        chuoiCu.ten = thongTinSach.nhieuTap ?? "";
+        await csdl.suaChuoiSachNhieuTap(chuoiCu);
+      }
+      await csdl.luuThongTinNhieuTapCuaSach(thongTinSach);
+      if (thongTinSach.maNhieuTap != thongTinHt.maNhieuTap && thongTinHt.maNhieuTap != null) {
+        await _lamSachNhieuTap(thongTinHt.maNhieuTap!);
+      }
+    }
   }
 
   /// Lưu nhãn
@@ -243,6 +300,10 @@ class ThaoTacLuuThongTinSach {
       final int stt = dsNhanHienCo.indexWhere((element) => element.maSo == nhanCu.maSo);
       if (stt < 0) {
         await csdl.xoaNhanChoSach(thongTinSach, nhanCu);
+        final int slGt = await csdl.demSoGiaTriCuaNhan(nhanCu);
+        if (slGt == 0) {
+          await csdl.xoaNhan(nhanCu);
+        }
       }
     }
     // Trạng thái luôn hiện của nhãn
