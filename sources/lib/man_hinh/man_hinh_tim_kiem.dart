@@ -583,8 +583,10 @@ class _TrangThaiNoiDungMhTimKiem extends TrangThaiWidgetCuaDieuKhien<_NoiDungMan
     ),
     trinhDieuKhien: widget.dieuKhienManHinh.dkTuKhoa,
     xayDungNutBenPhai: (_, khaDung) => NutBamBieuTuongTieuDe(
-      onPressed: khaDung ? widget.dieuKhienManHinh._khiNhanTimKiem : null,
-      icon: Icon(Icons.search, color: khaDung ? Theme.of(context).primaryColor : Colors.grey)
+      bieuTuong: Icons.search,
+      khaDung: khaDung,
+      thuocThanhDieuHuong: false,
+      khiNhan: khaDung ? widget.dieuKhienManHinh._khiNhanTimKiem : null
     )
   );
 

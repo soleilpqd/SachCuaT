@@ -39,6 +39,7 @@ import 'package:sach_cua_t/views/danh_sach_hien_thi.dart';
 import 'package:sach_cua_t/views/dieu_khien_co_so.dart';
 import 'package:sach_cua_t/views/nut_bam_bieu_tuong.dart';
 import 'package:sach_cua_t/views/nut_bam_tieu_de.dart';
+import 'package:sach_cua_t/views/phong_cach_giao_dien.dart';
 import 'package:sach_cua_t/views/truong_bat_tat.dart';
 import 'package:sach_cua_t/views/truong_hinh_anh.dart';
 import 'package:sach_cua_t/views/truong_nut_bam.dart';
@@ -658,7 +659,7 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo {
 
     int dem = 0;
     for (final muc in sach.tacGia) {
-      DieuKhienTruongVanBan dkVb = DieuKhienTruongVanBan(khaDung: !chiDoc);
+      DieuKhienTruongVanBan dkVb = DieuKhienTruongVanBan(khaDung: !chiDoc, goiYNoiDung: _goiYTg);
       dkVb.debugInfo = "TG $dem";
       dkVb.vanBan = muc;
       dkVb.trangThaiNutBenPhai = 0;
@@ -667,7 +668,7 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo {
       dem += 1;
     }
     if (!chiDoc) {
-      DieuKhienTruongVanBan dkRong = DieuKhienTruongVanBan();
+      DieuKhienTruongVanBan dkRong = DieuKhienTruongVanBan(goiYNoiDung: _goiYTg);
       dkRong.debugInfo = "TG $dem";
       dkRong.vanBan = "";
       dkRong.trangThaiNutBenPhai = null;
@@ -677,7 +678,7 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo {
 
     dem = 0;
     for (final muc in sach.dichGia) {
-      DieuKhienTruongVanBan dkVb = DieuKhienTruongVanBan(khaDung: !chiDoc);
+      DieuKhienTruongVanBan dkVb = DieuKhienTruongVanBan(khaDung: !chiDoc, goiYNoiDung: _goiYDg);
       dkVb.debugInfo = "DG $dem";
       dkVb.vanBan = muc;
       dkVb.trangThaiNutBenPhai = 0;
@@ -686,7 +687,7 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo {
       dem += 1;
     }
     if (!chiDoc) {
-      dkRong = DieuKhienTruongVanBan();
+      dkRong = DieuKhienTruongVanBan(goiYNoiDung: _goiYDg);
       dkRong.debugInfo = "DG $dem";
       dkRong.vanBan = "";
       dkRong.trangThaiNutBenPhai = null;
@@ -696,7 +697,7 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo {
 
     dem = 0;
     for (final muc in sach.nhaXuatBan) {
-      DieuKhienTruongVanBan dkVb = DieuKhienTruongVanBan(khaDung: !chiDoc);
+      DieuKhienTruongVanBan dkVb = DieuKhienTruongVanBan(khaDung: !chiDoc, goiYNoiDung: _goiYNxb);
       dkVb.debugInfo = "NXB $dem";
       dkVb.vanBan = muc;
       dkVb.trangThaiNutBenPhai = 0;
@@ -705,7 +706,7 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo {
       dem += 1;
     }
     if (!chiDoc) {
-      dkRong = DieuKhienTruongVanBan();
+      dkRong = DieuKhienTruongVanBan(goiYNoiDung: _goiYNxb);
       dkRong.debugInfo = "NXB $dem";
       dkRong.vanBan = "";
       dkRong.trangThaiNutBenPhai = null;
@@ -1065,7 +1066,12 @@ class _ManHinhSach extends StatelessWidget {
       khiNhanQuayLai: dkMh._khiNhanQuayLai,
       khiNhanTieuDe: dkMh._khiNhanTieuDeManHinh,
       dkNutQuayLai: dkMh._dkNutQuayLai,
-      nutPhai: dkMh.chiDoc && dkMh.maSach != null ? null : NutBamBieuTuong(icon: Icons.save, khiNhan: dkMh._khiNhanLuu, dieuKhien: dkMh._dkNutLuu),
+      nutPhai: dkMh.chiDoc && dkMh.maSach != null ? null : NutBamBieuTuong(
+        bieuTuong: Icons.save,
+        khiNhan: dkMh._khiNhanLuu,
+        thuocThanhDieuHuong: true,
+        dieuKhien: dkMh._dkNutLuu
+      ),
       noiDung: _NoiDungManHinhSach(dieuKhienManHinh: dkMh)
     );
   }
@@ -1221,8 +1227,10 @@ class _TrangThaiNoiDungManHinhSach extends TrangThaiWidgetCuaDieuKhien<_NoiDungM
         ),
         trinhDieuKhien: dkMh._dkISBN,
         xayDungNutBenPhai: (_, khaDung) => NutBamBieuTuongTieuDe(
-          onPressed: khaDung ? dkMh._khiNhanNutQuetISBN : null,
-          icon: Icon(Icons.camera_alt_outlined, color: khaDung ? Theme.of(context).primaryColor : Colors.grey)
+          bieuTuong: Icons.camera_alt_outlined,
+          khaDung: khaDung,
+          thuocThanhDieuHuong: false,
+          khiNhan: khaDung ? dkMh._khiNhanNutQuetISBN : null
         ),
       ),
       _ => null,
@@ -1235,9 +1243,12 @@ class _TrangThaiNoiDungManHinhSach extends TrangThaiWidgetCuaDieuKhien<_NoiDungM
       tieuDe: Vbht.tuKhoa(tieuDe, dem: dkMh._demVbht),
       trinhDieuKhien: dieuKhien,
       xayDungNutBenPhai: (danhDau, khaDung) => danhDau == null ? null : NutBamBieuTuongTieuDe(
-        onPressed: !khaDung ? null : () {
+        bieuTuong: Icons.delete_outline,
+        khaDung: khaDung,
+        thuocThanhDieuHuong: false,
+        khiNhan: !khaDung ? null : () {
           dkMh._khiNhanLoaiBoDauVao(dieuKhien);
-        }, icon: Icon(Icons.delete_outline, color: khaDung ? Theme.of(context).primaryColor : Colors.grey)
+        }
       ),
     );
   }
@@ -1278,9 +1289,12 @@ class _TrangThaiNoiDungManHinhSach extends TrangThaiWidgetCuaDieuKhien<_NoiDungM
       trinhDieuKhien: dieuKhien,
       demVbht: dkMh._demVbht,
       xayDungNutBenPhai: (coTheXoa, khaDung) => coTheXoa == null ? null : NutBamBieuTuongTieuDe(
-          onPressed: !khaDung ? null : () {
-            dkMh._khiNhanLoaiBoDauVao(dieuKhien);
-          }, icon: Icon(Icons.delete_outline, color: khaDung ? Theme.of(context).primaryColor : Colors.grey)
+        bieuTuong: Icons.delete_outline,
+        khaDung: khaDung,
+        thuocThanhDieuHuong: false,
+        khiNhan: !khaDung ? null : () {
+          dkMh._khiNhanLoaiBoDauVao(dieuKhien);
+        }
         ),
     );
   }
@@ -1320,7 +1334,10 @@ class _TrangThaiNoiDungManHinhSach extends TrangThaiWidgetCuaDieuKhien<_NoiDungM
       );
       if (dkMh._tapConThieu.isNotEmpty) {
         ketQua.add(
-          VbhtWidget(text: Vbht.tuKhoa(TK.tapConThieu, dem: dkMh._demVbht, ts: [dkMh._tapConThieu.join(", ")]))
+          VbhtWidget(
+            text: Vbht.tuKhoa(TK.tapConThieu, dem: dkMh._demVbht, ts: [dkMh._tapConThieu.join(", ")]),
+            coChu: CoChu.binhThuong,
+          )
         );
       }
 

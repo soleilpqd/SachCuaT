@@ -26,6 +26,8 @@ import 'package:sach_cua_t/utils/hopthoai.dart';
 import 'package:sach_cua_t/utils/vanbanhienthi.dart';
 import 'package:sach_cua_t/views/dieu_khien_co_so.dart';
 import 'package:sach_cua_t/views/nut_bam_bieu_tuong.dart';
+import 'package:sach_cua_t/views/phong_cach_giao_dien.dart';
+import 'package:sach_cua_t/views/van_ban_hien_thi_widget.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 class DieuKhienManHinhWeb extends DieuKhienManHinh {
@@ -241,17 +243,29 @@ class DieuKhienManHinhWeb extends DieuKhienManHinh {
 
   /// Xử lý kết quả trích xuất: hiển thị bottom sheet cho user chọn
   void _xuLyKetQuaTrichXuat() {
+    final PhongCachGiaoDien phongCach = PhongCachGiaoDien();
     _dkHopThoaiChonSach = HopThoai.hienThiHopThoaiTuDuoiDay(
       noiDung: Material(
-        color: Colors.white,
+        color: phongCach.mauNen,
         borderRadius: const BorderRadius.all(Radius.circular(20)),
         clipBehavior: Clip.antiAliasWithSaveLayer,
         child: ListView.separated(
           itemBuilder: (ctx2, index) {
             return ListTile(
-              leading: Text(dsSach[index][0]),
-              title: Text(dsSach[index][2]),
-              subtitle: Text("ISBN: ${dsSach[index][1]}\nTG: ${dsSach[index][3]}\nNXB: ${dsSach[index][5]}"),
+              leading: VbhtWidget(
+                text: Vbht.trucTiep(dsSach[index][0]),
+                coChu: CoChu.to,
+              ),
+              title: VbhtWidget(
+                text: Vbht.trucTiep(dsSach[index][2]),
+                coChu: CoChu.binhThuong,
+                style: const TextStyle(fontWeight: FontWeight.bold)
+              ),
+              subtitle: VbhtWidget(
+                text: Vbht.trucTiep("ISBN: ${dsSach[index][1]}\nTG: ${dsSach[index][3]}\nNXB: ${dsSach[index][5]}"),
+                coChu: CoChu.nho,
+                style: const TextStyle(fontStyle: FontStyle.italic),
+              ),
               isThreeLine: true,
               onTap: () {
                 Map<String, String> thongTinSach = {};
@@ -269,8 +283,8 @@ class DieuKhienManHinhWeb extends DieuKhienManHinh {
             );
           },
           separatorBuilder: (ctx3, index) {
-            return const Divider(
-              color: Colors.grey,
+            return Divider(
+              color: phongCach.mauVien,
               thickness: 1,
               height: 1,
             );
@@ -298,8 +312,9 @@ class _ManHinhWeb extends StatelessWidget  {
       khiNhanQuayLai: dkManHinh._khiNhanQuayLai,
       nutPhai: dkManHinh.batTrichXuat ?
         NutBamBieuTuong(
-          icon: Icons.input,
+          bieuTuong: Icons.input,
           khiNhan: dkManHinh._khiNhanNutTrichXuat,
+          thuocThanhDieuHuong: true,
           dieuKhien: dkManHinh._dkNutTrichXuat
         ) : null,
       noiDung: WebViewWidget(key: dkManHinh._webViewKey, controller: dkManHinh._webController)

@@ -20,7 +20,6 @@ import 'package:flutter/material.dart';
 import 'package:sach_cua_t/utils/vanbanhienthi.dart';
 import 'package:sach_cua_t/views/dieu_khien_co_so.dart';
 import 'package:sach_cua_t/views/nut_bam_tieu_de.dart';
-import 'package:sach_cua_t/views/van_ban_hien_thi_widget.dart';
 
 /// Trường chỉ xử lý nhấn với Tiêu đề và Biểu tượng
 class TruongNutBam extends GiaoDienCoSo<DieuKhienCoSo> {
@@ -53,20 +52,21 @@ class _TrangThaiTruongNutBam extends TrangThaiCoSo<TruongNutBam> {
   @override
   Widget build(BuildContext context) {
     final bool khaDung = widget.dieuKhien?.khaDung ?? true;
-    final Color color = khaDung ? (widget.canChuY ? Colors.red : Theme.of(context).primaryColor) : Colors.grey;
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
         NutBamTieuDe(
-          onPressed: khaDung ? widget.khiNhan : null,
-          child: VbhtWidget(text: widget.tieuDe, style: widget.canChuY ? TextStyle(color: color) : null)
+          tieuDe: widget.tieuDe,
+          khaDung: khaDung,
+          canChuY: widget.canChuY,
+          khiNhan: khaDung ? widget.khiNhan : null
         ),
         NutBamBieuTuongTieuDe(
-          onPressed: khaDung ? widget.khiNhan : null,
-          icon: Icon(
-            widget.icon,
-            color: color
-          )
+          bieuTuong: widget.icon,
+          khaDung: khaDung,
+          thuocThanhDieuHuong: false,
+          canChuY: widget.canChuY,
+          khiNhan: khaDung ? widget.khiNhan : null
         )
       ],
     );

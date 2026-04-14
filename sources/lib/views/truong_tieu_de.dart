@@ -18,6 +18,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:sach_cua_t/utils/vanbanhienthi.dart';
+import 'package:sach_cua_t/views/phong_cach_giao_dien.dart';
 import 'package:sach_cua_t/views/van_ban_hien_thi_widget.dart';
 
 /// Trường tiêu đề: hiển thị 2 dòng văn bản
@@ -39,6 +40,7 @@ class TruongTieuDe extends StatelessWidget {
     children.add(
       VbhtWidget(
         text: tieuDeChinh,
+        coChu: CoChu.to,
         style: const TextStyle(
           fontWeight: FontWeight.bold,
           fontSize: 17
@@ -47,7 +49,11 @@ class TruongTieuDe extends StatelessWidget {
     );
     if (tieuDePhu != null) {
       children.add(
-        VbhtWidget(text: tieuDePhu!)
+        VbhtWidget(
+          text: tieuDePhu!,
+          coChu: CoChu.nho,
+          style: const TextStyle(fontStyle: FontStyle.italic),
+        )
       );
     }
     return Column(

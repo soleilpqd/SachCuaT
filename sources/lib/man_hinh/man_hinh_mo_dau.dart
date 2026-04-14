@@ -26,6 +26,7 @@ import 'package:sach_cua_t/models/database.dart';
 import 'package:sach_cua_t/utils/hopthoai.dart';
 import 'package:sach_cua_t/utils/vanbanhienthi.dart';
 import 'package:sach_cua_t/views/nut_bam_bieu_tuong.dart';
+import 'package:sach_cua_t/views/phong_cach_giao_dien.dart';
 import 'package:sach_cua_t/views/van_ban_hien_thi_widget.dart';
 
 class DieuKhienManHinhMoDau extends DieuKhienManHinh {
@@ -104,19 +105,31 @@ class _TrangThaiManHinhMoDau extends TrangThaiWidgetCuaDieuKhien<_ManHinhMoDau> 
     final DieuKhienManHinhMoDau dkMh = widget.dieuKhienManHinh;
     return ManHinhCoSo(
       tieuDe: Vbht.tuKhoa(TK.sachCuaT),
-      nutTrai: dkMh._tongSoSach > 0 ? IconButton(onPressed: dkMh._khiNhanThemSach, icon: const Icon(Icons.add)) : null,
-      nutPhai: dkMh._tongSoSach > 0 ? IconButton(onPressed: dkMh._khiNhanTimKiem, icon: const Icon(Icons.search)) : null,
+      nutTrai: dkMh._tongSoSach > 0 ? NutBamBieuTuong(
+        bieuTuong: Icons.add,
+        thuocThanhDieuHuong: true,
+        khiNhan: dkMh._khiNhanThemSach
+      ) : null,
+      nutPhai: dkMh._tongSoSach > 0 ? NutBamBieuTuong(
+        bieuTuong: Icons.search,
+        thuocThanhDieuHuong: true,
+        khiNhan: dkMh._khiNhanTimKiem
+      ) : null,
       noiDung: dkMh._tongSoSach > 0 ?
         const Center(child: Text("Hello!")) :
         Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            VbhtWidget(text: Vbht.tuKhoa(TK.chuaCoSach, dem: dkMh._boDemVbht), textAlign: TextAlign.center),
+            VbhtWidget(
+              text: Vbht.tuKhoa(TK.chuaCoSach, dem: dkMh._boDemVbht),
+              coChu: CoChu.binhThuong,
+              textAlign: TextAlign.center
+            ),
             NutBamBieuTuong(
-              icon: Icons.add,
+              bieuTuong: Icons.add,
               khiNhan: dkMh._khiNhanThemSach,
-              mauChinh: Theme.of(context).primaryColor,
+              thuocThanhDieuHuong: false
             )
           ],
         )

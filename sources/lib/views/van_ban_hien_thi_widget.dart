@@ -19,11 +19,14 @@
 import 'package:flutter/material.dart';
 import 'package:sach_cua_t/utils/common.dart';
 import 'package:sach_cua_t/utils/vanbanhienthi.dart';
+import 'package:sach_cua_t/views/phong_cach_giao_dien.dart';
 
 /// Text widget mở rộng cho việc nạp Văn bản hiển thị
 class VbhtWidget extends StatefulWidget {
 
   final Vbht text;
+  final CoChu coChu;
+  final bool khaDung;
   final TextStyle? style;
   final StrutStyle? strutStyle;
   final TextAlign? textAlign;
@@ -40,6 +43,8 @@ class VbhtWidget extends StatefulWidget {
 
   const VbhtWidget({
     required this.text,
+    required this.coChu,
+    this.khaDung = true,
     super.key,
     this.style,
     this.strutStyle,
@@ -82,9 +87,24 @@ class _VbhtWidgetState extends State<VbhtWidget> {
 
   @override
   Widget build(BuildContext context) {
+    TextStyle style;
+    final PhongCachGiaoDien phongCach = PhongCachGiaoDien();
+    if (widget.style != null) {
+      style = widget.style!.copyWith(
+        color: widget.style?.color ?? (widget.khaDung ? phongCach.mauNoiDungNen : phongCach.mauNoiDungKhoaNen),
+        fontFamily: phongCach.tenFont,
+        fontSize: phongCach.coFont(widget.coChu)
+      );
+    } else {
+      style = TextStyle(
+        color: widget.style?.color ?? (widget.khaDung ? phongCach.mauNoiDungNen : phongCach.mauNoiDungKhoaNen),
+        fontFamily: phongCach.tenFont,
+        fontSize: phongCach.coFont(widget.coChu)
+      );
+    }
     return Text(
       widget.text.vanBan,
-      style: widget.style,
+      style: style,
       strutStyle: widget.strutStyle,
       textAlign: widget.textAlign,
       textDirection: widget.textDirection,

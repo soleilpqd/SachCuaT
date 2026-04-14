@@ -19,6 +19,7 @@
 import 'package:flutter/material.dart';
 import 'package:sach_cua_t/utils/vanbanhienthi.dart';
 import 'package:sach_cua_t/views/dieu_khien_co_so.dart';
+import 'package:sach_cua_t/views/phong_cach_giao_dien.dart';
 import 'package:sach_cua_t/views/van_ban_hien_thi_widget.dart';
 
 /// Nút bấm văn bản có điều khiển trạng thái khả dụng
@@ -43,8 +44,8 @@ class _TrangThaiNutBamBieuTuong extends TrangThaiCoSo<NutBamVanBan> {
     final bool khaDung = widget.dieuKhien?.khaDung ?? true;
     return TextButton(
       onPressed: khaDung ? widget.khiNhan : null,
-      style: ButtonStyle(foregroundColor: MaterialStatePropertyAll(khaDung ? Theme.of(context).primaryColor : Colors.grey)),
-      child: VbhtWidget(text: widget.vanBan)
+      style: ButtonStyle(foregroundColor: WidgetStatePropertyAll(khaDung ? Theme.of(context).primaryColor : Colors.grey)),
+      child: VbhtWidget(coChu: CoChu.binhThuong, text: widget.vanBan)
     );
   }
 

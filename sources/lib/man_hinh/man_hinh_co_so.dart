@@ -16,11 +16,11 @@
   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:sach_cua_t/utils/vanbanhienthi.dart';
 import 'package:sach_cua_t/views/dieu_khien_co_so.dart';
 import 'package:sach_cua_t/views/nut_bam_bieu_tuong.dart';
+import 'package:sach_cua_t/views/phong_cach_giao_dien.dart';
 import 'package:sach_cua_t/views/van_ban_hien_thi_widget.dart';
 
 /// Phần Navigation Bar dùng chung cho tất cả các màn hình.
@@ -54,24 +54,37 @@ class ManHinhCoSo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final PhongCachGiaoDien phongCach = PhongCachGiaoDien();
     Widget? nTrai = nutTrai;
     if (nTrai == null && khiNhanQuayLai != null) {
       nTrai = _taoNutQuayLai();
     }
     return Scaffold(
         appBar: AppBar(
+          backgroundColor: phongCach.mauChinh,
           title: GestureDetector(
             onTap: khiNhanTieuDe,
-            child: VbhtWidget(text: tieuDe)
+            child: VbhtWidget(
+              text: tieuDe,
+              coChu: CoChu.tieuDe,
+              style: TextStyle(
+                color: phongCach.mauNoiDungChinh
+              ),
+            )
           ),
           actions: nutPhai != null ? [nutPhai!] : null,
           leading: nTrai
         ),
-        body: noiDung
+        body: Container(color: phongCach.mauNen, child: noiDung)
       );
   }
 
   /// Tạo nút quay lại
-  Widget _taoNutQuayLai() => NutBamBieuTuong(icon: Icons.arrow_back, khiNhan: khiNhanQuayLai, dieuKhien: dkNutQuayLai);
+  Widget _taoNutQuayLai() => NutBamBieuTuong(
+    bieuTuong: Icons.arrow_back,
+    khiNhan: khiNhanQuayLai,
+    thuocThanhDieuHuong: true,
+    dieuKhien: dkNutQuayLai
+  );
 
 }

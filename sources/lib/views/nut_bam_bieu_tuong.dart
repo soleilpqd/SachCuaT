@@ -24,16 +24,14 @@ import 'package:sach_cua_t/views/nut_bam_tieu_de.dart';
 class NutBamBieuTuong extends GiaoDienCoSo<DieuKhienCoSo> {
 
   /// Hình biểu tượng
-  final IconData icon;
-  /// Màu chính
-  final Color mauChinh;
-  /// Màu phụ (màu không khả dụng)
-  final Color mauPhu;
+  final IconData bieuTuong;
+  /// Sử dụng trên thanh điều hướng (tiêu đề màn hình)
+  final bool thuocThanhDieuHuong;
   /// Hàm xử lý khi nhấn
   final void Function()? khiNhan;
 
   /// CONSTRUCTOR
-  const NutBamBieuTuong({super.key, required this.icon, this.khiNhan, super.dieuKhien, this.mauChinh = Colors.white, this.mauPhu = Colors.grey});
+  const NutBamBieuTuong({super.key, required this.bieuTuong, required this.thuocThanhDieuHuong, super.dieuKhien, this.khiNhan});
 
   @override
   State<StatefulWidget> createState() => _TrangThaiNutBamBieuTuong();
@@ -46,8 +44,10 @@ class _TrangThaiNutBamBieuTuong extends TrangThaiCoSo<NutBamBieuTuong> {
   Widget build(BuildContext context) {
     final bool khaDung = widget.dieuKhien?.khaDung ?? true;
     return NutBamBieuTuongTieuDe(
-      onPressed: khaDung ? widget.khiNhan : null,
-      icon: Icon(widget.icon, color: khaDung ? widget.mauChinh : widget.mauPhu)
+      bieuTuong: widget.bieuTuong,
+      khaDung: khaDung,
+      thuocThanhDieuHuong: widget.thuocThanhDieuHuong,
+      khiNhan: khaDung ? widget.khiNhan : null,
     );
   }
 

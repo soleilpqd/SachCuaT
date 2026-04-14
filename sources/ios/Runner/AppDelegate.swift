@@ -19,7 +19,7 @@
 import UIKit
 import Flutter
 
-@UIApplicationMain
+@main
 @objc class AppDelegate: FlutterAppDelegate {
 
     static var app: AppDelegate { UIApplication.shared.delegate! as! AppDelegate }

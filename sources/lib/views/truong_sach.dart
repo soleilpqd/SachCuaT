@@ -78,8 +78,6 @@ class TruongSach extends StatelessWidget {
       hinhAnh = LinhTinh.taoWidgetAnh(LinhTinh.taoDuongDan(phanLoai: PhanLoaiDuongDan.assets, duongDan: "assets/book.jpg"));
     }
     List<Widget> children = [];
-    Color mauChinh = Colors.yellow;
-    Color mauPhu = Colors.lightGreenAccent;
     for (final muc in thongTinCanHienThi) {
       String giaTri =
       switch (muc.truong) {
@@ -100,7 +98,7 @@ class TruongSach extends StatelessWidget {
             vanBanDayDu: giaTri,
             vanBanNoiBat: muc.tuKhoaNoiBat ?? []
           ),
-          mauNen: muc.laNoiBatChinh ? mauChinh : mauPhu
+          danhDauChinh: muc.laNoiBatChinh
         ));
       }
     }

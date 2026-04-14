@@ -20,7 +20,7 @@ import 'package:flutter/material.dart';
 import 'package:sach_cua_t/utils/vanbanhienthi.dart';
 import 'package:sach_cua_t/views/dieu_khien_co_so.dart';
 import 'package:sach_cua_t/views/nut_bam_tieu_de.dart';
-import 'package:sach_cua_t/views/van_ban_hien_thi_widget.dart';
+import 'package:sach_cua_t/views/phong_cach_giao_dien.dart';
 
 /// Thuộc tính trường bật/tắt (checkbox)
 enum ThuocTinhTruongBatTat {
@@ -76,11 +76,13 @@ class _TrangThaiTruongBatTat extends TrangThaiCoSo<TruongBatTat> {
 
   @override
   Widget build(BuildContext context) {
-    Color mainColor = (widget.dieuKhien?.khaDung ?? true) ? Theme.of(context).primaryColor : Colors.grey;
+    final PhongCachGiaoDien phongCach = PhongCachGiaoDien();
+    final Color mainColor = (widget.dieuKhien?.khaDung ?? true) ? phongCach.mauChinh : phongCach.mauNoiDungKhoaNen;
     List<Widget> dsCacO = [
       NutBamTieuDe(
-        onPressed: widget.dieuKhien!.khaDung ? _khiNhanTieuDe : null,
-        child: VbhtWidget(text: widget.tieuDe, style: widget.dieuKhien!.khaDung ? null : const TextStyle(color: Colors.grey))
+        tieuDe: widget.tieuDe,
+        khaDung: widget.dieuKhien!.khaDung,
+        khiNhan: widget.dieuKhien!.khaDung ? _khiNhanTieuDe : null
       ),
       Checkbox(
         value: widget.dieuKhien!.giaTri,

@@ -18,6 +18,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:sach_cua_t/models/vanbannoibat.dart';
+import 'package:sach_cua_t/views/phong_cach_giao_dien.dart';
 
 /// Hiển thị nổi bật (tô nền) các đoạn [vanBanNoiBat] có trong [vanBanDayDu]
 class VanBanHienThiNoiBat extends StatelessWidget {
@@ -25,16 +26,16 @@ class VanBanHienThiNoiBat extends StatelessWidget {
   /// Văn bản nổi bật
   final VanBanNoiBat vanBan;
   final TextOverflow tuDongCat;
-  final Color mauNen;
+  final bool danhDauChinh;
 
   /// Constructor
-  const VanBanHienThiNoiBat({super.key, required this.vanBan, this.tuDongCat = TextOverflow.ellipsis, this.mauNen = Colors.yellow});
+  const VanBanHienThiNoiBat({super.key, required this.vanBan, this.tuDongCat = TextOverflow.ellipsis, this.danhDauChinh = true});
 
   /// Xây dựng các đoạn văn bản
   List<TextSpan> _xayDungCacDoanVanBan() {
     List<TextSpan> ketQua = [];
     TextSpan doanVb = const TextSpan();
-
+    final PhongCachGiaoDien phongCach = PhongCachGiaoDien();
     if (vanBan.dsViTriKd.isEmpty) {
       doanVb = TextSpan(text: vanBan.vanBanDayDu);
       ketQua.add(doanVb);
@@ -47,7 +48,10 @@ class VanBanHienThiNoiBat extends StatelessWidget {
         ketQua.add(doanVb);
       }
       vtHt = vt.$1 + vt.$2;
-      doanVb = TextSpan(text: vanBan.vanBanDayDu.substring(vt.$1, vtHt), style: TextStyle(backgroundColor: mauNen));
+      doanVb = TextSpan(
+        text: vanBan.vanBanDayDu.substring(vt.$1, vtHt),
+        style: TextStyle(backgroundColor: danhDauChinh ? phongCach.mauDanhDauChinh : phongCach.mauDanhDauPhu)
+      );
       ketQua.add(doanVb);
     }
     if (vtHt < vanBan.vanBanDayDu.length) {
@@ -60,10 +64,13 @@ class VanBanHienThiNoiBat extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final List<TextSpan> cacDoan = _xayDungCacDoanVanBan();
+    final PhongCachGiaoDien phongCach = PhongCachGiaoDien();
     final TextSpan doanChinh = TextSpan(
       children: cacDoan,
-      style: const TextStyle(
-        color: Colors.black
+      style: TextStyle(
+        color: phongCach.mauNoiDungNen,
+        fontFamily: phongCach.tenFont,
+        fontSize: phongCach.coFontThuong
       )
     );
     return RichText(text: doanChinh, overflow: tuDongCat);

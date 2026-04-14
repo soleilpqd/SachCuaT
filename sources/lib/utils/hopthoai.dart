@@ -23,6 +23,7 @@ import 'package:man_hinh_ung_dung/xay_dung_widget_hoat_hinh.dart';
 import 'package:sach_cua_t/main.dart';
 import 'package:sach_cua_t/utils/vanbanhienthi.dart';
 import 'package:sach_cua_t/views/nut_bam_tieu_de.dart';
+import 'package:sach_cua_t/views/phong_cach_giao_dien.dart';
 import 'package:sach_cua_t/views/van_ban_hien_thi_widget.dart';
 
 /// Hộp thoại thông báo
@@ -80,7 +81,7 @@ class DieuKhienManHinhThongBao extends DieuKhienManHinh {
   final void Function(int)? hanhDong;
 
   DieuKhienManHinhThongBao({required this.noiDung, required this.nhanCacNut, this.cacNutCanChuY, this.hanhDong}) {
-    mauNenWidgetChua = Colors.black.withAlpha(128);
+    mauNenWidgetChua = PhongCachGiaoDien().mauDoBong;
     thamSoDieuKhienWidgetLuong[WidgetLuongManHinhXepLop.kKeyThamSoLopTrong] = true;
     thamSoDieuKhienWidgetLuong[WidgetLuongManHinhXepLop.kKeyThamSoHoatHinh] = xayDungLopDoMo;
   }
@@ -113,10 +114,12 @@ class _ManHinhThongBao extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final PhongCachGiaoDien phongCach = PhongCachGiaoDien();
     List<Widget> dsHienThi = [
       const SizedBox(height: 20),
       VbhtWidget(
         text: dieuKhienManHinh.noiDung,
+        coChu: CoChu.binhThuong,
         textAlign: TextAlign.center,
         style: Theme.of(context).textTheme.titleLarge
       ),
@@ -127,17 +130,19 @@ class _ManHinhThongBao extends StatelessWidget {
     int stt = 0;
     for (final muc in dieuKhienManHinh.nhanCacNut) {
       if (nutDoc) {
-        dsCacNut.add(Container(color: Colors.grey.withAlpha(128), height: 1.0));
+        dsCacNut.add(Container(color: phongCach.mauVien, height: 1.0));
       } else {
         if (stt > 0) {
-          dsCacNut.add(Container(color: Colors.grey.withAlpha(128), width: 1.0, height: 20,));
+          dsCacNut.add(Container(color: phongCach.mauVien, width: 1.0, height: 20,));
         }
       }
       int sttNut = stt;
       bool canChuY = dieuKhienManHinh.cacNutCanChuY?.contains(sttNut) ?? false;
       dsCacNut.add(NutBamTieuDe(
-        onPressed: () => dieuKhienManHinh._khiNhanNut(sttNut),
-        child: VbhtWidget(text: muc, style: canChuY ? const TextStyle(color: Colors.red) : null)
+        tieuDe: muc,
+        khaDung: true,
+        canChuY: canChuY,
+        khiNhan: () => dieuKhienManHinh._khiNhanNut(sttNut)
       ));
       stt += 1;
     }
@@ -154,14 +159,14 @@ class _ManHinhThongBao extends StatelessWidget {
         widthFactor: 0.8,
         child: Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: phongCach.mauNen,
             borderRadius: BorderRadius.circular(10),
             border: Border.all(
-              color: Colors.grey.withAlpha(128),
+              color: phongCach.mauVien,
               width: 1.0
             ),
             boxShadow: [BoxShadow(
-              color: Colors.black.withAlpha(64),
+              color: phongCach.mauDoBong,
               offset: const Offset(5, 5),
               blurRadius: 5.0,
               spreadRadius: 2.0
@@ -190,7 +195,7 @@ class DieuKhienManHinhTuDuoiDay extends DieuKhienManHinh {
   final void Function() khiDong;
 
   DieuKhienManHinhTuDuoiDay({required this.noiDung, required this.khiDong}) {
-    mauNenWidgetChua = Colors.black.withAlpha(128);
+    mauNenWidgetChua = PhongCachGiaoDien().mauDoBong;
     thamSoDieuKhienWidgetLuong[WidgetLuongManHinhXepLop.kKeyThamSoLopTrong] = true;
     thamSoDieuKhienWidgetLuong[WidgetLuongManHinhXepLop.kKeyThamSoHoatHinh] = xayDungLopDoMo;
   }
@@ -219,7 +224,14 @@ class _ManHinhTuDuoiDay extends StatelessWidget {
     final Widget viewChinh = Column(children: [
       Expanded(
         flex: 40,
-        child: NutBamTieuDe(onPressed: dieuKhienManHinh.khiDong, child: Container(color: Colors.transparent))
+        child: TextButton(
+          style: const ButtonStyle(
+            overlayColor: WidgetStatePropertyAll(Colors.transparent),
+            splashFactory: NoSplash.splashFactory
+          ),
+          onPressed: dieuKhienManHinh.khiDong,
+          child: Container(color: Colors.transparent)
+        )
       ),
       Expanded(
         flex: 60,

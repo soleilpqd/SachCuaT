@@ -21,6 +21,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:sach_cua_t/utils/common.dart';
 import 'package:sach_cua_t/utils/vanbanhienthi.dart';
 import 'package:sach_cua_t/views/dieu_khien_co_so.dart';
+import 'package:sach_cua_t/views/phong_cach_giao_dien.dart';
 import 'package:sach_cua_t/views/van_ban_hien_thi_widget.dart';
 
 /// Thuộc tính trường hình ảnh
@@ -71,23 +72,29 @@ class _TrangThaiTruongHinhAnh extends TrangThaiCoSo<TruongHinhAnh> {
   @override
   Widget build(BuildContext context) {
     final bool khaDung = widget.dieuKhien!.khaDung;
+    final PhongCachGiaoDien phongCach = PhongCachGiaoDien();
     List<Widget> children = [
       Container(
-        color: widget.dieuKhien?.hinhAnh == null ? Colors.grey : Colors.white,
+        color: widget.dieuKhien?.hinhAnh == null ? phongCach.mauVien : phongCach.mauNen,
       ),
       widget.dieuKhien?.hinhAnh != null ?
         LinhTinh.taoWidgetAnh(widget.dieuKhien!.hinhAnh!) :
         Icon(
           Icons.camera_alt,
           size: 60,
-          color: khaDung ? Colors.white : Colors.grey,
+          color: khaDung ? phongCach.mauChinh : phongCach.mauNoiDungKhoaNen,
         )
     ];
     if (widget.dieuKhien?.hinhAnh == null && khaDung) {
       children.add(
         Column(
           mainAxisAlignment: MainAxisAlignment.end,
-          children: [VbhtWidget(text: Vbht.tuKhoa(TK.hdsdAnh, dem: widget.dem), textAlign: TextAlign.right)],
+          children: [VbhtWidget(
+            text: Vbht.tuKhoa(TK.hdsdAnh, dem: widget.dem),
+            coChu: CoChu.binhThuong,
+            style: TextStyle(color: phongCach.mauChinh),
+            textAlign: TextAlign.right
+          )],
         )
       );
     }

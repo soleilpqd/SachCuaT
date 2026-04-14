@@ -41,29 +41,9 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const Color mainColor = Colors.blue;
     return MaterialApp(
       home: luongMHGoc.xayDungGiaoDienNguoiDung(context, null),
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: mainColor),
-        primaryColor: mainColor,
-        scaffoldBackgroundColor: Colors.white,
-        textButtonTheme: TextButtonThemeData(
-          style: TextButton.styleFrom(
-            foregroundColor: mainColor
-          )
-        ),
-        popupMenuTheme: const PopupMenuThemeData(
-          iconColor: Colors.black
-        ),
-        textTheme: const TextTheme(
-          bodyMedium: TextStyle(color: Colors.black)
-        ),
-        appBarTheme: const AppBarTheme(
-          backgroundColor: mainColor,
-          foregroundColor: Colors.white
-        )
-      )
     );
   }
+
 }

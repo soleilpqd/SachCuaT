@@ -23,6 +23,7 @@ import 'package:sach_cua_t/man_hinh/man_hinh_liet_ke_sach.dart';
 import 'package:sach_cua_t/models/dulieu.dart';
 import 'package:sach_cua_t/utils/vanbanhienthi.dart';
 import 'package:sach_cua_t/views/danh_sach_hien_thi.dart';
+import 'package:sach_cua_t/views/phong_cach_giao_dien.dart';
 import 'package:sach_cua_t/views/truong_tieu_de.dart';
 import 'package:sach_cua_t/views/van_ban_hien_thi_widget.dart';
 
@@ -317,6 +318,7 @@ class _ManHinhThongKe extends StatelessWidget with ListViewTheoPhanDoan {
   }) => GestureDetector(
       behavior: HitTestBehavior.opaque,
       child: VbhtWidget(
+        coChu: CoChu.binhThuong,
         text: Vbht.trucTiep("${danhSach[stt].giaTri} [${danhSach[stt].soLuong}]"),
       ),
       onTap: () => khiNhan.call(stt)

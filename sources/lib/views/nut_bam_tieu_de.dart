@@ -17,30 +17,55 @@
  */
 
 import 'package:flutter/material.dart';
+import 'package:sach_cua_t/utils/vanbanhienthi.dart';
+import 'package:sach_cua_t/views/phong_cach_giao_dien.dart';
+import 'package:sach_cua_t/views/van_ban_hien_thi_widget.dart';
 
 /// Nút bấm chỉ có tiêu đề (ko hiệu ứng nền)
 class NutBamTieuDe extends TextButton {
 
-  const NutBamTieuDe({
+  NutBamTieuDe({
     super.key,
-    required super.child,
-    required super.onPressed
-  }) : super(style: const ButtonStyle(
-    overlayColor: MaterialStatePropertyAll(Colors.transparent),
-    splashFactory: NoSplash.splashFactory
-  ));
+    required Vbht tieuDe,
+    required bool khaDung,
+    bool canChuY = false,
+    void Function()? khiNhan
+  }) : super(
+    child: VbhtWidget(
+      text: tieuDe,
+      coChu: CoChu.binhThuong,
+      style: TextStyle(color: khaDung ?
+        (canChuY ? PhongCachGiaoDien().mauThaoTacCanChuY : PhongCachGiaoDien().mauChinh) :
+        PhongCachGiaoDien().mauNoiDungKhoaNen
+      )
+    ),
+    style: const ButtonStyle(
+      overlayColor: WidgetStatePropertyAll(Colors.transparent),
+      splashFactory: NoSplash.splashFactory
+    ),
+    onPressed: khiNhan
+  );
 
 }
 
 class NutBamBieuTuongTieuDe extends IconButton {
 
-  const NutBamBieuTuongTieuDe({
+  NutBamBieuTuongTieuDe({
     super.key,
-    super.onPressed,
-    required super.icon
+    required IconData bieuTuong,
+    required bool thuocThanhDieuHuong,
+    required bool khaDung,
+    bool canChuY = false,
+    void Function()? khiNhan,
   }) : super(style: const ButtonStyle(
-    overlayColor: MaterialStatePropertyAll(Colors.transparent),
-    splashFactory: NoSplash.splashFactory
-  ));
+      overlayColor: WidgetStatePropertyAll(Colors.transparent),
+      splashFactory: NoSplash.splashFactory
+    ),
+    icon: Icon(bieuTuong, color: khaDung ?
+      (canChuY ? PhongCachGiaoDien().mauThaoTacCanChuY : (thuocThanhDieuHuong ? PhongCachGiaoDien().mauNoiDungChinh : PhongCachGiaoDien().mauChinh)) :
+      (thuocThanhDieuHuong ? PhongCachGiaoDien().mauNoiDungKhoaChinh : PhongCachGiaoDien().mauNoiDungKhoaNen)
+    ),
+    onPressed: khiNhan
+  );
 
 }

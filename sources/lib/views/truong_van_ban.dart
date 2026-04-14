@@ -23,6 +23,7 @@ import 'package:sach_cua_t/utils/common.dart';
 import 'package:sach_cua_t/utils/vanbanhienthi.dart';
 import 'package:sach_cua_t/utils/vonglapgioihan.dart';
 import 'package:sach_cua_t/views/dieu_khien_co_so.dart';
+import 'package:sach_cua_t/views/phong_cach_giao_dien.dart';
 import 'package:sach_cua_t/views/truong_bat_tat.dart';
 import 'package:sach_cua_t/views/van_ban_hien_thi_noi_bat.dart';
 import 'package:sach_cua_t/views/van_ban_hien_thi_widget.dart';
@@ -229,6 +230,9 @@ class DieuKhienTruongVanBan extends DieuKhienCoSo {
   }
 
   void _thongBaoTrangThaiNhap() {
+    if (!khaDung) {
+      return;
+    }
     final TrangThaiNhapVanBan trangThaiHienTai = trangThaiNhap;
     if (trangThaiHienTai != _trangThaiCu) {
       _trangThaiCu = trangThaiHienTai;
@@ -394,7 +398,12 @@ class _TrangThaiTruongVanBan extends TrangThaiCoSo<TruongVanBan> {
         )
       ]));
     } else {
-      mainChildren.add(VbhtWidget(text: widget.tieuDe ?? Vbht.trucTiep(""), textAlign: TextAlign.left));
+      mainChildren.add(VbhtWidget(
+        text: widget.tieuDe ?? Vbht.trucTiep(""),
+        coChu: CoChu.binhThuong,
+        khaDung: widget.dieuKhien!.khaDung,
+        textAlign: TextAlign.left
+      ));
       // Text input
       mainChildren.add(_xayDungONhap(
         key: widget.dieuKhien!._keyNoiDung,
@@ -407,7 +416,12 @@ class _TrangThaiTruongVanBan extends TrangThaiCoSo<TruongVanBan> {
     // Thông báo lỗi
     if (tbLoi != null) {
       mainChildren.add(
-        VbhtWidget(text: tbLoi, style: const TextStyle(color: Colors.red))
+        VbhtWidget(
+          text: tbLoi,
+          khaDung: widget.dieuKhien!.khaDung,
+          coChu: CoChu.binhThuong,
+          style: TextStyle(color: PhongCachGiaoDien().mauThaoTacCanChuY)
+        )
       );
     }
     if (widget.batLuonHienThi) {
@@ -454,19 +468,31 @@ class _TrangThaiTruongVanBan extends TrangThaiCoSo<TruongVanBan> {
     required bool laONhapChinh
   }) {
     final Vbht? tbLoi = widget.dieuKhien?.thongBaoLoi;
+    final PhongCachGiaoDien phongCach = PhongCachGiaoDien();
+    final double chieuCaoO = phongCach.coFontThuong * 2;
     return RawAutocomplete<String>(
       focusNode: fNode,
       textEditingController: txtCtrl,
       fieldViewBuilder: (context, textEditingController, focusNode, onFieldSubmitted) {
         return SizedBox(
-          height: cauHinh.soKyTuToiDa == null ? 30 : 50,
+          height: cauHinh.soKyTuToiDa == null ? chieuCaoO : chieuCaoO + 20,
           child: TextFormField(
             key: key,
-            style: TextStyle(fontWeight: laONhapChinh ? FontWeight.normal : FontWeight.bold),
+            style: TextStyle(
+              fontSize: phongCach.coFontThuong,
+              fontWeight: laONhapChinh ? FontWeight.normal : FontWeight.bold,
+              color: widget.dieuKhien!.khaDung ? phongCach.mauNoiDungNen : phongCach.mauNoiDungKhoaNen
+            ),
             decoration: InputDecoration(
               contentPadding: const EdgeInsets.fromLTRB(5, 0, 5, 0),
-              enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: tbLoi != null ? Colors.red : Colors.grey)),
-              focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Theme.of(context).primaryColor))
+              enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: tbLoi != null ? phongCach.mauThaoTacCanChuY : phongCach.mauVien)),
+              focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: phongCach.mauChinh)),
+              counterStyle: TextStyle(
+                fontFamily: phongCach.tenFont,
+                fontSize: phongCach.coFontSieuNho,
+                fontStyle: FontStyle.italic,
+                color: widget.dieuKhien!.khaDung ? phongCach.mauNoiDungNen : phongCach.mauNoiDungKhoaNen
+              )
             ),
             keyboardType: cauHinh.kieuBanPhim,
             textInputAction: cauHinh.kieuNutEnter,
@@ -480,7 +506,7 @@ class _TrangThaiTruongVanBan extends TrangThaiCoSo<TruongVanBan> {
           )
         );
       },
-      optionsBuilder: (value) async => await _timGoiY(laONhapChinh),
+      optionsBuilder: (value) async => widget.dieuKhien!.khaDung ? await _timGoiY(laONhapChinh) : [],
       optionsViewBuilder: (context, onSelected, options) {
         // print("DEBUG build suggest $laONhapChinh: $options");
         double maxH = options.length * 50;
@@ -504,26 +530,24 @@ class _TrangThaiTruongVanBan extends TrangThaiCoSo<TruongVanBan> {
         return Align(
           alignment: Alignment.topLeft,
           child: Container(
-            // color: Color.fromARGB(255, 170, 170, 170),
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.all(Radius.circular(5)),
+            decoration: BoxDecoration(
+              color: phongCach.mauNen,
+              borderRadius: const BorderRadius.all(Radius.circular(5)),
               boxShadow: [
-                BoxShadow(offset: Offset(5, 5), blurRadius: 5, color: Color.fromARGB(255, 200, 200, 200)),
-                BoxShadow(offset: Offset(-1, -1), blurRadius: 1, color: Color.fromARGB(255, 200, 200, 200))
+                BoxShadow(offset: const Offset(5, 5), blurRadius: 5, color: phongCach.mauVien),
+                BoxShadow(offset: const Offset(-1, -1), blurRadius: 1, color: phongCach.mauVien)
               ]
             ),
             constraints: BoxConstraints(maxHeight: maxH, maxWidth: maxW),
             child: ListView.separated(
               padding: EdgeInsets.zero,
               itemCount: options.length,
-              separatorBuilder: (context, index) => SizedBox(height: 1, child: Container(color: Colors.grey)),
+              separatorBuilder: (context, index) => SizedBox(height: 1, child: Container(color: phongCach.mauVien)),
               itemBuilder: (context, index) {
                 final String opt = options.toList()[index];
                 return TextButton(
                   style: const ButtonStyle(
-                    shape: MaterialStatePropertyAll(RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.zero))),
-                    foregroundColor: MaterialStatePropertyAll(Colors.black),
+                    shape: WidgetStatePropertyAll(RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.zero)))
                   ),
                   onPressed: () => onSelected(opt),
                   child: Row(children: [VanBanHienThiNoiBat(vanBan: _layVanBanNoiBat(dayDu: opt, laPhanNoiDung: laONhapChinh))])
