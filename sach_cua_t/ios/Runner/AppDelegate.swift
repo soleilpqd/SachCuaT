@@ -20,20 +20,32 @@ import Flutter
 import UIKit
 
 @main
-@objc class AppDelegate: FlutterAppDelegate {
+@objc class AppDelegate: FlutterAppDelegate, FlutterImplicitEngineDelegate {
 
     static var app: AppDelegate { UIApplication.shared.delegate! as! AppDelegate }
-    var rootViewController: FlutterViewController { window!.rootViewController as! FlutterViewController }
+    var rootViewController: FlutterViewController? {
+        for schene in UIApplication.shared.connectedScenes {
+            if let winSchene = schene as? UIWindowScene {
+               for win in winSchene.windows {
+                   if let root = win.rootViewController as? FlutterViewController {
+                       return root
+                   }
+               }
+            }
+        }
+        return nil
+    }
 
     override func application(
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
     ) -> Bool {
-        GeneratedPluginRegistrant.register(with: self)
-        if let controller = window?.rootViewController as? FlutterViewController {
-            HeThongMay.register(with: controller)
-        }
         return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+    }
+
+    func didInitializeImplicitFlutterEngine(_ engineBridge: any FlutterImplicitEngineBridge) {
+        GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
+        HeThongMay.register(with: engineBridge.applicationRegistrar.messenger())
     }
 
 }

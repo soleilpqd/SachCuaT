@@ -46,8 +46,8 @@ final class HeThongMay {
 
 //    private let kbToolbarView = UIView(frame: CGRect(x: 0, y: 0, width: 100, height: 50))
 
-    public static func register(with rootController: FlutterViewController) {
-        let channel = FlutterMethodChannel(name: "sach.cua.T", binaryMessenger: rootController.binaryMessenger)
+    public static func register(with messenger: any FlutterBinaryMessenger) {
+        let channel = FlutterMethodChannel(name: "sach.cua.T", binaryMessenger: messenger)
         let instance = HeThongMay(kenh: channel)
         duyNhat = instance
     }
@@ -115,11 +115,12 @@ final class HeThongMay {
         }
         switch ham {
         case .quetMaISBN:
-            if let manHinh = AppDelegate.app.rootViewController.storyboard?.instantiateViewController(withIdentifier: "ManHinhCamera") as? ManHinhCamera {
+            if let rootController = AppDelegate.app.rootViewController,
+               let manHinh = rootController.storyboard?.instantiateViewController(withIdentifier: "ManHinhCamera") as? ManHinhCamera {
                 manHinh.resultHandle = result
                 manHinh.kieuQuet = .isbn
                 manHinh.chuanBi {
-                    AppDelegate.app.rootViewController.present(manHinh, animated: true)
+                    rootController.present(manHinh, animated: true)
                 }
             }
         case .luuAnhSach:

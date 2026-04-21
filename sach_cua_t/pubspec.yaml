@@ -15,8 +15,12 @@ dependencies:
   permission_handler: ^11.3.1
   shared_preferences: ^2.2.3
   sqflite: ^2.3.3+1
+  # if XCode < 14.3
   webview_flutter: 4.10.0
   webview_flutter_wkwebview: 3.17.0
+  # else newer xcode
+  # webview_flutter: 4.13.1
+  # end if
   man_hinh_ung_dung:
     path: ../libraries/man_hinh_ung_dung
 

@@ -153,7 +153,7 @@ final class ManHinhCamera: UIViewController {
 
         self.view.layer.addSublayer(videoLayer)
         self.view.bringSubviewToFront(nutDong)
-        captureSession.startRunning()
+        captureSession.performSelector(inBackground: #selector(AVCaptureSession.startRunning), with: nil)
         khiCauHinhXong?()
         khiCauHinhXong = nil
     }

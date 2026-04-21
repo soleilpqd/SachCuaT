@@ -3,6 +3,7 @@
 ## Chú ý:
 
 - Bundle ID: ảnh hưởng Bundle ID của iOS, Package ID của Android và Flutter (đặc biệt `import` strong source).
+- Phiên bản thư viện `webview_flutter` phụ thuộc vào phiên bản XCode (XCode từ 14.3 trở lên thì có thể sử dụng thư viện này với phiên bản mới nhất).
 
 ## Các cấu hình so với mặc định:
 
