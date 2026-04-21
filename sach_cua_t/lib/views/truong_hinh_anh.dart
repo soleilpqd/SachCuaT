@@ -73,7 +73,7 @@ class _TrangThaiTruongHinhAnh extends TrangThaiCoSo<TruongHinhAnh> {
   Widget build(BuildContext context) {
     final bool khaDung = widget.dieuKhien!.khaDung;
     final PhongCachGiaoDien phongCach = PhongCachGiaoDien();
-    List<Widget> children = [
+    final List<Widget> children = [
       Container(
         color: widget.dieuKhien?.hinhAnh == null ? phongCach.mauVien : phongCach.mauNen,
       ),
@@ -85,29 +85,32 @@ class _TrangThaiTruongHinhAnh extends TrangThaiCoSo<TruongHinhAnh> {
           color: khaDung ? phongCach.mauChinh : phongCach.mauNoiDungKhoaNen,
         )
     ];
-    if (widget.dieuKhien?.hinhAnh == null && khaDung) {
-      children.add(
-        Column(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [VbhtWidget(
+    final AspectRatio khungVuong = AspectRatio(
+      aspectRatio: 1,
+      child: Stack(
+        alignment: AlignmentDirectional.center,
+        children: children
+      )
+    );
+    Widget khungChinh = khungVuong;
+    if (khaDung) {
+      khungChinh = Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          khungVuong,
+          VbhtWidget(
             text: Vbht.tuKhoa(TK.hdsdAnh, dem: widget.dem),
-            coChu: CoChu.binhThuong,
-            style: TextStyle(color: phongCach.mauChinh),
+            coChu: CoChu.nho,
+            style: TextStyle(color: phongCach.mauVien, fontStyle: FontStyle.italic),
             textAlign: TextAlign.right
-          )],
-        )
+          )
+        ],
       );
     }
     return GestureDetector(
       onTap: khaDung ? _khiNhanChonAnh : null,
       onDoubleTap: khaDung ? _khiXoaAnh : null,
-      child: AspectRatio(
-        aspectRatio: 1,
-        child: Stack(
-          alignment: AlignmentDirectional.center,
-          children: children
-        ),
-      )
+      child: khungChinh
     );
   }
 

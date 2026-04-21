@@ -142,7 +142,9 @@ enum TK {
   /// Hướng dẫn
   huongDan,
   /// Giới thiệu
-  gioiThieu
+  gioiThieu,
+  /// Gần đây
+  ganDay
   ;
 }
 
@@ -177,7 +179,7 @@ class Vbht {
   /// CONSTRUCTOR
   /// Nếu [trucTiep] = true thì [vanBan] là [tuKhoa].
   /// [trucTiep] = false thì dùng [tuKhoa] để nạp nội dung từ `VanBanHienThi`, sau đó chạy [khiXong]
-  Vbht({required this.tuKhoa, bool trucTiep = true, this.dem, this.thamSo}) {
+  Vbht({required this.tuKhoa, bool trucTiep = true, this.dem, this.thamSo, Future<String?>? nguon}) {
     _vanBan = tuKhoa;
     if (!trucTiep) {
       String? vbDem = dem?[tuKhoa];
@@ -192,11 +194,19 @@ class Vbht {
           khiXong?.call(value);
         });
       }
+    } else if (nguon != null) {
+      nguon.then((giaTri) {
+        _vanBan = giaTri ?? "";
+        _apDungThamSo();
+        khiXong?.call(_vanBan);
+      });
     }
   }
 
   /// CONVENIENCE CONSTRUCTOR: văn bản trực tiếp
-  Vbht.trucTiep(String tk) : this(tuKhoa: tk, trucTiep: true);
+  Vbht.trucTiep(String tk) : this(tuKhoa: "", trucTiep: true);
+  /// CONVENIENCE CONSTRUCTOR: văn bản gián tiếp từ nguồn khác
+  Vbht.gianTiep(Future<String?> tk) : this(tuKhoa: "", trucTiep: true, nguon: tk);
   /// CONVENIENCE CONSTRUCTOR: văn bản cần nạp từ CSDL thông qua từ khoá
   Vbht.tuKhoa(TK tk, {BoDemVbht? dem, List<String>? ts}) : this(tuKhoa: tk.name, trucTiep: false, dem: dem, thamSo: ts);
 

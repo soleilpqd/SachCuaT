@@ -19,17 +19,20 @@
 import 'package:flutter/material.dart';
 import 'package:man_hinh_ung_dung/luong_man_hinh.dart';
 import 'package:man_hinh_ung_dung/man_hinh_ung_dung.dart';
+import 'package:sach_cua_t/main.dart';
 import 'package:sach_cua_t/man_hinh/man_hinh_co_so.dart';
 import 'package:sach_cua_t/man_hinh/man_hinh_sach.dart';
 import 'package:sach_cua_t/man_hinh/man_hinh_tim_kiem.dart';
 import 'package:sach_cua_t/man_hinh/man_hinh_tro_giup.dart';
 import 'package:sach_cua_t/models/database.dart';
+import 'package:sach_cua_t/models/dulieu.dart';
 import 'package:sach_cua_t/models/native.dart';
-import 'package:sach_cua_t/utils/hopthoai.dart';
 import 'package:sach_cua_t/utils/vanbanhienthi.dart';
 import 'package:sach_cua_t/views/danh_sach_hien_thi.dart';
 import 'package:sach_cua_t/views/nut_bam_bieu_tuong.dart';
 import 'package:sach_cua_t/views/phong_cach_giao_dien.dart';
+import 'package:sach_cua_t/views/truong_nut_bam.dart';
+import 'package:sach_cua_t/views/truong_sach.dart';
 import 'package:sach_cua_t/views/truong_tieu_de.dart';
 import 'package:sach_cua_t/views/van_ban_hien_thi_widget.dart';
 
@@ -61,25 +64,35 @@ class DieuKhienManHinhMoDau extends DieuKhienManHinh {
   int _tongSoSach = 0;
   final BoDemVbht _boDemVbht = BoDemVbht();
   final ScrollController _dkCuon = ScrollController();
-  String _phienBan = "";
+  final Vbht phienBan = Vbht.gianTiep(HeThongMay.duyNhat.layThongTinPhienBan());
+  List<Sach> _dsDanhDau = [];
+  List<Sach> _dsGanDay = [];
 
   DieuKhienManHinhMoDau() {
     widgetCuaManHinh = _ManHinhMoDau(dieuKhienManHinh: this);
-    HeThongMay.duyNhat.layThongTinPhienBan().then((giaTri) {
-      _phienBan = giaTri ?? "";
-      print("PHIEN BAN $_phienBan");
-      trangThaiWidgetManHinh?.capNhatGiaoDienCuaManHinh(dieuKhienManHinh: this);
-    });
   }
 
   @override
   void manHinhSeThanhManHinhChinhTrongLuong() {
     super.manHinhSeThanhManHinhChinhTrongLuong();
+    _truyVanDuLieu();
+  }
+
+  void _truyVanDuLieu() {
+    _dsDanhDau.clear();
+    _dsGanDay.clear();
+    // TODO: refresh data
+    _dsDanhDau.add(Sach.taoDuLieuGia());
+    _dsDanhDau.add(Sach.taoDuLieuGia());
+    _dsDanhDau.add(Sach.taoDuLieuGia());
+    _dsDanhDau.add(Sach.taoDuLieuGia());
+    _dsDanhDau.add(Sach.taoDuLieuGia());
+    _dsDanhDau.add(Sach.taoDuLieuGia());
+    _dsGanDay.add(Sach.taoDuLieuGia());
+
     CoSoDuLieu().demTongSoSach().then((value) {
-      if (_tongSoSach != value) {
-        _tongSoSach = value;
-        trangThaiWidgetManHinh?.capNhatGiaoDienCuaManHinh(dieuKhienManHinh: this);
-      }
+      _tongSoSach = value;
+      trangThaiWidgetManHinh?.capNhatGiaoDienCuaManHinh(dieuKhienManHinh: this);
     });
   }
 
@@ -89,35 +102,18 @@ class DieuKhienManHinhMoDau extends DieuKhienManHinh {
     luongManHinh?.themManHinh(manHinh: mhSach);
   }
 
-  DieuKhienManHinhTuDuoiDay? _dkHopThoaiChonSach;
-
   /// Khi nhấn nút Tìm kiếm
   void _khiNhanTimKiem() {
     final DieuKhienManHinhTimKiem mhTimKiem = DieuKhienManHinhTimKiem();
     luongManHinh?.themManHinh(manHinh: mhTimKiem);
-    // HopThoai.hienThiHopThoaiThongBao(
-    //   noiDung: Vbht.trucTiep("Thông báo dài loằng ngoằng. Xin chào. Tạm biệt!"),
-    //   nhanCacNut: [Vbht.tuKhoa(TK.dong), Vbht.tuKhoa(TK.luu)],
-    //   khiDong: (stt, nhan) => print("STT: $stt; Nhan: ${nhan.vanBan}")
-    // );
-    // _dkHopThoaiChonSach = HopThoai.hienThiHopThoaiTuDuoiDay(
-    //   noiDung: Container(
-    //     color: Colors.red,
-    //     child: Center(child: TextButton(onPressed: _dongHopThoaiChonSach, child: const Text("CLOSE"))),
-    //   ),
-    //   khiDong: _dongHopThoaiChonSach
-    // );
   }
 
   void _khiNhanQuet() {
 
   }
 
-    void _dongHopThoaiChonSach() {
-    if (_dkHopThoaiChonSach != null) {
-      _dkHopThoaiChonSach!.luongManHinh?.loaiManHinh(manHinh: _dkHopThoaiChonSach!);
-      _dkHopThoaiChonSach = null;
-    }
+  void _khiNhanGioiThieu() {
+    MainApp.luongMHGoc.themManHinh(manHinh: DieuKhienManHinhHuongDan(kieu: KieuHuongDan.gioiThieu));
   }
 
 }
@@ -163,17 +159,14 @@ class _TrangThaiManHinhMoDau extends TrangThaiWidgetCuaDieuKhien<_ManHinhMoDau> 
         khiNhan: dkMh._khiNhanThemSach
       ) : null,
       nutPhai: nutPhai,
-      noiDung: dkMh._tongSoSach > 0 ?
-        // xayDungListView(context, scrollCtrl: widget.dieuKhienManHinh._dkCuon) :
-        const Center(child: Text("HELLO!")) :
-        _xayDungManHinhLanDau(context)
+      noiDung: xayDungListView(context, scrollCtrl: widget.dieuKhienManHinh._dkCuon)
     );
   }
 
   /// Xây dựng màn hình lần đầu
-  Widget _xayDungManHinhLanDau(BuildContext context) {
+  Widget _xayDungManHinhLanDau() {
     final DieuKhienManHinhMoDau dkMh = widget.dieuKhienManHinh;
-    return Column(
+    return SizedBox(height: 100, child: Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -188,7 +181,7 @@ class _TrangThaiManHinhMoDau extends TrangThaiWidgetCuaDieuKhien<_ManHinhMoDau> 
           thuocThanhDieuHuong: false
         )
       ],
-    );
+    ));
   }
 
   @override
@@ -206,32 +199,78 @@ class _TrangThaiManHinhMoDau extends TrangThaiWidgetCuaDieuKhien<_ManHinhMoDau> 
 
   @override
   int soLuongPhanDoan() {
-    // TODO: implement soLuongPhanDoan
-    throw UnimplementedError();
+    if (widget.dieuKhienManHinh._tongSoSach > 0) {
+      return _PhanDoanManHinhMoDau.tongSo();
+    }
+    return 2;
   }
 
   @override
   int soMucCuaPhanDoan(int doan) {
-    // TODO: implement soMucCuaPhanDoan
-    throw UnimplementedError();
+    if (widget.dieuKhienManHinh._tongSoSach > 0) {
+      return switch(_PhanDoanManHinhMoDau.khoiTao(doan)) {
+        _PhanDoanManHinhMoDau.danhDau => widget.dieuKhienManHinh._dsDanhDau.length,
+        _PhanDoanManHinhMoDau.ganDay => widget.dieuKhienManHinh._dsGanDay.length,
+        _PhanDoanManHinhMoDau.gioiThieu => 1,
+        _ => 0
+      };
+    }
+    return 1;
   }
 
   @override
   TruongTieuDe? tieuDeChoDoan(int doan) {
-    // TODO: implement tieuDeChoDoan
-    throw UnimplementedError();
+    if (widget.dieuKhienManHinh._tongSoSach > 0) {
+      return switch(_PhanDoanManHinhMoDau.khoiTao(doan)) {
+        _PhanDoanManHinhMoDau.danhDau => _xayDungTruongTieuDe(TK.danhDau),
+        _PhanDoanManHinhMoDau.ganDay => _xayDungTruongTieuDe(TK.ganDay),
+        _PhanDoanManHinhMoDau.gioiThieu => _xayDungTruongTieuDe(TK.gioiThieu),
+        _ => null
+      };
+    } else if (doan == 1) {
+      return _xayDungTruongTieuDe(TK.gioiThieu);
+    }
+    return null;
   }
+
+  TruongTieuDe _xayDungTruongTieuDe(TK tk) => TruongTieuDe(
+    tieuDeChinh: Vbht.tuKhoa(tk, dem: widget.dieuKhienManHinh._boDemVbht)
+  );
 
   @override
   Widget? widgetCuaMuc(int doan, int dong) {
-    // TODO: implement widgetCuaMuc
-    throw UnimplementedError();
+    final DieuKhienManHinhMoDau dkMh = widget.dieuKhienManHinh;
+    if (widget.dieuKhienManHinh._tongSoSach > 0) {
+      return switch(_PhanDoanManHinhMoDau.khoiTao(doan)) {
+        _PhanDoanManHinhMoDau.danhDau => _xayDungTruongSach(dkMh._dsDanhDau[dong], true),
+        _PhanDoanManHinhMoDau.ganDay => _xayDungTruongSach(dkMh._dsGanDay[dong], false),
+        _PhanDoanManHinhMoDau.gioiThieu => _xayDuongTruongGioiThieu(),
+        _ => null
+      };
+    }
+    return switch(doan) {
+      0 => _xayDungManHinhLanDau(),
+      1 => _xayDuongTruongGioiThieu(),
+      _ => null
+    };
   }
 
-  @override
-  List<Widget>? widgetsCuaCaDoan(int doan) {
-    // TODO: implement widgetsCuaCaDoan
-    throw UnimplementedError();
+  Widget _xayDuongTruongGioiThieu() => TruongNutBam(
+    khiNhan: widget.dieuKhienManHinh._khiNhanGioiThieu,
+    tieuDe: widget.dieuKhienManHinh.phienBan,
+    icon: Icons.help
+  );
+
+  Widget _xayDungTruongSach(Sach sach, bool hienThiDanhDau) {
+    List<ThongTinHienThiTruongSach> dsHienThi = TruongSach.thongTinMacDinh();
+    if (hienThiDanhDau) {
+      dsHienThi.add(ThongTinHienThiTruongSach(truong: ThongTinSachDeHienThi.danhDau));
+    }
+    return TruongSach(sach: sach, thongTinCanHienThi: dsHienThi);
   }
+
+
+  @override
+  List<Widget>? widgetsCuaCaDoan(int doan) => null;
 
 }

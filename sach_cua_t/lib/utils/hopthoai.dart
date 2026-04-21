@@ -116,14 +116,15 @@ class _ManHinhThongBao extends StatelessWidget {
   Widget build(BuildContext context) {
     final PhongCachGiaoDien phongCach = PhongCachGiaoDien();
     List<Widget> dsHienThi = [
-      const SizedBox(height: 20),
-      VbhtWidget(
-        text: dieuKhienManHinh.noiDung,
-        coChu: CoChu.binhThuong,
-        textAlign: TextAlign.center,
-        style: Theme.of(context).textTheme.titleLarge
+      Padding(
+        padding: EdgeInsetsGeometry.all(20),
+        child:VbhtWidget(
+          text: dieuKhienManHinh.noiDung,
+          coChu: CoChu.binhThuong,
+          textAlign: TextAlign.center,
+          style: Theme.of(context).textTheme.titleLarge
+        )
       ),
-      const SizedBox(height: 20),
     ];
     bool nutDoc = dieuKhienManHinh.nhanCacNut.length > 2;
     List<Widget> dsCacNut = nutDoc ? dsHienThi : [];
