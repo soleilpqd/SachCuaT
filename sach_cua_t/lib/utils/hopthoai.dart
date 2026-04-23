@@ -118,11 +118,10 @@ class _ManHinhThongBao extends StatelessWidget {
     List<Widget> dsHienThi = [
       Padding(
         padding: EdgeInsetsGeometry.all(20),
-        child:VbhtWidget(
+        child: VbhtWidget(
           text: dieuKhienManHinh.noiDung,
-          coChu: CoChu.binhThuong,
+          coChu: CoChu.to,
           textAlign: TextAlign.center,
-          style: Theme.of(context).textTheme.titleLarge
         )
       ),
     ];
@@ -155,7 +154,7 @@ class _ManHinhThongBao extends StatelessWidget {
       ));
     }
     dsHienThi.add(const SizedBox(height: 10));
-    final viewChinh = Center(
+    final viewChinh = Material(color: Colors.transparent, child: Center(
       child: FractionallySizedBox(
         widthFactor: 0.8,
         child: Container(
@@ -181,7 +180,7 @@ class _ManHinhThongBao extends StatelessWidget {
           ),
         ),
       )
-    );
+    ));
     if (dkChuyenDong != null) {
       return xayDungLopThuPhong(context, viewChinh, dkChuyenDong!);
     }

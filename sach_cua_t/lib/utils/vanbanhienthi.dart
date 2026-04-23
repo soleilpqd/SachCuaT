@@ -97,8 +97,6 @@ enum TK {
   chonSachLapChuoi,
   /// Xoá sách khỏi chuỗi
   roiChuoi,
-  /// Tập số # trong chuỗi sách # tập
-  namTrongChuoi,
   /// Ghi chú chuỗi sách
   ghiChuChuoi,
   /// Tập còn thiếu (Các tập còn thiếu: #_)
@@ -204,7 +202,7 @@ class Vbht {
   }
 
   /// CONVENIENCE CONSTRUCTOR: văn bản trực tiếp
-  Vbht.trucTiep(String tk) : this(tuKhoa: "", trucTiep: true);
+  Vbht.trucTiep(String tk) : this(tuKhoa: tk, trucTiep: true);
   /// CONVENIENCE CONSTRUCTOR: văn bản gián tiếp từ nguồn khác
   Vbht.gianTiep(Future<String?> tk) : this(tuKhoa: "", trucTiep: true, nguon: tk);
   /// CONVENIENCE CONSTRUCTOR: văn bản cần nạp từ CSDL thông qua từ khoá

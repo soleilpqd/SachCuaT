@@ -376,6 +376,20 @@ class CoSoDuLieu {
     await _delete(BANG_SACH, where: "\"ma\" = ?", whereArgs: [maSach]);
   }
 
+  Future<List<Sach>> layDsSachGanDay() async {
+    assert(_db != null, "CSDL chưa được khởi tạo.");
+    final List<Map<String, Object?>> ketQua = await _query(
+      BANG_SACH,
+      orderBy: "\"xem\" DESC",
+      limit: 5
+    );
+    return ketQua.map((muc) {
+      final Sach sach = Sach();
+      _ganDLVaoSach(muc, sach);
+      return sach;
+    }).toList();
+  }
+
   // ------
 
   /// Gán dữ liệu từ kết quả CSDL sang object
@@ -1093,6 +1107,24 @@ WHERE "nhan" = ?;
     );
   }
 
+  /// Lấy danh sách các sách có đánh dấu
+  Future<List<Sach>> layDanhSachSachDanhDau() async {
+    assert(_db != null, "CSDL chưa được khởi tạo.");
+    final List<Map<String, Object?>> banGhiS = await _rawQuery("""
+SELECT "$BANG_SACH".*, "$BANG_DANH_DAU"."ghi_chu" FROM "$BANG_SACH"
+INNER JOIN "$BANG_DANH_DAU" ON "$BANG_SACH"."ma" = "$BANG_DANH_DAU"."sach"
+ORDER BY "$BANG_DANH_DAU"."thoi_gian" DESC;
+""");
+    List<Sach> ketQua = [];
+    for (final Map<String, Object?> banGhi in banGhiS) {
+      final Sach sach = Sach();
+      _ganDLVaoSach(banGhi, sach);
+      sach.danhDau = [(banGhi["ghi_chu"] as String?) ?? ""];
+      ketQua.add(sach);
+    }
+    return ketQua;
+  }
+
   // ------
 
   /// Gán dữ liệu cho object SachNhieuTap
@@ -1464,6 +1496,20 @@ WHERE "chuoi" = ?;
     whereArgs.add("%$tuKhoa%");
     whereArgs.add("%$tkKd%");
     return await _thucHienTimKiemSach(tacGia, dichGia, nxb, viTri, nhan, nhieuTap, whereStatements, whereArgs, joinStatements);
+  }
+
+  /// Tìm sách theo mã ISBN
+  Future<int?> timSachTheoISBN(String isbn) async {
+    assert(_db != null, "CSDL chưa được khởi tạo.");
+    final List<Map<String, Object?>> ketQua = await _query(
+      BANG_SACH,
+      where: "\"isbn\" = ?",
+      whereArgs: [isbn]
+    );
+    if (ketQua.isNotEmpty) {
+      return ketQua.first["ma"] as int;
+    }
+    return null;
   }
 
 }

@@ -33,18 +33,19 @@ class NutBamVanBan extends GiaoDienCoSo<DieuKhienCoSo> {
   const NutBamVanBan({super.key, required this.vanBan, this.khiNhan, super.dieuKhien});
 
   @override
-  State<StatefulWidget> createState() => _TrangThaiNutBamBieuTuong();
+  State<StatefulWidget> createState() => _TrangThaiNutBamVanBan();
 
 }
 
-class _TrangThaiNutBamBieuTuong extends TrangThaiCoSo<NutBamVanBan> {
+class _TrangThaiNutBamVanBan extends TrangThaiCoSo<NutBamVanBan> {
 
   @override
   Widget build(BuildContext context) {
     final bool khaDung = widget.dieuKhien?.khaDung ?? true;
+    final PhongCachGiaoDien phongCach = PhongCachGiaoDien();
     return TextButton(
       onPressed: khaDung ? widget.khiNhan : null,
-      style: ButtonStyle(foregroundColor: WidgetStatePropertyAll(khaDung ? Theme.of(context).primaryColor : Colors.grey)),
+      style: ButtonStyle(foregroundColor: WidgetStatePropertyAll(khaDung ? phongCach.mauChinh : phongCach.mauNoiDungKhoaNen)),
       child: VbhtWidget(coChu: CoChu.binhThuong, text: widget.vanBan)
     );
   }

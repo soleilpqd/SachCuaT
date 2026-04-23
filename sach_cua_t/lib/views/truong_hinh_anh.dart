@@ -82,7 +82,7 @@ class _TrangThaiTruongHinhAnh extends TrangThaiCoSo<TruongHinhAnh> {
         Icon(
           Icons.camera_alt,
           size: 60,
-          color: khaDung ? phongCach.mauChinh : phongCach.mauNoiDungKhoaNen,
+          color: khaDung ? phongCach.mauNoiDungChinh : phongCach.mauNoiDungKhoaChinh,
         )
     ];
     final AspectRatio khungVuong = AspectRatio(

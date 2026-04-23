@@ -27,6 +27,8 @@ import 'package:sach_cua_t/man_hinh/man_hinh_tro_giup.dart';
 import 'package:sach_cua_t/models/database.dart';
 import 'package:sach_cua_t/models/dulieu.dart';
 import 'package:sach_cua_t/models/native.dart';
+import 'package:sach_cua_t/models/operations/thao_tac_nap_man_hinh_mo_dau.dart';
+import 'package:sach_cua_t/utils/hopthoai.dart';
 import 'package:sach_cua_t/utils/vanbanhienthi.dart';
 import 'package:sach_cua_t/views/danh_sach_hien_thi.dart';
 import 'package:sach_cua_t/views/nut_bam_bieu_tuong.dart';
@@ -61,12 +63,10 @@ enum _PhanDoanManHinhMoDau {
 
 class DieuKhienManHinhMoDau extends DieuKhienManHinh {
 
-  int _tongSoSach = 0;
   final BoDemVbht _boDemVbht = BoDemVbht();
   final ScrollController _dkCuon = ScrollController();
   final Vbht phienBan = Vbht.gianTiep(HeThongMay.duyNhat.layThongTinPhienBan());
-  List<Sach> _dsDanhDau = [];
-  List<Sach> _dsGanDay = [];
+  final ThaoTacNapDuLieuManHinhMoDau nguonDuLieu = ThaoTacNapDuLieuManHinhMoDau();
 
   DieuKhienManHinhMoDau() {
     widgetCuaManHinh = _ManHinhMoDau(dieuKhienManHinh: this);
@@ -79,21 +79,15 @@ class DieuKhienManHinhMoDau extends DieuKhienManHinh {
   }
 
   void _truyVanDuLieu() {
-    _dsDanhDau.clear();
-    _dsGanDay.clear();
-    // TODO: refresh data
-    _dsDanhDau.add(Sach.taoDuLieuGia());
-    _dsDanhDau.add(Sach.taoDuLieuGia());
-    _dsDanhDau.add(Sach.taoDuLieuGia());
-    _dsDanhDau.add(Sach.taoDuLieuGia());
-    _dsDanhDau.add(Sach.taoDuLieuGia());
-    _dsDanhDau.add(Sach.taoDuLieuGia());
-    _dsGanDay.add(Sach.taoDuLieuGia());
-
-    CoSoDuLieu().demTongSoSach().then((value) {
-      _tongSoSach = value;
+    nguonDuLieu.napDuLieu().then((_) {
       trangThaiWidgetManHinh?.capNhatGiaoDienCuaManHinh(dieuKhienManHinh: this);
     });
+    trangThaiWidgetManHinh?.capNhatGiaoDienCuaManHinh(dieuKhienManHinh: this);
+  }
+
+  /// Khi nhấn tiêu đề màn hình
+  void _khiNhanTieuDeManHinh() {
+    _dkCuon.cuonLenDau();
   }
 
   /// Khi nhấn nút Thêm sách
@@ -108,10 +102,41 @@ class DieuKhienManHinhMoDau extends DieuKhienManHinh {
     luongManHinh?.themManHinh(manHinh: mhTimKiem);
   }
 
-  void _khiNhanQuet() {
-
+    /// Khi không có máy ảnh
+  void _khiKhongCoMayAnh() {
+    HopThoai.hienThiHopThoaiThongBao(
+      noiDung: Vbht.tuKhoa(TK.khongCoMayAnh, dem: _boDemVbht),
+      nhanCacNut: [Vbht.tuKhoa(TK.dong, dem: _boDemVbht)]
+    );
   }
 
+  /// Khi nhấn nút quét mã vạch
+  void _khiNhanQuet() async {
+    final String? maISBN = await HeThongMay.duyNhat.quetMaISBN().onError((error, stackTrace) {
+      _khiKhongCoMayAnh();
+      return;
+    });
+    if (maISBN != null) {
+      int? maSach = await CoSoDuLieu().timSachTheoISBN(maISBN);
+      if (maSach != null) {
+        final DieuKhienManHinhSach mhSach = DieuKhienManHinhSach(maSach: maSach);
+        luongManHinh?.themManHinh(manHinh: mhSach);
+      } else {
+        HopThoai.hienThiHopThoaiThongBao(
+          noiDung: Vbht.tuKhoa(TK.sachKhongTonTai, dem: _boDemVbht),
+          nhanCacNut: [Vbht.tuKhoa(TK.dong, dem: _boDemVbht)]
+        );
+      }
+    }
+  }
+
+  /// Khi nhấn vào 1 dòng sách
+  void _khiNhanSach(Sach sach) {
+    final DieuKhienManHinhSach mhSach = DieuKhienManHinhSach(maSach: sach.maSo);
+    luongManHinh?.themManHinh(manHinh: mhSach);
+  }
+
+  /// Khi nhấn Giới thiệu
   void _khiNhanGioiThieu() {
     MainApp.luongMHGoc.themManHinh(manHinh: DieuKhienManHinhHuongDan(kieu: KieuHuongDan.gioiThieu));
   }
@@ -120,7 +145,7 @@ class DieuKhienManHinhMoDau extends DieuKhienManHinh {
 
 class _ManHinhMoDau extends WidgetCuaDieuKhienManHinh<DieuKhienManHinhMoDau> {
 
-  const _ManHinhMoDau({required super.dieuKhienManHinh});
+  _ManHinhMoDau({required super.dieuKhienManHinh});
 
   @override
   State<StatefulWidget> createState() => _TrangThaiManHinhMoDau();
@@ -138,7 +163,7 @@ class _TrangThaiManHinhMoDau extends TrangThaiWidgetCuaDieuKhien<_ManHinhMoDau> 
   Widget build(BuildContext context) {
     final DieuKhienManHinhMoDau dkMh = widget.dieuKhienManHinh;
     List<Widget> nutPhai = [];
-    if (dkMh._tongSoSach > 0) {
+    if (dkMh.nguonDuLieu.tongSoSach > 0) {
       nutPhai.add(NutBamBieuTuong(
         bieuTuong: Icons.camera_alt_outlined,
         thuocThanhDieuHuong: true,
@@ -153,7 +178,8 @@ class _TrangThaiManHinhMoDau extends TrangThaiWidgetCuaDieuKhien<_ManHinhMoDau> 
     nutPhai.add(ManHinhCoSo.taoNutHuongDan(KieuHuongDan.chinh));
     return ManHinhCoSo(
       tieuDe: Vbht.tuKhoa(TK.sachCuaT),
-      nutTrai: dkMh._tongSoSach > 0 ? NutBamBieuTuong(
+      khiNhanTieuDe: dkMh._khiNhanTieuDeManHinh,
+      nutTrai: dkMh.nguonDuLieu.tongSoSach > 0 ? NutBamBieuTuong(
         bieuTuong: Icons.add,
         thuocThanhDieuHuong: true,
         khiNhan: dkMh._khiNhanThemSach
@@ -199,7 +225,7 @@ class _TrangThaiManHinhMoDau extends TrangThaiWidgetCuaDieuKhien<_ManHinhMoDau> 
 
   @override
   int soLuongPhanDoan() {
-    if (widget.dieuKhienManHinh._tongSoSach > 0) {
+    if (widget.dieuKhienManHinh.nguonDuLieu.tongSoSach > 0) {
       return _PhanDoanManHinhMoDau.tongSo();
     }
     return 2;
@@ -207,10 +233,10 @@ class _TrangThaiManHinhMoDau extends TrangThaiWidgetCuaDieuKhien<_ManHinhMoDau> 
 
   @override
   int soMucCuaPhanDoan(int doan) {
-    if (widget.dieuKhienManHinh._tongSoSach > 0) {
+    if (widget.dieuKhienManHinh.nguonDuLieu.tongSoSach > 0) {
       return switch(_PhanDoanManHinhMoDau.khoiTao(doan)) {
-        _PhanDoanManHinhMoDau.danhDau => widget.dieuKhienManHinh._dsDanhDau.length,
-        _PhanDoanManHinhMoDau.ganDay => widget.dieuKhienManHinh._dsGanDay.length,
+        _PhanDoanManHinhMoDau.danhDau => widget.dieuKhienManHinh.nguonDuLieu.dsDanhDau.length,
+        _PhanDoanManHinhMoDau.ganDay => widget.dieuKhienManHinh.nguonDuLieu.dsGanDay.length,
         _PhanDoanManHinhMoDau.gioiThieu => 1,
         _ => 0
       };
@@ -220,7 +246,7 @@ class _TrangThaiManHinhMoDau extends TrangThaiWidgetCuaDieuKhien<_ManHinhMoDau> 
 
   @override
   TruongTieuDe? tieuDeChoDoan(int doan) {
-    if (widget.dieuKhienManHinh._tongSoSach > 0) {
+    if (widget.dieuKhienManHinh.nguonDuLieu.tongSoSach > 0) {
       return switch(_PhanDoanManHinhMoDau.khoiTao(doan)) {
         _PhanDoanManHinhMoDau.danhDau => _xayDungTruongTieuDe(TK.danhDau),
         _PhanDoanManHinhMoDau.ganDay => _xayDungTruongTieuDe(TK.ganDay),
@@ -240,10 +266,10 @@ class _TrangThaiManHinhMoDau extends TrangThaiWidgetCuaDieuKhien<_ManHinhMoDau> 
   @override
   Widget? widgetCuaMuc(int doan, int dong) {
     final DieuKhienManHinhMoDau dkMh = widget.dieuKhienManHinh;
-    if (widget.dieuKhienManHinh._tongSoSach > 0) {
+    if (widget.dieuKhienManHinh.nguonDuLieu.tongSoSach > 0) {
       return switch(_PhanDoanManHinhMoDau.khoiTao(doan)) {
-        _PhanDoanManHinhMoDau.danhDau => _xayDungTruongSach(dkMh._dsDanhDau[dong], true),
-        _PhanDoanManHinhMoDau.ganDay => _xayDungTruongSach(dkMh._dsGanDay[dong], false),
+        _PhanDoanManHinhMoDau.danhDau => _xayDungTruongSach(dkMh.nguonDuLieu.dsDanhDau[dong], true),
+        _PhanDoanManHinhMoDau.ganDay => _xayDungTruongSach(dkMh.nguonDuLieu.dsGanDay[dong], false),
         _PhanDoanManHinhMoDau.gioiThieu => _xayDuongTruongGioiThieu(),
         _ => null
       };
@@ -266,9 +292,12 @@ class _TrangThaiManHinhMoDau extends TrangThaiWidgetCuaDieuKhien<_ManHinhMoDau> 
     if (hienThiDanhDau) {
       dsHienThi.add(ThongTinHienThiTruongSach(truong: ThongTinSachDeHienThi.danhDau));
     }
-    return TruongSach(sach: sach, thongTinCanHienThi: dsHienThi);
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () => widget.dieuKhienManHinh._khiNhanSach(sach),
+      child: TruongSach(sach: sach, thongTinCanHienThi: dsHienThi)
+    );
   }
-
 
   @override
   List<Widget>? widgetsCuaCaDoan(int doan) => null;

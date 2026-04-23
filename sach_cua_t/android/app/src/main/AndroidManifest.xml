@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
-        android:label="sach_cua_t"
+        android:label="Sách của T"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

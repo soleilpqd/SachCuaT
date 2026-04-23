@@ -97,7 +97,7 @@ class DieuKhienManHinhThongKe extends DieuKhienManHinh {
   final ScrollController _dkCuon = ScrollController();
 
   DieuKhienManHinhThongKe({required this.dsSach}) {
-    widgetCuaManHinh = _ManHinhThongKe(dkMh: this);
+    widgetCuaManHinh = _ManHinhThongKe(dieuKhienManHinh: this);
     _phanTich();
   }
 
@@ -189,18 +189,16 @@ class DieuKhienManHinhThongKe extends DieuKhienManHinh {
 }
 
 /// Giao diện màn hình thống kê
-class _ManHinhThongKe extends StatelessWidget with ListViewTheoPhanDoan {
+class _ManHinhThongKe extends WidgetTinhCuaDieuKhienManHinh<DieuKhienManHinhThongKe> with ListViewTheoPhanDoan {
 
-  final DieuKhienManHinhThongKe dkMh;
-
-  const _ManHinhThongKe({required this.dkMh});
+  _ManHinhThongKe({required super.dieuKhienManHinh});
 
   @override
   Widget build(BuildContext context) => ManHinhCoSo(
-    tieuDe: Vbht.tuKhoa(TK.thongKe, dem: dkMh.demVbht),
-    khiNhanQuayLai: dkMh._khiNhanQuayLai,
-    khiNhanTieuDe: dkMh._khiNhanTieuDeMh,
-    noiDung: xayDungListView(context, scrollCtrl: dkMh._dkCuon)
+    tieuDe: Vbht.tuKhoa(TK.thongKe, dem: dieuKhienManHinh.demVbht),
+    khiNhanQuayLai: dieuKhienManHinh._khiNhanQuayLai,
+    khiNhanTieuDe: dieuKhienManHinh._khiNhanTieuDeMh,
+    noiDung: xayDungListView(context, scrollCtrl: dieuKhienManHinh._dkCuon)
   );
 
   @override
@@ -210,12 +208,12 @@ class _ManHinhThongKe extends StatelessWidget with ListViewTheoPhanDoan {
   int soMucCuaPhanDoan(int doan) {
     return switch (_PhanDoanManHinhThongKe.khoiTao(doan)) {
       _PhanDoanManHinhThongKe.tong => 1,
-      _PhanDoanManHinhThongKe.tacGia => dkMh._kqTacGia.length,
-      _PhanDoanManHinhThongKe.dichGia => dkMh._kqDichGia.length,
-      _PhanDoanManHinhThongKe.nxb => dkMh._kqNxb.length,
-      _PhanDoanManHinhThongKe.viTri => dkMh._kqViTri.length,
-      _PhanDoanManHinhThongKe.nhan => dkMh._kqNhan.length,
-      _PhanDoanManHinhThongKe.nhieuTap => dkMh._kqSachNhieuTap.length,
+      _PhanDoanManHinhThongKe.tacGia => dieuKhienManHinh._kqTacGia.length,
+      _PhanDoanManHinhThongKe.dichGia => dieuKhienManHinh._kqDichGia.length,
+      _PhanDoanManHinhThongKe.nxb => dieuKhienManHinh._kqNxb.length,
+      _PhanDoanManHinhThongKe.viTri => dieuKhienManHinh._kqViTri.length,
+      _PhanDoanManHinhThongKe.nhan => dieuKhienManHinh._kqNhan.length,
+      _PhanDoanManHinhThongKe.nhieuTap => dieuKhienManHinh._kqSachNhieuTap.length,
       _PhanDoanManHinhThongKe.chanTrang => 1,
       _ => 0
     };
@@ -223,8 +221,8 @@ class _ManHinhThongKe extends StatelessWidget with ListViewTheoPhanDoan {
 
   /// Xây dựng trường tiêu đề
   TruongTieuDe _xayDungTruongTieuDe({required TK chinh, required TK phu, required String thamSo}) => TruongTieuDe(
-    tieuDeChinh: Vbht.tuKhoa(chinh, dem: dkMh.demVbht),
-    tieuDePhu: Vbht.tuKhoa(phu, dem: dkMh.demVbht, ts: [thamSo])
+    tieuDeChinh: Vbht.tuKhoa(chinh, dem: dieuKhienManHinh.demVbht),
+    tieuDePhu: Vbht.tuKhoa(phu, dem: dieuKhienManHinh.demVbht, ts: [thamSo])
   );
 
   @override
@@ -234,37 +232,37 @@ class _ManHinhThongKe extends StatelessWidget with ListViewTheoPhanDoan {
       _PhanDoanManHinhThongKe.tong => _xayDungTruongTieuDe(
         chinh: TK.sachCuaT,
         phu: TK.soLuongKetQua,
-        thamSo: "${dkMh.dsSach.length}"
+        thamSo: "${dieuKhienManHinh.dsSach.length}"
       ),
       _PhanDoanManHinhThongKe.tacGia => _xayDungTruongTieuDe(
         chinh: TK.tacGia,
         phu: TK.soLuongKetQua,
-        thamSo: "${dkMh._kqTacGia.length}"
+        thamSo: "${dieuKhienManHinh._kqTacGia.length}"
       ),
       _PhanDoanManHinhThongKe.dichGia => _xayDungTruongTieuDe(
         chinh: TK.dichGia,
         phu: TK.soLuongKetQua,
-        thamSo: "${dkMh._kqDichGia.length}"
+        thamSo: "${dieuKhienManHinh._kqDichGia.length}"
       ),
       _PhanDoanManHinhThongKe.nxb => _xayDungTruongTieuDe(
         chinh: TK.dvPhatHanh,
         phu: TK.soLuongKetQua,
-        thamSo: "${dkMh._kqNxb.length}"
+        thamSo: "${dieuKhienManHinh._kqNxb.length}"
       ),
       _PhanDoanManHinhThongKe.viTri => _xayDungTruongTieuDe(
         chinh: TK.viTri,
         phu: TK.soLuongKetQua,
-        thamSo: "${dkMh._kqViTri.length}"
+        thamSo: "${dieuKhienManHinh._kqViTri.length}"
       ),
       _PhanDoanManHinhThongKe.nhan => _xayDungTruongTieuDe(
         chinh: TK.tieuDeNhan,
         phu: TK.soLuongKetQua,
-        thamSo: "${dkMh._kqNhan.length}"
+        thamSo: "${dieuKhienManHinh._kqNhan.length}"
       ),
       _PhanDoanManHinhThongKe.nhieuTap => _xayDungTruongTieuDe(
         chinh: TK.tieuDeSachNhieuTap,
         phu: TK.soLuongKetQua,
-        thamSo: "${dkMh._kqSachNhieuTap.length}"
+        thamSo: "${dieuKhienManHinh._kqSachNhieuTap.length}"
       ),
       _ => null,
     };
@@ -277,34 +275,34 @@ class _ManHinhThongKe extends StatelessWidget with ListViewTheoPhanDoan {
   Widget? widgetCuaMuc(int doan, int dong) {
     return switch (_PhanDoanManHinhThongKe.khoiTao(doan)) {
       _PhanDoanManHinhThongKe.tacGia => _xayDungDongKetQua(
-        danhSach: dkMh._kqTacGia,
+        danhSach: dieuKhienManHinh._kqTacGia,
         stt: dong,
-        khiNhan: dkMh._khiNhanKqTacGia
+        khiNhan: dieuKhienManHinh._khiNhanKqTacGia
       ),
       _PhanDoanManHinhThongKe.dichGia => _xayDungDongKetQua(
-        danhSach: dkMh._kqDichGia,
+        danhSach: dieuKhienManHinh._kqDichGia,
         stt: dong,
-        khiNhan: dkMh._khiNhanKqDichGia
+        khiNhan: dieuKhienManHinh._khiNhanKqDichGia
       ),
       _PhanDoanManHinhThongKe.nxb => _xayDungDongKetQua(
-        danhSach: dkMh._kqNxb,
+        danhSach: dieuKhienManHinh._kqNxb,
         stt: dong,
-        khiNhan: dkMh._khiNhanKqNxb
+        khiNhan: dieuKhienManHinh._khiNhanKqNxb
       ),
       _PhanDoanManHinhThongKe.viTri => _xayDungDongKetQua(
-        danhSach: dkMh._kqViTri,
+        danhSach: dieuKhienManHinh._kqViTri,
         stt: dong,
-        khiNhan: dkMh._khiNhanKqViTri
+        khiNhan: dieuKhienManHinh._khiNhanKqViTri
       ),
       _PhanDoanManHinhThongKe.nhan => _xayDungDongKetQua(
-        danhSach: dkMh._kqNhan,
+        danhSach: dieuKhienManHinh._kqNhan,
         stt: dong,
-        khiNhan: dkMh._khiNhanKqNhan
+        khiNhan: dieuKhienManHinh._khiNhanKqNhan
       ),
       _PhanDoanManHinhThongKe.nhieuTap => _xayDungDongKetQua(
-        danhSach: dkMh._kqSachNhieuTap,
+        danhSach: dieuKhienManHinh._kqSachNhieuTap,
         stt: dong,
-        khiNhan: dkMh._khiNhanKqNhieuTap
+        khiNhan: dieuKhienManHinh._khiNhanKqNhieuTap
       ),
       _ => null
     };

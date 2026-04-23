@@ -55,7 +55,6 @@ class DieuKhienManHinhWeb extends DieuKhienManHinh {
   Map<String, String> dsNXB = {};
   /// Danh sách Sách đã trích xuất
   List<List<String>> dsSach = [];
-  final GlobalKey _webViewKey = GlobalKey();
 
   DieuKhienManHinhTuDuoiDay? _dkHopThoaiChonSach;
 
@@ -322,7 +321,7 @@ class _ManHinhWeb extends StatelessWidget  {
       tieuDe: dkManHinh.tieuDe,
       khiNhanQuayLai: dkManHinh._khiNhanQuayLai,
       nutPhai: nutPhai,
-      noiDung: WebViewWidget(key: dkManHinh._webViewKey, controller: dkManHinh._webController)
+      noiDung: WebViewWidget(key: dkManHinh.khoaWidgetGoc, controller: dkManHinh._webController)
     );
   }
 

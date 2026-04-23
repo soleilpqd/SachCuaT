@@ -106,7 +106,6 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo {
   final void Function()? khiLuuSach;
 
   final ScrollController _dkCuon = ScrollController();
-  final GlobalKey _cuonKey = GlobalKey();
   final DieuKhienCoSo _dkLuuChieu = DieuKhienCoSo();
   final DieuKhienCoSo _dkDkXuatBan = DieuKhienCoSo();
   final DieuKhienTruongBatTat _dkDaDocXong = DieuKhienTruongBatTat();
@@ -172,7 +171,6 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo {
   @override
   void manHinhDuocThemVaoLuong() {
     super.manHinhDuocThemVaoLuong();
-    // CoSoDuLieu().ghiLog = true;
     _khoiTaoDuLieu();
   }
 
@@ -1086,7 +1084,7 @@ class _ManHinhSach extends StatelessWidget {
 
 class _NoiDungManHinhSach extends WidgetCuaDieuKhienManHinh<DieuKhienManHinhSach> {
 
-  const _NoiDungManHinhSach({required super.dieuKhienManHinh});
+  _NoiDungManHinhSach({required super.dieuKhienManHinh});
 
   @override
   State<StatefulWidget> createState() => _TrangThaiNoiDungManHinhSach();
@@ -1097,15 +1095,6 @@ class _TrangThaiNoiDungManHinhSach extends TrangThaiWidgetCuaDieuKhien<_NoiDungM
 
   bool _canHienThiTienTrinh() => widget.dieuKhienManHinh.maSach != null && !widget.dieuKhienManHinh._thaoTacNap!.daXong;
   bool _sachTonTai() => (widget.dieuKhienManHinh.maSach != null && widget.dieuKhienManHinh._thaoTacNap!.thanhCong) || widget.dieuKhienManHinh.maSach == null;
-  bool _hienThiTienTrinh = false;
-  bool _coLoi = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _hienThiTienTrinh = _canHienThiTienTrinh();
-    _coLoi = !_sachTonTai();
-  }
 
   @override
   void capNhatGiaoDienCuaManHinh({required DieuKhienManHinh dieuKhienManHinh, ThamSoDieuKhienWidgetManHinh? duLieuDinhKem}) {
@@ -1114,13 +1103,13 @@ class _TrangThaiNoiDungManHinhSach extends TrangThaiWidgetCuaDieuKhien<_NoiDungM
 
   @override
   Widget build(BuildContext context) {
-    if (_hienThiTienTrinh) {
-      return Center(child: CircularProgressIndicator(color: Theme.of(context).primaryColor));
+    if (_canHienThiTienTrinh()) {
+      return Center(child: CircularProgressIndicator(color: PhongCachGiaoDien().mauChinh));
     }
-    if (_coLoi) {
+    if (!_sachTonTai()) {
       return Container(); // Hiển thị nền trống cho thông báo lỗi
     }
-    return xayDungListView(context, key: widget.dieuKhienManHinh._cuonKey, scrollCtrl: widget.dieuKhienManHinh._dkCuon);
+    return xayDungListView(context, scrollCtrl: widget.dieuKhienManHinh._dkCuon);
   }
 
   // --- Cấu hình danh sách hiển thị

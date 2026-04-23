@@ -196,11 +196,9 @@ class DieuKhienManHinhTimKiem extends DieuKhienManHinh with TheoDoiDieuKhienCoSo
     _xoaKetQua();
     final String tuKhoa = dkTuKhoa.vanBan.trim();
     dkTuKhoa.khaDung = false;
-    // CoSoDuLieu().ghiLog = true;
     _congCuTimKiem.batDauTimKiem(
       khiXong1Viec: () => trangThaiWidgetManHinh?.capNhatGiaoDienCuaManHinh(dieuKhienManHinh: this),
       khiXongTatCa: () {
-        // CoSoDuLieu().ghiLog = false;
         dkTuKhoa.khaDung = true;
         _dkCuon.cuonLenDau();
       }
@@ -419,7 +417,7 @@ class _ManHinhTimKiem extends StatelessWidget {
 
 class _NoiDungManHinhTimKiem extends WidgetCuaDieuKhienManHinh<DieuKhienManHinhTimKiem> {
 
-  const _NoiDungManHinhTimKiem({required super.dieuKhienManHinh});
+  _NoiDungManHinhTimKiem({required super.dieuKhienManHinh});
 
   @override
   State<StatefulWidget> createState() => _TrangThaiNoiDungMhTimKiem();

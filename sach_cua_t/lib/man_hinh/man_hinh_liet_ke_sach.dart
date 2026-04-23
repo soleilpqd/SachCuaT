@@ -34,7 +34,7 @@ class DieuKhienManHinhLietKeSach extends DieuKhienManHinh {
   final List<Sach> dsSach;
 
   DieuKhienManHinhLietKeSach({required this.dsSach}) {
-    widgetCuaManHinh = _ManHinhLietKeSach(dkMh: this);
+    widgetCuaManHinh = _ManHinhLietKeSach(dieuKhienManHinh: this);
   }
 
   /// Khi nhấn Tiêu đề của màn hình
@@ -55,26 +55,24 @@ class DieuKhienManHinhLietKeSach extends DieuKhienManHinh {
 
 }
 
-class _ManHinhLietKeSach extends StatelessWidget {
+class _ManHinhLietKeSach extends WidgetTinhCuaDieuKhienManHinh<DieuKhienManHinhLietKeSach> {
 
-  final DieuKhienManHinhLietKeSach dkMh;
-
-  const _ManHinhLietKeSach({required this.dkMh});
+  _ManHinhLietKeSach({required super.dieuKhienManHinh});
 
   @override
   Widget build(BuildContext context) => ManHinhCoSo(
-    tieuDe: Vbht.tuKhoa(TK.thongKe, dem: dkMh.demVbht),
-    khiNhanQuayLai: dkMh._khiNhanQuayLai,
-    khiNhanTieuDe: dkMh._khiNhanTieuDeMh,
+    tieuDe: Vbht.tuKhoa(TK.thongKe, dem: dieuKhienManHinh.demVbht),
+    khiNhanQuayLai: dieuKhienManHinh._khiNhanQuayLai,
+    khiNhanTieuDe: dieuKhienManHinh._khiNhanTieuDeMh,
     noiDung: ListView(
-      controller: dkMh._dkCuon,
+      controller: dieuKhienManHinh._dkCuon,
       padding: const EdgeInsets.all(5),
       children: _xayDungCacWidgetCon()
     )
   );
 
   List<Widget> _xayDungCacWidgetCon() {
-    return dkMh.dsSach.map((muc) => _xayDungDongKetQuaSach(muc)).toList();
+    return dieuKhienManHinh.dsSach.map((muc) => _xayDungDongKetQuaSach(muc)).toList();
   }
 
   Widget _xayDungDongKetQuaSach(Sach sach) => GestureDetector(
@@ -82,7 +80,7 @@ class _ManHinhLietKeSach extends StatelessWidget {
     child: TruongSach(
       sach: sach,
       thongTinCanHienThi: TruongSach.thongTinMacDinh(),
-    ), onTap: () => dkMh._khiNhanSach(sach)
+    ), onTap: () => dieuKhienManHinh._khiNhanSach(sach)
   );
 
 }
