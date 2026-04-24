@@ -23,6 +23,7 @@ import 'package:sach_cua_t/utils/vanbanhienthi.dart';
 import 'package:sach_cua_t/views/dieu_khien_co_so.dart';
 import 'package:sach_cua_t/views/nut_bam_bieu_tuong.dart';
 import 'package:sach_cua_t/views/phong_cach_giao_dien.dart';
+import 'package:sach_cua_t/views/truong_nut_bam_thanh_dieu_huong.dart';
 import 'package:sach_cua_t/views/van_ban_hien_thi_widget.dart';
 
 /// Phần Navigation Bar dùng chung cho tất cả các màn hình.
@@ -54,6 +55,18 @@ class ManHinhCoSo extends StatelessWidget {
     this.khiNhanTieuDe
   });
 
+  int get _soLuongNutPhai {
+    int kq = nutPhai?.length ?? 0;
+    if (kq > 0) {
+      for (final Widget muc in nutPhai!) {
+        if (muc is TruongNutBamThanhDieuHuong) {
+          kq = 2;
+        }
+      }
+    }
+    return kq;
+  }
+
   @override
   Widget build(BuildContext context) {
     final PhongCachGiaoDien phongCach = PhongCachGiaoDien();
@@ -61,18 +74,22 @@ class ManHinhCoSo extends StatelessWidget {
     if (nTrai == null && khiNhanQuayLai != null) {
       nTrai = _taoNutQuayLai();
     }
+    Widget viewTieuDe = VbhtWidget(
+      text: tieuDe,
+      coChu: CoChu.tieuDe,
+      style: TextStyle(
+        color: phongCach.mauNoiDungChinh,
+      ),
+    );
+    if (_soLuongNutPhai > 1) {
+      viewTieuDe = Align(alignment: AlignmentGeometry.centerLeft, child: viewTieuDe);
+    }
     return Scaffold(
         appBar: AppBar(
           backgroundColor: phongCach.mauChinh,
           title: GestureDetector(
             onTap: khiNhanTieuDe,
-            child: VbhtWidget(
-              text: tieuDe,
-              coChu: CoChu.tieuDe,
-              style: TextStyle(
-                color: phongCach.mauNoiDungChinh
-              ),
-            )
+            child: viewTieuDe
           ),
           actions: nutPhai != null && nutPhai!.isNotEmpty ? nutPhai! : null,
           leading: nTrai
@@ -89,7 +106,7 @@ class ManHinhCoSo extends StatelessWidget {
     dieuKhien: dkNutQuayLai
   );
 
-  static Widget taoNutHuongDan(KieuHuongDan kieu)  => NutBamBieuTuong(
+  static NutBamBieuTuong taoNutHuongDan(KieuHuongDan kieu)  => NutBamBieuTuong(
     bieuTuong: Icons.help_outline,
     khiNhan: () => ManHinhCoSo._khiNhanNutHuongDan(kieu),
     thuocThanhDieuHuong: true

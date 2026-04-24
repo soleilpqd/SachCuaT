@@ -65,7 +65,13 @@ class TruongBatTat extends GiaoDienCoSo<DieuKhienTruongBatTat> {
   final bool daoChieu;
 
   /// CONSTRUCTOR
-  const TruongBatTat({super.key, required this.tieuDe, required DieuKhienTruongBatTat trinhDieuKhien, this.sapXep = MainAxisAlignment.spaceBetween, this.daoChieu = false}) : super(dieuKhien: trinhDieuKhien);
+  const TruongBatTat({
+    super.key,
+    required this.tieuDe,
+    required DieuKhienTruongBatTat trinhDieuKhien,
+    this.sapXep = MainAxisAlignment.spaceBetween,
+    this.daoChieu = false
+  }) : super(dieuKhien: trinhDieuKhien);
 
   @override
   State<StatefulWidget> createState() => _TrangThaiTruongBatTat();

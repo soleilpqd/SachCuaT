@@ -89,6 +89,14 @@ class DieuKhienManHinhWeb extends DieuKhienManHinh {
     luongManHinh?.loaiManHinh(manHinh: this);
   }
 
+  void _khiNhanTaiLaiTrang() {
+    dangTai = true;
+    daTaiThanhCong = false;
+    trichXuatSanSang = false;
+    _cauHinhNutTrichXuat();
+    _webController.loadRequest(Uri.parse(url));
+  }
+
   /// Khi webview bắt đầu tải trang
   void _khiBatDauTaiTrang(String url) {
     dangTai = true;
@@ -307,7 +315,13 @@ class _ManHinhWeb extends StatelessWidget  {
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> nutPhai = [];
+    List<Widget> nutPhai = [
+      NutBamBieuTuong(
+        bieuTuong: Icons.refresh,
+        thuocThanhDieuHuong: true,
+        khiNhan: dkManHinh._khiNhanTaiLaiTrang
+      )
+    ];
     if (dkManHinh.batTrichXuat) {
       nutPhai.add(NutBamBieuTuong(
         bieuTuong: Icons.input,

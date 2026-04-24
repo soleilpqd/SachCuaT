@@ -55,11 +55,14 @@ class _TrangThaiTruongNutBam extends TrangThaiCoSo<TruongNutBam> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        NutBamTieuDe(
-          tieuDe: widget.tieuDe,
-          khaDung: khaDung,
-          canChuY: widget.canChuY,
-          khiNhan: khaDung ? widget.khiNhan : null
+        Expanded(child: Align(
+          alignment: AlignmentGeometry.centerRight,
+          child: NutBamTieuDe(
+            tieuDe: widget.tieuDe,
+            khaDung: khaDung,
+            canChuY: widget.canChuY,
+            khiNhan: khaDung ? widget.khiNhan : null
+          ))
         ),
         NutBamBieuTuongTieuDe(
           bieuTuong: widget.icon,

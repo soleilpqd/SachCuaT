@@ -58,7 +58,9 @@ class ThaoTacSoSanhSach {
     if (thongTin1.hinhAnh?.path != thongTin2.hinhAnh?.path) {
       return false;
     }
-    // TODO: nhiều tập
+    if (thongTin1.maNhieuTap != thongTin2.maNhieuTap || thongTin1.tap != thongTin2.tap) {
+      return false;
+    }
     if (!_soSanhDs(thongTin1.tacGia, thongTin2.tacGia)) {
       return false;
     }

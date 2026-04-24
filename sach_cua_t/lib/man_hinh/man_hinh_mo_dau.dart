@@ -34,6 +34,7 @@ import 'package:sach_cua_t/views/danh_sach_hien_thi.dart';
 import 'package:sach_cua_t/views/nut_bam_bieu_tuong.dart';
 import 'package:sach_cua_t/views/phong_cach_giao_dien.dart';
 import 'package:sach_cua_t/views/truong_nut_bam.dart';
+import 'package:sach_cua_t/views/truong_nut_bam_thanh_dieu_huong.dart';
 import 'package:sach_cua_t/views/truong_sach.dart';
 import 'package:sach_cua_t/views/truong_tieu_de.dart';
 import 'package:sach_cua_t/views/van_ban_hien_thi_widget.dart';
@@ -67,9 +68,10 @@ class DieuKhienManHinhMoDau extends DieuKhienManHinh {
   final ScrollController _dkCuon = ScrollController();
   final Vbht phienBan = Vbht.gianTiep(HeThongMay.duyNhat.layThongTinPhienBan());
   final ThaoTacNapDuLieuManHinhMoDau nguonDuLieu = ThaoTacNapDuLieuManHinhMoDau();
+  final DieuKhienTruongNutBamThanhDieuHuong _dkNutPhai = DieuKhienTruongNutBamThanhDieuHuong();
 
   DieuKhienManHinhMoDau() {
-    widgetCuaManHinh = _ManHinhMoDau(dieuKhienManHinh: this);
+    widgetCuaManHinh = _ManHinhMoDau(dkMh: this);
   }
 
   @override
@@ -78,10 +80,30 @@ class DieuKhienManHinhMoDau extends DieuKhienManHinh {
     _truyVanDuLieu();
   }
 
+  void _cauHinhNutDieuHuong() {
+    List<NutBamBieuTuong> nutPhai = [];
+    if (nguonDuLieu.tongSoSach > 0) {
+      nutPhai.add(NutBamBieuTuong(
+        bieuTuong: Icons.camera_alt_outlined,
+        thuocThanhDieuHuong: true,
+        khiNhan: _khiNhanQuet
+      ));
+      nutPhai.add(NutBamBieuTuong(
+        bieuTuong: Icons.search,
+        thuocThanhDieuHuong: true,
+        khiNhan: _khiNhanTimKiem
+      ));
+    }
+    nutPhai.add(ManHinhCoSo.taoNutHuongDan(KieuHuongDan.chinh));
+    _dkNutPhai.dsNut = nutPhai;
+  }
+
   void _truyVanDuLieu() {
     nguonDuLieu.napDuLieu().then((_) {
+      _cauHinhNutDieuHuong();
       trangThaiWidgetManHinh?.capNhatGiaoDienCuaManHinh(dieuKhienManHinh: this);
     });
+    _cauHinhNutDieuHuong();
     trangThaiWidgetManHinh?.capNhatGiaoDienCuaManHinh(dieuKhienManHinh: this);
   }
 
@@ -143,39 +165,14 @@ class DieuKhienManHinhMoDau extends DieuKhienManHinh {
 
 }
 
-class _ManHinhMoDau extends WidgetCuaDieuKhienManHinh<DieuKhienManHinhMoDau> {
+class _ManHinhMoDau extends StatelessWidget {
 
-  _ManHinhMoDau({required super.dieuKhienManHinh});
+  final DieuKhienManHinhMoDau dkMh;
 
-  @override
-  State<StatefulWidget> createState() => _TrangThaiManHinhMoDau();
-
-}
-
-class _TrangThaiManHinhMoDau extends TrangThaiWidgetCuaDieuKhien<_ManHinhMoDau> with ListViewTheoPhanDoan {
-
-  @override
-  void capNhatGiaoDienCuaManHinh({required DieuKhienManHinh dieuKhienManHinh, ThamSoDieuKhienWidgetManHinh? duLieuDinhKem}) {
-    setState(() {});
-  }
+  const _ManHinhMoDau({required this.dkMh});
 
   @override
   Widget build(BuildContext context) {
-    final DieuKhienManHinhMoDau dkMh = widget.dieuKhienManHinh;
-    List<Widget> nutPhai = [];
-    if (dkMh.nguonDuLieu.tongSoSach > 0) {
-      nutPhai.add(NutBamBieuTuong(
-        bieuTuong: Icons.camera_alt_outlined,
-        thuocThanhDieuHuong: true,
-        khiNhan: dkMh._khiNhanQuet
-      ));
-      nutPhai.add(NutBamBieuTuong(
-        bieuTuong: Icons.search,
-        thuocThanhDieuHuong: true,
-        khiNhan: dkMh._khiNhanTimKiem
-      ));
-    }
-    nutPhai.add(ManHinhCoSo.taoNutHuongDan(KieuHuongDan.chinh));
     return ManHinhCoSo(
       tieuDe: Vbht.tuKhoa(TK.sachCuaT),
       khiNhanTieuDe: dkMh._khiNhanTieuDeManHinh,
@@ -184,10 +181,31 @@ class _TrangThaiManHinhMoDau extends TrangThaiWidgetCuaDieuKhien<_ManHinhMoDau> 
         thuocThanhDieuHuong: true,
         khiNhan: dkMh._khiNhanThemSach
       ) : null,
-      nutPhai: nutPhai,
-      noiDung: xayDungListView(context, scrollCtrl: widget.dieuKhienManHinh._dkCuon)
+      nutPhai: [TruongNutBamThanhDieuHuong(dieuKhien: dkMh._dkNutPhai)],
+      noiDung: _NoiDungManHinhMoDau(dieuKhienManHinh: dkMh)
     );
   }
+
+}
+
+class _NoiDungManHinhMoDau extends WidgetCuaDieuKhienManHinh<DieuKhienManHinhMoDau> {
+
+  _NoiDungManHinhMoDau({required super.dieuKhienManHinh});
+
+  @override
+  State<StatefulWidget> createState() => _TrangThaiManHinhMoDau();
+
+}
+
+class _TrangThaiManHinhMoDau extends TrangThaiWidgetCuaDieuKhien<_NoiDungManHinhMoDau> with ListViewTheoPhanDoan {
+
+  @override
+  void capNhatGiaoDienCuaManHinh({required DieuKhienManHinh dieuKhienManHinh, ThamSoDieuKhienWidgetManHinh? duLieuDinhKem}) {
+    setState(() {});
+  }
+
+  @override
+  Widget build(BuildContext context) => xayDungListView(context, scrollCtrl: widget.dieuKhienManHinh._dkCuon);
 
   /// Xây dựng màn hình lần đầu
   Widget _xayDungManHinhLanDau() {
@@ -250,7 +268,14 @@ class _TrangThaiManHinhMoDau extends TrangThaiWidgetCuaDieuKhien<_ManHinhMoDau> 
       return switch(_PhanDoanManHinhMoDau.khoiTao(doan)) {
         _PhanDoanManHinhMoDau.danhDau => _xayDungTruongTieuDe(TK.danhDau),
         _PhanDoanManHinhMoDau.ganDay => _xayDungTruongTieuDe(TK.ganDay),
-        _PhanDoanManHinhMoDau.gioiThieu => _xayDungTruongTieuDe(TK.gioiThieu),
+        _PhanDoanManHinhMoDau.gioiThieu => _xayDungTruongTieuDe(
+          TK.gioiThieu,
+          phu: Vbht.tuKhoa(
+            TK.tongSoSach,
+            dem: widget.dieuKhienManHinh._boDemVbht,
+            ts: [widget.dieuKhienManHinh.nguonDuLieu.tongSoSach.toString()]
+          )
+        ),
         _ => null
       };
     } else if (doan == 1) {
@@ -259,8 +284,9 @@ class _TrangThaiManHinhMoDau extends TrangThaiWidgetCuaDieuKhien<_ManHinhMoDau> 
     return null;
   }
 
-  TruongTieuDe _xayDungTruongTieuDe(TK tk) => TruongTieuDe(
-    tieuDeChinh: Vbht.tuKhoa(tk, dem: widget.dieuKhienManHinh._boDemVbht)
+  TruongTieuDe _xayDungTruongTieuDe(TK tk, {Vbht? phu}) => TruongTieuDe(
+    tieuDeChinh: Vbht.tuKhoa(tk, dem: widget.dieuKhienManHinh._boDemVbht),
+    tieuDePhu: phu,
   );
 
   @override

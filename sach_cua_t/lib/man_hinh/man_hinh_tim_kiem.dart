@@ -612,7 +612,8 @@ class _TrangThaiNoiDungMhTimKiem extends TrangThaiWidgetCuaDieuKhien<_NoiDungMan
     };
     return TruongNutBam(
       khiNhan: () => widget.dieuKhienManHinh._khiNhanBoLoc(boLoc),
-      tieuDe: tieuDe, icon: Icons.delete
+      tieuDe: tieuDe,
+      icon: Icons.delete
     );
   }
 

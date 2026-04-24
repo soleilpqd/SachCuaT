@@ -36,7 +36,7 @@ class NutBamTieuDe extends TextButton {
       coChu: CoChu.binhThuong,
       style: TextStyle(color: khaDung ?
         (canChuY ? PhongCachGiaoDien().mauThaoTacCanChuY : PhongCachGiaoDien().mauChinh) :
-        PhongCachGiaoDien().mauNoiDungKhoaNen
+        PhongCachGiaoDien().mauNoiDungKhoaNen,
       )
     ),
     style: const ButtonStyle(

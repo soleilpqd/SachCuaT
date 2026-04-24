@@ -97,11 +97,11 @@ class CoSoDuLieu {
       } catch (_) {}
     }
     _db = await openDatabase(duongDanCSDL, version: _dbVersion);
-    _kiemTraDuLieuChuan(bytes, duongDanCoSo);
+    await _kiemTraDuLieuChuan(bytes, duongDanCoSo);
   }
 
   /// Cập nhật lại dữ liệu chuẩn (văn bản hiển thị) từ DB gốc trong bundle
-  void _kiemTraDuLieuChuan(List<int> duLieuGoc, String duongDanCoSo) async {
+  Future<void> _kiemTraDuLieuChuan(List<int> duLieuGoc, String duongDanCoSo) async {
     const tenDBGoc = "sachcuat_tam.db";
     final duongDanCSDL = join(duongDanCoSo, tenDBGoc);
     final tepCSDL = File(duongDanCSDL);

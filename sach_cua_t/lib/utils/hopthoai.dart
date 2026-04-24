@@ -154,7 +154,7 @@ class _ManHinhThongBao extends StatelessWidget {
       ));
     }
     dsHienThi.add(const SizedBox(height: 10));
-    final viewChinh = Material(color: Colors.transparent, child: Center(
+    final viewChinh = Center(
       child: FractionallySizedBox(
         widthFactor: 0.8,
         child: Container(
@@ -180,7 +180,7 @@ class _ManHinhThongBao extends StatelessWidget {
           ),
         ),
       )
-    ));
+    );
     if (dkChuyenDong != null) {
       return xayDungLopThuPhong(context, viewChinh, dkChuyenDong!);
     }

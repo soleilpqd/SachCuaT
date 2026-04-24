@@ -142,7 +142,9 @@ enum TK {
   /// Giới thiệu
   gioiThieu,
   /// Gần đây
-  ganDay
+  ganDay,
+  /// Bạn đang có #_ tựa sách
+  tongSoSach
   ;
 }
 
@@ -168,7 +170,7 @@ class Vbht {
     if (thamSo != null && thamSo!.isNotEmpty) {
       final String tmp = _vanBan;
       _vanBan = LinhTinh.dienVaoChoTrong(_vanBan, thamSo!);
-      if (tmp == tmp) {
+      if (_vanBan == tmp) {
         _vanBan += " ${thamSo!}";
       }
     }
