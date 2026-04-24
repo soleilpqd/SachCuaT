@@ -17,4 +17,4 @@ Nên tôi tự tạo cho mình 1 ứng dụng nhỏ, nhằm lưu trữ danh sác
 
 Tôi hi vọng ứng dụng này có ích với bạn nhưng tôi không cung cấp bất cứ bảo hành hay trách nhiệm nào đối với việc sử dụng ứng dụng này.
 
-Trong ứng dụng có liên kết đến 2 trang web ngoài [https://ppdvn.gov.vn/web/guest/tra-cuu-luu-chieu](https://ppdvn.gov.vn/web/guest/tra-cuu-luu-chieu) và [https://ppdvn.gov.vn/web/guest/ke-hoach-xuat-ban](https://ppdvn.gov.vn/web/guest/ke-hoach-xuat-ban). 2 trang web này không được cung cấp bởi tôi hay có liên kết với ứng dụng này. Ứng dụng chỉ đóng vai trò như 1 trình duyệt giúp bạn truy cập vào 2 trang web trên.
+Trong ứng dụng có liên kết đến 2 trang web công cộng bên ngoài [https://ppdvn.gov.vn/web/guest/tra-cuu-luu-chieu](https://ppdvn.gov.vn/web/guest/tra-cuu-luu-chieu) và [https://ppdvn.gov.vn/web/guest/ke-hoach-xuat-ban](https://ppdvn.gov.vn/web/guest/ke-hoach-xuat-ban). 2 trang web này không được cung cấp bởi tôi và không có mối quan hệ nào tới việc phát triển ứng dụng này. Ứng dụng chỉ đóng vai trò như 1 trình duyệt giúp bạn truy cập vào 2 trang web trên.
