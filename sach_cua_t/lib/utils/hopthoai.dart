@@ -38,6 +38,8 @@ class HopThoai {
       required List<Vbht> nhanCacNut,
       /// Các nút cần chú ý
       List<int>? cacNutCanChuY,
+      /// Bố cục các nút theo hàng dọc
+      bool boCucHangDoc = false,
       /// Hàm xử lý khi nhấn nút (context của hộp thoại, thứ tự nút (từ 0), tiêu đề nút)
       Function(int, Vbht)? khiDong
     }
@@ -46,6 +48,7 @@ class HopThoai {
       noiDung: noiDung,
       nhanCacNut: nhanCacNut,
       cacNutCanChuY: cacNutCanChuY,
+      boCucHangDoc: boCucHangDoc,
       hanhDong: (stt) => khiDong?.call(stt, nhanCacNut[stt])
     );
     MainApp.luongMHGoc.themManHinh(manHinh: hopThoaiTb);
@@ -77,10 +80,12 @@ class DieuKhienManHinhThongBao extends DieuKhienManHinh {
   final List<Vbht> nhanCacNut;
   /// Các nút cần chú ý (đỏ)
   final List<int>? cacNutCanChuY;
+  /// Bố cục các nút theo hàng dọc
+  final bool boCucHangDoc;
   /// Hành động khi nhấn vào nút có số thứ tự tương ứng
   final void Function(int)? hanhDong;
 
-  DieuKhienManHinhThongBao({required this.noiDung, required this.nhanCacNut, this.cacNutCanChuY, this.hanhDong}) {
+  DieuKhienManHinhThongBao({required this.noiDung, required this.nhanCacNut, this.cacNutCanChuY, this.boCucHangDoc = false, this.hanhDong}) {
     mauNenWidgetChua = PhongCachGiaoDien().mauDoBong;
     thamSoDieuKhienWidgetLuong[WidgetLuongManHinhXepLop.kKeyThamSoLopTrong] = true;
     thamSoDieuKhienWidgetLuong[WidgetLuongManHinhXepLop.kKeyThamSoHoatHinh] = xayDungLopDoMo;
@@ -125,7 +130,7 @@ class _ManHinhThongBao extends StatelessWidget {
         )
       ),
     ];
-    bool nutDoc = dieuKhienManHinh.nhanCacNut.length > 2;
+    bool nutDoc = dieuKhienManHinh.nhanCacNut.length > 2 || dieuKhienManHinh.boCucHangDoc;
     List<Widget> dsCacNut = nutDoc ? dsHienThi : [];
     int stt = 0;
     for (final muc in dieuKhienManHinh.nhanCacNut) {

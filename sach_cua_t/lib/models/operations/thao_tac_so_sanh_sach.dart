@@ -88,7 +88,10 @@ class ThaoTacSoSanhSach {
         return false;
       }
     }
-    if (!_soSanhDs(thongTin1.danhDau, thongTin2.danhDau)) {
+    if (!_soSanhDs(
+      thongTin1.danhDau.map((muc) => muc.noiDung).toList(),
+      thongTin2.danhDau.map((muc) => muc.noiDung).toList()
+    )) {
       return false;
     }
     return true;

@@ -26,10 +26,3 @@ app/build.gradle.kts:
 
 - Kênh xử lý yêu cầu từ module Flutter.
 - Màn hình quét mã: class, giao diện (storyboard, XML layout).
-
-## Lịch sử phiên bản:
-
-### 1.0.0:
-
-- Các chức năng cơ bản.
-- Dùng thử, sửa lỗi.

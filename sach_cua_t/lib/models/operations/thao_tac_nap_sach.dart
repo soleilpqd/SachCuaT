@@ -54,7 +54,7 @@ class ThaoTacNapThongTinSach {
       nhanSach[nhan.ten] = nhan.giaTri ?? "";
     }
     thongTinSach.nhan = nhanSach;
-    thongTinSach.danhDau = (await csdl.layDSDanhDauCuaSach(thongTinSach)).map((e) => e.noiDung).toList();
+    thongTinSach.danhDau = (await csdl.layDSDanhDauCuaSach(thongTinSach));
     dsSachTrongChuoi = null;
     if (thongTinSach.maNhieuTap != null) {
       SachNhieuTap? chuoi = await csdl.timChuoiSachNhieuTap(thongTinSach.maNhieuTap!);

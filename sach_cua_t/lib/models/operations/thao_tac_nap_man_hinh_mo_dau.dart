@@ -55,4 +55,9 @@ class ThaoTacNapDuLieuManHinhMoDau {
     }
   }
 
+  Future<void> xoaDanhDau(int stt) async {
+    final Sach sach = dsDanhDau.removeAt(stt);
+    await CoSoDuLieu().xoaDanhDau(sach.danhDau.first);
+  }
+
 }

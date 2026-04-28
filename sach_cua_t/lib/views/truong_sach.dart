@@ -87,7 +87,7 @@ class TruongSach extends StatelessWidget {
         ThongTinSachDeHienThi.dichGia => sach.dichGia.join("; "),
         ThongTinSachDeHienThi.nxb => sach.nhaXuatBan.join("; "),
         ThongTinSachDeHienThi.soTap => soTap,
-        ThongTinSachDeHienThi.danhDau => sach.danhDau.join("; "),
+        ThongTinSachDeHienThi.danhDau => sach.danhDau.map((muc) => muc.noiDung).join("; "),
         ThongTinSachDeHienThi.nhan => sach.nhan.entries.map((e) => "${e.key}: ${e.value}").join("; "),
         ThongTinSachDeHienThi.viTri => sach.viTri.join("; "),
         ThongTinSachDeHienThi.nhieuTap => sach.nhieuTap ?? ""

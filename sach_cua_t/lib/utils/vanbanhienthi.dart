@@ -144,7 +144,17 @@ enum TK {
   /// Gần đây
   ganDay,
   /// Bạn đang có #_ tựa sách
-  tongSoSach
+  tongSoSach,
+  /// Lưu ý: bạn đang truy cập vào trang web công cộng bên ngoài không dược cung cấp bởi ứng dụng này.\n#_
+  luuYTrangWebNgoai,
+  /// Mở trong trình duyệt ngoài
+  moTrongTrinhDuyet,
+  /// Mở trong ứng dụng
+  moTrongUngDung,
+  /// Xoá
+  xoa,
+  /// Xoá "#_"
+  xoaNoiDung
   ;
 }
 
@@ -294,7 +304,7 @@ class VanBanHienThi {
     return ketQua;
   }
 
-  /// Khởi tạo List<String> thành Map<String, String> với giá trị của map là chính từ khoá.
+  /// Khởi tạo `List<String>` thành `Map<String, String>` với giá trị của map là chính từ khoá.
   static Map<String, String> khoiTaoDSTuKhoa(List<String> dsTuKhoa) {
     Map<String, String> ketQua = {};
     for (final muc in dsTuKhoa) {

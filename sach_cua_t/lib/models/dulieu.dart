@@ -40,7 +40,7 @@ class Sach {
   List<String> viTri = [];
   Map<String, String> nhan = {};
   List<String> nhanLuonHien = [];
-  List<String> danhDau = [];
+  List<DanhDauSach> danhDau = [];
   String? nhieuTap;
 
   static Sach taoDuLieuGia({int chiSo = 0}) {
@@ -59,7 +59,9 @@ class Sach {
     ketQua.tap = chiSo;
     ketQua.hinhAnh = LinhTinh.taoDuongDan(phanLoai: PhanLoaiDuongDan.assets, duongDan: "assets/book.jpg");
     ketQua.hinhThuNho = LinhTinh.taoDuongDan(phanLoai: PhanLoaiDuongDan.assets, duongDan: "assets/book.jpg");
-    ketQua.danhDau.add("Danh dau 01");
+    final DanhDauSach danhDau = DanhDauSach();
+    danhDau.noiDung = "Danh dau 01";
+    ketQua.danhDau.add(danhDau);
     ketQua.nhieuTap = "Nhieu tap 01";
     ketQua.nhan = {"Nhan sach 01": "Gia tri nhan 01"};
     return ketQua;
@@ -82,7 +84,7 @@ class Sach {
     print("        xong: '$daHoanThanh'");
     print("        nhan: '$nhan'");
     print("  nhan lHien: '$nhanLuonHien'");
-    print("    danh dau: '$danhDau'");
+    print("    danh dau: '${danhDau.map((muc) => muc.noiDung)}'");
   }
 
 }

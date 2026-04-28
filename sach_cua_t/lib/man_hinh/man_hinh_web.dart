@@ -22,6 +22,7 @@ import 'package:flutter/material.dart';
 import 'package:man_hinh_ung_dung/man_hinh_ung_dung.dart';
 import 'package:sach_cua_t/man_hinh/man_hinh_co_so.dart';
 import 'package:sach_cua_t/man_hinh/man_hinh_tro_giup.dart';
+import 'package:sach_cua_t/models/luutrucauhinh.dart';
 import 'package:sach_cua_t/utils/common.dart';
 import 'package:sach_cua_t/utils/hopthoai.dart';
 import 'package:sach_cua_t/utils/vanbanhienthi.dart';
@@ -29,6 +30,7 @@ import 'package:sach_cua_t/views/dieu_khien_co_so.dart';
 import 'package:sach_cua_t/views/nut_bam_bieu_tuong.dart';
 import 'package:sach_cua_t/views/phong_cach_giao_dien.dart';
 import 'package:sach_cua_t/views/van_ban_hien_thi_widget.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 class DieuKhienManHinhWeb extends DieuKhienManHinh {
@@ -55,6 +57,8 @@ class DieuKhienManHinhWeb extends DieuKhienManHinh {
   Map<String, String> dsNXB = {};
   /// Danh sách Sách đã trích xuất
   List<List<String>> dsSach = [];
+  /// Đã cấu hình
+  bool _daCauHinh = false;
 
   DieuKhienManHinhTuDuoiDay? _dkHopThoaiChonSach;
 
@@ -74,7 +78,6 @@ class DieuKhienManHinhWeb extends DieuKhienManHinh {
     dangTai = true;
     daTaiThanhCong = false;
     trichXuatSanSang = false;
-    _webController.loadRequest(Uri.parse(url));
   }
 
   void _cauHinhNutTrichXuat() => _dkNutTrichXuat.khaDung = choPhepTrichXuat;
@@ -83,6 +86,35 @@ class DieuKhienManHinhWeb extends DieuKhienManHinh {
   bool get choPhepTrichXuat {
     final bool koChoPhep = dangTai || !daTaiThanhCong || !batTrichXuat || !trichXuatSanSang;
     return !koChoPhep;
+  }
+
+  @override
+  void manHinhDaThanhManHinhChinhTrongLuong() {
+    super.manHinhDaThanhManHinhChinhTrongLuong();
+    if (_daCauHinh) { return; }
+    _daCauHinh = true;
+    final LuuTruCauHinh cauHinh = LuuTruCauHinh();
+    final Uri uri = Uri.parse(url);
+    cauHinh.layLuuYTrangWeb(uri.host).then((gt) {
+      if (!(gt ?? false)) {
+        HopThoai.hienThiHopThoaiThongBao(
+          noiDung: Vbht.tuKhoa(TK.luuYTrangWebNgoai, ts: [url]),
+          nhanCacNut: [Vbht.tuKhoa(TK.moTrongTrinhDuyet), Vbht.tuKhoa(TK.moTrongUngDung)],
+          boCucHangDoc: true,
+          khiDong: (stt, _) {
+            if (stt == 0) {
+              launchUrl(uri, mode: LaunchMode.externalApplication);
+              luongManHinh?.loaiManHinh(manHinh: this);
+            } else {
+              cauHinh.luuLuuYTrangWeb(uri.host);
+              _webController.loadRequest(uri);
+            }
+          },
+        );
+      } else {
+        _webController.loadRequest(uri);
+      }
+    });
   }
 
   void _khiNhanQuayLai() {
@@ -165,6 +197,11 @@ class DieuKhienManHinhWeb extends DieuKhienManHinh {
     dangTai = false;
     daTaiThanhCong = false;
     _cauHinhNutTrichXuat();
+  }
+
+  /// Mở URL gốc trong trình duyệt ngoài
+  void _khiNhanNutTrinhDuyet() {
+    launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
   }
 
   /// Khi nhấn nút trích xuất
@@ -316,6 +353,11 @@ class _ManHinhWeb extends StatelessWidget  {
   @override
   Widget build(BuildContext context) {
     List<Widget> nutPhai = [
+      NutBamBieuTuong(
+        bieuTuong: Icons.open_in_browser,
+        thuocThanhDieuHuong: true,
+        khiNhan: dkManHinh._khiNhanNutTrinhDuyet
+      ),
       NutBamBieuTuong(
         bieuTuong: Icons.refresh,
         thuocThanhDieuHuong: true,

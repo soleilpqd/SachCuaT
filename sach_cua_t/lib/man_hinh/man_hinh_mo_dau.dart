@@ -158,6 +158,20 @@ class DieuKhienManHinhMoDau extends DieuKhienManHinh {
     luongManHinh?.themManHinh(manHinh: mhSach);
   }
 
+  void _khiNhanXoaDanhDau(int stt) {
+    final Sach sach = nguonDuLieu.dsDanhDau[stt];
+    HopThoai.hienThiHopThoaiThongBao(
+      noiDung: Vbht.tuKhoa(TK.xoaNoiDung, dem: _boDemVbht, ts: [sach.danhDau.first.noiDung]),
+      nhanCacNut: [Vbht.tuKhoa(TK.xoa, dem: _boDemVbht), Vbht.tuKhoa(TK.dong, dem: _boDemVbht)],
+      cacNutCanChuY: [0],
+      khiDong: (nut, _) {
+        if (nut == 0) {
+          nguonDuLieu.xoaDanhDau(stt).then((_) => trangThaiWidgetManHinh?.capNhatGiaoDienCuaManHinh(dieuKhienManHinh: this));
+        }
+      },
+    );
+  }
+
   /// Khi nhấn Giới thiệu
   void _khiNhanGioiThieu() {
     MainApp.luongMHGoc.themManHinh(manHinh: DieuKhienManHinhHuongDan(kieu: KieuHuongDan.gioiThieu));
@@ -294,7 +308,7 @@ class _TrangThaiManHinhMoDau extends TrangThaiWidgetCuaDieuKhien<_NoiDungManHinh
     final DieuKhienManHinhMoDau dkMh = widget.dieuKhienManHinh;
     if (widget.dieuKhienManHinh.nguonDuLieu.tongSoSach > 0) {
       return switch(_PhanDoanManHinhMoDau.khoiTao(doan)) {
-        _PhanDoanManHinhMoDau.danhDau => _xayDungTruongSach(dkMh.nguonDuLieu.dsDanhDau[dong], true),
+        _PhanDoanManHinhMoDau.danhDau => _xayDungDanhDau(dong),
         _PhanDoanManHinhMoDau.ganDay => _xayDungTruongSach(dkMh.nguonDuLieu.dsGanDay[dong], false),
         _PhanDoanManHinhMoDau.gioiThieu => _xayDuongTruongGioiThieu(),
         _ => null
@@ -310,7 +324,7 @@ class _TrangThaiManHinhMoDau extends TrangThaiWidgetCuaDieuKhien<_NoiDungManHinh
   Widget _xayDuongTruongGioiThieu() => TruongNutBam(
     khiNhan: widget.dieuKhienManHinh._khiNhanGioiThieu,
     tieuDe: widget.dieuKhienManHinh.phienBan,
-    icon: Icons.help
+    icon: Icons.help_outline
   );
 
   Widget _xayDungTruongSach(Sach sach, bool hienThiDanhDau) {
@@ -322,6 +336,19 @@ class _TrangThaiManHinhMoDau extends TrangThaiWidgetCuaDieuKhien<_NoiDungManHinh
       behavior: HitTestBehavior.opaque,
       onTap: () => widget.dieuKhienManHinh._khiNhanSach(sach),
       child: TruongSach(sach: sach, thongTinCanHienThi: dsHienThi)
+    );
+  }
+
+  Widget _xayDungDanhDau(int stt) {
+    return Row(
+      children: [
+        Expanded(child: _xayDungTruongSach(widget.dieuKhienManHinh.nguonDuLieu.dsDanhDau[stt], true)),
+        NutBamBieuTuong(
+          bieuTuong: Icons.delete_outline,
+          thuocThanhDieuHuong: false,
+          khiNhan: () => widget.dieuKhienManHinh._khiNhanXoaDanhDau(stt),
+        )
+      ],
     );
   }
 

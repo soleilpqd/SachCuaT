@@ -317,17 +317,17 @@ class ThaoTacLuuThongTinSach {
   Future<void> _luuDanhDau() async {
     final CoSoDuLieu csdl = CoSoDuLieu();
     final List<DanhDauSach> dsDanhDauHt = await csdl.layDSDanhDauCuaSach(thongTinSach);
-    for (final String danhDau in thongTinSach.danhDau) {
-      final int stt = dsDanhDauHt.indexWhere((element) => element.noiDung == danhDau);
+    for (final DanhDauSach danhDau in thongTinSach.danhDau) {
+      final int stt = dsDanhDauHt.indexWhere((element) => element.noiDung == danhDau.noiDung);
       if (stt < 0) {
         final DanhDauSach danhDauMoi = DanhDauSach();
         danhDauMoi.maSach = thongTinSach.maSo ?? 0;
-        danhDauMoi.noiDung = danhDau;
+        danhDauMoi.noiDung = danhDau.noiDung;
         await csdl.themDanhDauChoSach(danhDauMoi);
       }
     }
     for (final DanhDauSach danhDauCu in dsDanhDauHt) {
-      final int stt = thongTinSach.danhDau.indexWhere((element) => element == danhDauCu.noiDung);
+      final int stt = thongTinSach.danhDau.indexWhere((element) => element.noiDung == danhDauCu.noiDung);
       if (stt < 0) {
         await csdl.xoaDanhDau(danhDauCu);
       }

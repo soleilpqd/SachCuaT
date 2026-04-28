@@ -16,13 +16,20 @@
   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_pdfview/flutter_pdfview.dart';
+import 'package:man_hinh_ung_dung/luong_man_hinh.dart';
 import 'package:man_hinh_ung_dung/man_hinh_ung_dung.dart';
 import 'package:man_hinh_ung_dung/widget_luong_man_hinh_xep_lop.dart';
 import 'package:man_hinh_ung_dung/xay_dung_widget_hoat_hinh.dart';
 import 'package:sach_cua_t/man_hinh/man_hinh_co_so.dart';
+import 'package:sach_cua_t/utils/common.dart';
 import 'package:sach_cua_t/utils/vanbanhienthi.dart';
 import 'package:sach_cua_t/views/nut_bam_bieu_tuong.dart';
+import 'package:sach_cua_t/views/phong_cach_giao_dien.dart';
 
 /// Kiểu màn hình hướng dẫn
 enum KieuHuongDan {
@@ -43,9 +50,26 @@ class DieuKhienManHinhHuongDan extends DieuKhienManHinh {
 
   final KieuHuongDan kieu;
   final BoDemVbht _demVbht = BoDemVbht();
+  Uint8List? _pdfData;
 
   DieuKhienManHinhHuongDan({required this.kieu}) {
     thamSoDieuKhienWidgetLuong[WidgetLuongManHinhXepLop.kKeyThamSoHoatHinh] = xayDungLopDoMo;
+    _napPdf();
+  }
+
+  void _napPdf() async {
+    final String fName = switch (kieu) {
+      KieuHuongDan.chinh => "mo_dau",
+      KieuHuongDan.sach => "sach",
+      KieuHuongDan.timKiem => "tim_kiem",
+      KieuHuongDan.web => "web",
+      KieuHuongDan.gioiThieu => "gioi_thieu",
+    };
+    final String phanLoai = VanBanHienThi().phanLoai.first;
+    final Uri uri = LinhTinh.taoDuongDan(phanLoai: PhanLoaiDuongDan.assets, duongDan: "assets/${fName}_$phanLoai.pdf");
+    final data = await rootBundle.load(uri.path);
+    _pdfData = data.buffer.asUint8List();
+    trangThaiWidgetManHinh?.capNhatGiaoDienCuaManHinh(dieuKhienManHinh: this);
   }
 
   /// Khi nhấn Đóng
@@ -86,12 +110,43 @@ class _ManHinhHuongDan extends StatelessWidget {
         thuocThanhDieuHuong: true,
         khiNhan: dkMh._khiNhanDong,
       ),
-      noiDung: Container(color: Colors.red, child: const Text("Under construction"))
+      noiDung: _NoiDungManHinhTroGiup(dieuKhienManHinh: dkMh)
     );
     if (dkChuyenDong != null) {
       return xayDungLopTruotLen(context, viewChinh, dkChuyenDong!);
     }
     return viewChinh;
+  }
+
+}
+
+class _NoiDungManHinhTroGiup extends WidgetCuaDieuKhienManHinh<DieuKhienManHinhHuongDan> {
+
+  _NoiDungManHinhTroGiup({required super.dieuKhienManHinh});
+
+  @override
+  State<StatefulWidget> createState() => _TrangThaiNoiDungTroGiup();
+
+}
+
+class _TrangThaiNoiDungTroGiup extends TrangThaiWidgetCuaDieuKhien<_NoiDungManHinhTroGiup> {
+
+  @override
+  void capNhatGiaoDienCuaManHinh({required DieuKhienManHinh dieuKhienManHinh, ThamSoDieuKhienWidgetManHinh? duLieuDinhKem}) {
+    setState(() { });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final PhongCachGiaoDien phongCach = PhongCachGiaoDien();
+    if (widget.dieuKhienManHinh._pdfData != null) {
+      return PDFView(
+        pdfData: widget.dieuKhienManHinh._pdfData,
+        pageFling: false,
+        backgroundColor: phongCach.mauNen,
+      );
+    }
+    return Container(color: phongCach.mauNen);
   }
 
 }

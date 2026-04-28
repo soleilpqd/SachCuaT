@@ -15,12 +15,14 @@ dependencies:
   permission_handler: ^11.3.1
   shared_preferences: ^2.2.3
   sqflite: ^2.3.3+1
+  url_launcher: 6.3.2
   # if XCode < 14.3
   webview_flutter: 4.10.0
   webview_flutter_wkwebview: 3.17.0
   # else newer xcode
   # webview_flutter: 4.13.1
   # end if
+  flutter_pdfview: 1.4.4
   man_hinh_ung_dung:
     path: ../libraries/man_hinh_ung_dung
 
@@ -43,3 +45,8 @@ flutter:
   assets:
     - assets/sachcuat.db
     - assets/book.jpg
+    - assets/gioi_thieu_vi.pdf
+    - assets/tim_kiem_vi.pdf
+    - assets/web_vi.pdf
+    - assets/sach_vi.pdf
+    - assets/mo_dau_vi.pdf

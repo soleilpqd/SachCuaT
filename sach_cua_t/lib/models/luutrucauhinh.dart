@@ -55,16 +55,14 @@ class LuuTruCauHinh {
     _prefs!.setBool("hien_thi_ds_tap_day_du", value);
   }
 
-  /// Lấy tuỳ chọn hiển thị danh sách tập đầy đủ
-  Future<bool?> layTimKiemChinhXac() async {
+  Future<bool?> layLuuYTrangWeb(String url) async {
     await _khoiTaoNeuCan();
-    return _prefs!.getBool("tim_kiem_chinh_xac");
+    return _prefs!.getBool("web: $url");
   }
 
-  /// Lưu tuỳ chọn hiển thị danh sách tập đầy đủ
-  Future<void> luuTimKiemChinhXac(bool value) async {
+  Future<void> luuLuuYTrangWeb(String url) async {
     await _khoiTaoNeuCan();
-    _prefs!.setBool("tim_kiem_chinh_xac", value);
+    _prefs!.setBool("web: $url", true);
   }
 
 }

@@ -786,7 +786,7 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo {
     for (final muc in sach.danhDau) {
       DieuKhienTruongVanBan dkVb = DieuKhienTruongVanBan(khaDung: !chiDoc);
       dkVb.debugInfo = "DD $dem";
-      dkVb.vanBan = muc;
+      dkVb.vanBan = muc.noiDung;
       dkVb.trangThaiNutBenPhai = 0;
       dkVb.themTheoDoi(this);
       _dsDkDanhDau.add(dkVb);
@@ -995,11 +995,15 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo {
     thongTinSach.isbn = _dkISBN.vanBan;
     thongTinSach.daHoanThanh = _dkDaDocXong.giaTri;
     thongTinSach.hinhAnh = _dkHinhAnh.hinhAnh;
-    thongTinSach.tacGia = _dsDkTacGia.where((element) => element.vanBan.isNotEmpty).map((e) => e.vanBan).toList();
-    thongTinSach.dichGia = _dsDkDichGia.where((element) => element.vanBan.isNotEmpty).map((e) => e.vanBan).toList();
-    thongTinSach.nhaXuatBan = _dsDkNxb.where((element) => element.vanBan.isNotEmpty).map((e) => e.vanBan).toList();
-    thongTinSach.viTri = _dsDkViTri.where((element) => element.vanBan.isNotEmpty).map((e) => e.vanBan).toList();
-    thongTinSach.danhDau = _dsDkDanhDau.where((element) => element.vanBan.isNotEmpty).map((e) => e.vanBan).toList();
+    thongTinSach.tacGia = _dsDkTacGia.where((phanTu) => phanTu.vanBan.isNotEmpty).map((muc) => muc.vanBan).toList();
+    thongTinSach.dichGia = _dsDkDichGia.where((phanTu) => phanTu.vanBan.isNotEmpty).map((muc) => muc.vanBan).toList();
+    thongTinSach.nhaXuatBan = _dsDkNxb.where((phanTu) => phanTu.vanBan.isNotEmpty).map((muc) => muc.vanBan).toList();
+    thongTinSach.viTri = _dsDkViTri.where((phanTu) => phanTu.vanBan.isNotEmpty).map((muc) => muc.vanBan).toList();
+    thongTinSach.danhDau = _dsDkDanhDau.where((phanTu) => phanTu.vanBan.isNotEmpty).map((muc) {
+      final DanhDauSach danhDau = DanhDauSach();
+      danhDau.noiDung = muc.vanBan;
+      return danhDau;
+    }).toList();
     List<String> nhanLuonHien = [];
     Map<String, String> nhan = {};
     for (final DieuKhienTruongVanBan dk in _dsDkNhan) {

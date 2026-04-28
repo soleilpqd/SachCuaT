@@ -61,7 +61,7 @@ class GoiYNhan extends GoiYVanBan {
   @override
   VanBanNoiBat? layVanBanNoiBat(String dayDu, String noiBat) {
     try {
-      return _dsKetQua.firstWhere((element) => element.vanBanDayDu == dayDu && element.vanBanNoiBat == noiBat);
+      return _dsKetQua.firstWhere((phanTu) => phanTu.vanBanDayDu == dayDu && phanTu.vanBanNoiBat.contains(noiBat));
     } catch (_) {
       return null;
     }

@@ -1111,7 +1111,7 @@ WHERE "nhan" = ?;
   Future<List<Sach>> layDanhSachSachDanhDau() async {
     assert(_db != null, "CSDL chưa được khởi tạo.");
     final List<Map<String, Object?>> banGhiS = await _rawQuery("""
-SELECT "$BANG_SACH".*, "$BANG_DANH_DAU"."ghi_chu" FROM "$BANG_SACH"
+SELECT "$BANG_SACH".*, "$BANG_DANH_DAU"."ma" AS "ma_dd", "$BANG_DANH_DAU"."ghi_chu" FROM "$BANG_SACH"
 INNER JOIN "$BANG_DANH_DAU" ON "$BANG_SACH"."ma" = "$BANG_DANH_DAU"."sach"
 ORDER BY "$BANG_DANH_DAU"."thoi_gian" DESC;
 """);
@@ -1119,7 +1119,11 @@ ORDER BY "$BANG_DANH_DAU"."thoi_gian" DESC;
     for (final Map<String, Object?> banGhi in banGhiS) {
       final Sach sach = Sach();
       _ganDLVaoSach(banGhi, sach);
-      sach.danhDau = [(banGhi["ghi_chu"] as String?) ?? ""];
+      final DanhDauSach danhDau = DanhDauSach();
+      danhDau.maSach = sach.maSo ?? 0;
+      danhDau.maSo = banGhi["ma_dd"] as int;
+      danhDau.noiDung = (banGhi["ghi_chu"] as String?) ?? "";
+      sach.danhDau = [danhDau];
       ketQua.add(sach);
     }
     return ketQua;
