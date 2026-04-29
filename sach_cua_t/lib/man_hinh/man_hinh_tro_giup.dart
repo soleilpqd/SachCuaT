@@ -56,7 +56,6 @@ class DieuKhienManHinhHuongDan extends DieuKhienManHinh {
   }
 
   void _napPdf() async {
-    // TODO: đa ngôn ngữ
     final String fName = switch (kieu) {
       KieuHuongDan.chinh => "mo_dau",
       KieuHuongDan.sach => "sach",
@@ -64,7 +63,8 @@ class DieuKhienManHinhHuongDan extends DieuKhienManHinh {
       KieuHuongDan.web => "web",
       KieuHuongDan.gioiThieu => "gioi_thieu",
     };
-    final String phanLoai = VanBanHienThi().phanLoai.first;
+    // TODO: đa ngôn ngữ, tìm file có tồn tại
+    final String phanLoai = "vi"; //VanBanHienThi().phanLoai.first;
     final Uri uri = LinhTinh.taoDuongDan(phanLoai: PhanLoaiDuongDan.assets, duongDan: "assets/${fName}_$phanLoai.pdf");
     final data = await rootBundle.load(uri.path);
     _pdfData = data.buffer.asUint8List();
