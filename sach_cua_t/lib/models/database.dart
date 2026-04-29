@@ -798,6 +798,9 @@ WHERE "vi_tri" = ?;
     assert(sach.maSo != null, "Thiếu mã sách để cập nhật.");
     final String duongDanAnh = join(_thuMucAnhSach, "${sach.maSo!}.jpg");
     final String duongDanAnhNho = join(_thuMucAnhSach, "${sach.maSo!}_tn.jpg");
+    final File fileAnh = File(duongDanAnh);
+    final File fileAnhNho = File(duongDanAnhNho);
+    bool xoaDemAnh = false;
     if (sach.hinhAnh != null && sach.hinhAnh!.path != duongDanAnh) {
       // final ImgImage? anh = await Isolations.napAnhTuXFile(sach.hinhAnh!);
       // if (anh != null) {
@@ -807,16 +810,26 @@ WHERE "vi_tri" = ?;
       //     encodeJpgFile(duongDanAnhNho, anhThuNho);
       //   }
       // }
+      xoaDemAnh = true;
       await HeThongMay.duyNhat.luuAnhSach(anhGoc: sach.hinhAnh!.path, mucTieu: duongDanAnh, anhThuNho: duongDanAnhNho);
     } else if (sach.hinhAnh == null) {
       sach.hinhThuNho = null;
-      final File fileAnh = File(duongDanAnh);
-      final File fileAnhNho = File(duongDanAnhNho);
+      xoaDemAnh = true;
       if (await fileAnh.exists()) {
         await fileAnh.delete();
       }
       if (await fileAnhNho.exists()) {
         await fileAnhNho.delete();
+      }
+    }
+    if (xoaDemAnh) {
+      if (await fileAnh.exists()) {
+        final FileImage dem = FileImage(fileAnh);
+        await dem.evict();
+      }
+      if (await fileAnhNho.exists()) {
+        final FileImage dem = FileImage(fileAnhNho);
+        await dem.evict();
       }
     }
   }

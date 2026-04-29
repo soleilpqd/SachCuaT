@@ -142,7 +142,9 @@ class _TrangThaiNoiDungTroGiup extends TrangThaiWidgetCuaDieuKhien<_NoiDungManHi
     if (widget.dieuKhienManHinh._pdfData != null) {
       return PDFView(
         pdfData: widget.dieuKhienManHinh._pdfData,
+        autoSpacing: false,
         pageFling: false,
+        pageSnap: false,
         backgroundColor: phongCach.mauNen,
       );
     }

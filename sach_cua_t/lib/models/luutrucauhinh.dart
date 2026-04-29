@@ -40,7 +40,7 @@ class LuuTruCauHinh {
   /// Lưu thời điểm tham chiếu
   Future<void> luuThoiDiemThamChieu(int value) async {
     await _khoiTaoNeuCan();
-    _prefs!.setInt("thoi_diem_tham_chieu", value);
+    await _prefs!.setInt("thoi_diem_tham_chieu", value);
   }
 
   /// Lấy tuỳ chọn hiển thị danh sách tập đầy đủ
@@ -52,17 +52,22 @@ class LuuTruCauHinh {
   /// Lưu tuỳ chọn hiển thị danh sách tập đầy đủ
   Future<void> luuHienThiDSTapDayDu(bool value) async {
     await _khoiTaoNeuCan();
-    _prefs!.setBool("hien_thi_ds_tap_day_du", value);
+    await _prefs!.setBool("hien_thi_ds_tap_day_du", value);
   }
 
-  Future<bool?> layLuuYTrangWeb(String url) async {
+  Future<bool> layLuuYTrangWeb(String url) async {
     await _khoiTaoNeuCan();
-    return _prefs!.getBool("web: $url");
+    final List<String> trangWebNgoai = _prefs!.getStringList("web_3rd") ?? [];
+    return trangWebNgoai.contains(url);
   }
 
   Future<void> luuLuuYTrangWeb(String url) async {
     await _khoiTaoNeuCan();
-    _prefs!.setBool("web: $url", true);
+    List<String> trangWebNgoai = _prefs!.getStringList("web_3rd") ?? [];
+    if (!trangWebNgoai.contains(url)) {
+      trangWebNgoai.add(url);
+      await _prefs!.setStringList("web_3rd", trangWebNgoai);
+    }
   }
 
 }

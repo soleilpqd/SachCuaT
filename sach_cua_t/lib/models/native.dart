@@ -94,7 +94,7 @@ class HeThongMay {
   /// - [mucTieu]: đường dẫn lưu ảnh sách
   /// - [anhThuNho]; đường dẫn lưu ảnh thu nhỏ
   /// - [chieuCao]: chiều cao ảnh thu nhỏ
-  Future<bool?> luuAnhSach({required String anhGoc, required String mucTieu, required String anhThuNho, int chieuCao = 50}) async {
+  Future<bool?> luuAnhSach({required String anhGoc, required String mucTieu, required String anhThuNho, int chieuCao = 100}) async {
     return _kenhKetNoi.invokeMethod<bool>(
       _MethodToNative.luuAnhSach.value, {
         "goc": anhGoc,
