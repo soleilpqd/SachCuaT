@@ -23,12 +23,14 @@ import 'package:sach_cua_t/utils/common.dart';
 class DieuKhienManHinhKhoiDong extends DieuKhienManHinh {
 
   DieuKhienManHinhKhoiDong() {
-    widgetCuaManHinh = _ManHinhKhoiDong();
+    widgetCuaManHinh = _ManHinhKhoiDong(dieuKhienManHinh: this);
   }
 
 }
 
-class _ManHinhKhoiDong extends StatelessWidget {
+class _ManHinhKhoiDong extends WidgetTinhCuaDieuKhienManHinh<DieuKhienManHinhKhoiDong> {
+
+  _ManHinhKhoiDong({required super.dieuKhienManHinh});
 
   @override
   Widget build(BuildContext context) {

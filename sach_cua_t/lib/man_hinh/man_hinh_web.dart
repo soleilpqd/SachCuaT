@@ -96,7 +96,7 @@ class DieuKhienManHinhWeb extends DieuKhienManHinh {
     final LuuTruCauHinh cauHinh = LuuTruCauHinh();
     final Uri uri = Uri.parse(url);
     cauHinh.layLuuYTrangWeb(uri.host).then((gt) {
-      if (!(gt ?? false)) {
+      if (!gt) {
         HopThoai.hienThiHopThoaiThongBao(
           noiDung: Vbht.tuKhoa(TK.luuYTrangWebNgoai, ts: [url]),
           nhanCacNut: [Vbht.tuKhoa(TK.moTrongTrinhDuyet), Vbht.tuKhoa(TK.moTrongUngDung)],

@@ -16,8 +16,6 @@
   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_pdfview/flutter_pdfview.dart';
@@ -58,6 +56,7 @@ class DieuKhienManHinhHuongDan extends DieuKhienManHinh {
   }
 
   void _napPdf() async {
+    // TODO: đa ngôn ngữ
     final String fName = switch (kieu) {
       KieuHuongDan.chinh => "mo_dau",
       KieuHuongDan.sach => "sach",
