@@ -49,6 +49,8 @@ class DieuKhienManHinhHuongDan extends DieuKhienManHinh {
   final KieuHuongDan kieu;
   final BoDemVbht _demVbht = BoDemVbht();
   Uint8List? _pdfData;
+  PDFViewController? _pdfController;
+  bool _daCauHinh = false;
 
   DieuKhienManHinhHuongDan({required this.kieu}) {
     thamSoDieuKhienWidgetLuong[WidgetLuongManHinhXepLop.kKeyThamSoHoatHinh] = xayDungLopDoMo;
@@ -71,9 +73,22 @@ class DieuKhienManHinhHuongDan extends DieuKhienManHinh {
     trangThaiWidgetManHinh?.capNhatGiaoDienCuaManHinh(dieuKhienManHinh: this);
   }
 
+  @override
+  void manHinhDaThanhManHinhChinhTrongLuong() {
+    super.manHinhDaThanhManHinhChinhTrongLuong();
+    if (!_daCauHinh) {
+      _daCauHinh = true;
+      _pdfController?.setPage(0);
+    }
+  }
+
   /// Khi nhấn Đóng
   void _khiNhanDong() {
     luongManHinh?.loaiManHinh(manHinh: this);
+  }
+
+  void _khiNhanTieuDe() {
+    _pdfController?.setPage(0);
   }
 
    @override
@@ -109,6 +124,7 @@ class _ManHinhHuongDan extends StatelessWidget {
         thuocThanhDieuHuong: true,
         khiNhan: dkMh._khiNhanDong,
       ),
+      khiNhanTieuDe: dkMh._khiNhanTieuDe,
       noiDung: _NoiDungManHinhTroGiup(dieuKhienManHinh: dkMh)
     );
     if (dkChuyenDong != null) {
@@ -145,6 +161,7 @@ class _TrangThaiNoiDungTroGiup extends TrangThaiWidgetCuaDieuKhien<_NoiDungManHi
         pageFling: false,
         pageSnap: false,
         backgroundColor: phongCach.mauNen,
+        onViewCreated: (controller) => widget.dieuKhienManHinh._pdfController = controller
       );
     }
     return Container(color: phongCach.mauNen);

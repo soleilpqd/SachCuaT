@@ -111,6 +111,16 @@ class DieuKhienManHinhThongKe extends DieuKhienManHinh {
         dsDich[stt].soLuong += 1;
       }
     }
+    if (dsDich is List<_MucThongKe<String>>) {
+      final List<_MucThongKe<String>> danhSach = dsDich as List<_MucThongKe<String>>;
+      danhSach.sort((muc1, muc2) {
+        final int kq = muc1.giaTri.compareTo(muc2.giaTri);
+        if (kq == 0) {
+          return muc1.soLuong.compareTo(muc2.soLuong);
+        }
+        return kq;
+      });
+    }
   }
 
   /// Chuyển danh sách nhãn từ kiểu Map sang List

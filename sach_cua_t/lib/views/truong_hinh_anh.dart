@@ -49,6 +49,8 @@ class DieuKhienTruongHinhAnh extends DieuKhienCoSo {
 
 }
 
+// TODO: màn hình xem ảnh
+
 /// Trường hình ảnh và chụp ảnh
 /// - Nhấn 1 lần để chụp ảnh.
 /// - Nhấn 2 lần để xoá ảnh.
@@ -69,6 +71,17 @@ class TruongHinhAnh extends GiaoDienCoSo<DieuKhienTruongHinhAnh> {
 
 class _TrangThaiTruongHinhAnh extends TrangThaiCoSo<TruongHinhAnh> {
 
+  Widget _xayDungKhungAnh(Color mauNen) {
+    if (widget.dieuKhien?.hinhAnh != null) {
+      return LinhTinh.taoWidgetAnh(widget.dieuKhien!.hinhAnh!);
+    }
+    return Icon(
+      Icons.camera_alt,
+      size: 60,
+      color: mauNen,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final bool khaDung = widget.dieuKhien!.khaDung;
@@ -77,13 +90,7 @@ class _TrangThaiTruongHinhAnh extends TrangThaiCoSo<TruongHinhAnh> {
       Container(
         color: widget.dieuKhien?.hinhAnh == null ? phongCach.mauVien : phongCach.mauNen,
       ),
-      widget.dieuKhien?.hinhAnh != null ?
-        LinhTinh.taoWidgetAnh(widget.dieuKhien!.hinhAnh!) :
-        Icon(
-          Icons.camera_alt,
-          size: 60,
-          color: khaDung ? phongCach.mauNoiDungChinh : phongCach.mauNoiDungKhoaChinh,
-        )
+      _xayDungKhungAnh(khaDung ? phongCach.mauNoiDungChinh : phongCach.mauNoiDungKhoaChinh)
     ];
     final AspectRatio khungVuong = AspectRatio(
       aspectRatio: 1,
