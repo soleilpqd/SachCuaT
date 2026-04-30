@@ -63,6 +63,10 @@ class ThaoTacNapThongTinSach {
         if (timSachTrongChuoi) {
           dsSachTrongChuoi = await csdl.layDanhSachSachThuocChuoi(thongTinSach.maNhieuTap!);
           dsSachTrongChuoi?.removeWhere((muc) => muc.maSo == thongTinSach.maSo);
+          for (final Sach muc in (dsSachTrongChuoi ?? [])) {
+            final ThaoTacNapThongTinSach nap = ThaoTacNapThongTinSach(muc);
+            await nap.napThongTin();
+          }
         }
       } else {
         thongTinSach.maNhieuTap = null;

@@ -133,7 +133,7 @@ class DieuKhienManHinhThongKe extends DieuKhienManHinh {
       final List<String> dsNhanGt = _lamPhangDSNhan(sach.nhan);
       _phanTichDanhSach(dsNhanGt, _kqNhan);
       if (sach.nhieuTap != null && sach.nhieuTap!.isNotEmpty) {
-        _phanTichDanhSach([sach.nhieuTap], _kqSachNhieuTap);
+        _phanTichDanhSach([sach.nhieuTap!], _kqSachNhieuTap);
       }
     }
   }

@@ -385,21 +385,34 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo {
     luongManHinh?.themManHinh(manHinh: mhTimKiem);
   }
 
+  /// Nạp thông tin của các sách trong chuỗi được chọn để gộp làm bộ sách
+  Future<void> _napThongTinChuoiSach(Sach doiTuong) async {
+    _dsCacTap = await CoSoDuLieu().layDanhSachSachThuocChuoi(doiTuong.maNhieuTap!);
+    if (maSach != null) {
+      try {
+        int? soTap = _dsCacTap.firstWhere((muc) => muc.maSo == maSach).tap;
+        if (soTap != null) {
+          _dkSoTap.vanBan = "$soTap";
+        }
+      } catch (_) {}
+      _dsCacTap.removeWhere((muc) => muc.maSo == maSach);
+    }
+    final SachNhieuTap? boSach = await CoSoDuLieu().timChuoiSachNhieuTap(doiTuong.maNhieuTap!);
+    if (boSach != null) {
+      _dkGhiChuTap.vanBan = boSach.ten;
+    }
+    for (final Sach muc in _dsCacTap) {
+      final ThaoTacNapThongTinSach nap = ThaoTacNapThongTinSach(muc);
+      await nap.napThongTin();
+    }
+  }
+
+  /// Khi chọn sách để lập bộ sách
   void _khiChonSachLapChuoi(Sach doiTuong) {
     _dsCacTap.clear();
     _dkSoTap.vanBan = "";
     if (doiTuong.maNhieuTap != null) {
-      CoSoDuLieu().layDanhSachSachThuocChuoi(doiTuong.maNhieuTap!).then((cacTap) {
-        _dsCacTap = cacTap;
-        if (maSach != null) {
-          try {
-            int? soTap = _dsCacTap.firstWhere((muc) => muc.maSo == maSach).tap;
-            if (soTap != null) {
-              _dkSoTap.vanBan = "$soTap";
-            }
-          } catch (_) {}
-          _dsCacTap.removeWhere((muc) => muc.maSo == maSach);
-        }
+      _napThongTinChuoiSach(doiTuong).then((_) {
         _khiDanhSachCacTapThayDoi();
         trangThaiWidgetManHinh?.capNhatGiaoDienCuaManHinh(dieuKhienManHinh: this);
       });
@@ -418,11 +431,13 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo {
     trangThaiWidgetManHinh?.capNhatGiaoDienCuaManHinh(dieuKhienManHinh: this);
   }
 
+  /// Khi thay đổi cấu hình hiển thị danh sách các tập 1 cách đầy đủ
   void _khiThayDoiHienThiDSTapDayDu() {
     LuuTruCauHinh().luuHienThiDSTapDayDu(_dkHienThiDSTapDayDu.giaTri);
     trangThaiWidgetManHinh?.capNhatGiaoDienCuaManHinh(dieuKhienManHinh: this);
   }
 
+  /// Khi nhấn xoá sách
   void _khiNhanXoaSach() {
     HopThoai.hienThiHopThoaiThongBao(
       noiDung: Vbht.tuKhoa(TK.xacNhanXoa, dem: _demVbht),
@@ -441,6 +456,7 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo {
 
   // --- Xử lý
 
+  /// Khởi tạo dữ liệu
   void _khoiTaoDuLieu() {
     _khoiTaoDSNhan().then((_) {
       if (maSach != null) {
@@ -479,6 +495,7 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo {
     });
   }
 
+  /// Khởi tạo danh sách nhãn sách
   Future<void> _khoiTaoDSNhan() async {
     _dsNhanLuonHien = await CoSoDuLieu().layDSNhanLuonHien();
   }
@@ -813,6 +830,7 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo {
     _dkGhiChuTap.vanBan = sach.nhieuTap ?? "";
   }
 
+  /// Khi danh sách các tập thây đổi
   void _khiDanhSachCacTapThayDoi() {
     if (!_dsCacTap.contains(_tapHienTai)) {
       _dsCacTap.add(_tapHienTai);
@@ -845,6 +863,7 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo {
     });
   }
 
+  /// Kiểm tra tính liên tục của các tập
   void _kiemTraTinhLienTucCacTap() {
     _tapConThieu.clear();
     if (_dsCacTap.isEmpty) { return; }
@@ -988,6 +1007,7 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo {
     });
   }
 
+  /// Thu thập dữ liệu từ màn hình vào object dữ liệu cuối
   Sach _thongTinSachTuGiaoDien() {
     final Sach thongTinSach = Sach();
     thongTinSach.maSo = maSach;
@@ -1019,7 +1039,7 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo {
     if (_dsCacTap.isNotEmpty) {
       thongTinSach.nhieuTap = _dkGhiChuTap.vanBan;
       thongTinSach.tap = int.tryParse(_dkSoTap.vanBan);
-      thongTinSach.maNhieuTap = _dsCacTap.first.maNhieuTap;
+      thongTinSach.maNhieuTap = _dsCacTap.firstWhere((muc) => muc.maNhieuTap != null).maNhieuTap;
     } else {
       thongTinSach.nhieuTap = null;
       thongTinSach.tap = null;
@@ -1032,7 +1052,7 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo {
   void _luuSach() {
     _khoaManHinh();
     final Sach thongTinSach = _thongTinSachTuGiaoDien();
-    thongTinSach.inThongTinChiTiet();
+    // thongTinSach.inThongTinChiTiet();
     final List<Sach> dsCacTap = _dsCacTap.toList();
     dsCacTap.remove(_tapHienTai);
     // luongManHinh?.loaiManHinh(manHinh: this);
