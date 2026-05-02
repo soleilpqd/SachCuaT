@@ -41,6 +41,7 @@ class Sach {
   Map<String, String> nhan = {};
   List<String> nhanLuonHien = [];
   List<DanhDauSach> danhDau = [];
+  /// Tên bộ sách
   String? nhieuTap;
 
   static Sach taoDuLieuGia({int chiSo = 0}) {

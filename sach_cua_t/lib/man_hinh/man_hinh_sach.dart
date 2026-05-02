@@ -410,7 +410,6 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo {
   /// Khi chọn sách để lập bộ sách
   void _khiChonSachLapChuoi(Sach doiTuong) {
     _dsCacTap.clear();
-    _dkSoTap.vanBan = "";
     if (doiTuong.maNhieuTap != null) {
       _napThongTinChuoiSach(doiTuong).then((_) {
         _khiDanhSachCacTapThayDoi();
@@ -426,7 +425,6 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo {
   /// Khi nhấn vào Rời chuỗi
   void _khiNhanRoiChuoi() {
     _dsCacTap.clear();
-    _dkSoTap.vanBan = "";
     _tapConThieu.clear();
     trangThaiWidgetManHinh?.capNhatGiaoDienCuaManHinh(dieuKhienManHinh: this);
   }
@@ -818,12 +816,12 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo {
       _dsDkDanhDau.add(dkRong);
     }
 
+    if (sach.tap != null) {
+      _dkSoTap.vanBan = "${sach.tap}";
+    } else {
+      _dkSoTap.vanBan = "";
+    }
     if (sach.maNhieuTap != null) {
-      if (sach.tap != null) {
-        _dkSoTap.vanBan = "${sach.tap}";
-      } else {
-        _dkSoTap.vanBan = "";
-      }
       _dsCacTap = _thaoTacNap?.dsSachTrongChuoi ?? [];
       _khiDanhSachCacTapThayDoi();
     }
@@ -1036,13 +1034,16 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo {
     }
     thongTinSach.nhan = nhan;
     thongTinSach.nhanLuonHien = nhanLuonHien;
+    thongTinSach.tap = int.tryParse(_dkSoTap.vanBan);
     if (_dsCacTap.isNotEmpty) {
       thongTinSach.nhieuTap = _dkGhiChuTap.vanBan;
-      thongTinSach.tap = int.tryParse(_dkSoTap.vanBan);
-      thongTinSach.maNhieuTap = _dsCacTap.firstWhere((muc) => muc.maNhieuTap != null).maNhieuTap;
+      try {
+        thongTinSach.maNhieuTap = _dsCacTap.firstWhere((muc) => muc.maNhieuTap != null).maNhieuTap;
+      } catch (_) {
+        thongTinSach.maNhieuTap = null;
+      }
     } else {
       thongTinSach.nhieuTap = null;
-      thongTinSach.tap = null;
       thongTinSach.maNhieuTap = null;
     }
     return thongTinSach;
@@ -1441,6 +1442,17 @@ class _TrangThaiNoiDungManHinhSach extends TrangThaiWidgetCuaDieuKhien<_NoiDungM
           );
         }
       }
+    } else {
+      ketQua.add(
+        TruongVanBan(
+          tieuDe: Vbht.tuKhoa(TK.tapSo, dem: dkMh._demVbht),
+          cauHinh: CauHinhTruongVanBan(
+            kieuBanPhim: TextInputType.number,
+            kiemSoatNhapLieu: [FilteringTextInputFormatter.digitsOnly]
+          ),
+          trinhDieuKhien: dkMh._dkSoTap
+        )
+      );
     }
     return ketQua;
   }

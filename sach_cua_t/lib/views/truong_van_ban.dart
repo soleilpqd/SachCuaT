@@ -546,11 +546,12 @@ class _TrangThaiTruongVanBan extends TrangThaiCoSo<TruongVanBan> {
               itemBuilder: (context, index) {
                 final String opt = options.toList()[index];
                 return TextButton(
-                  style: const ButtonStyle(
-                    shape: WidgetStatePropertyAll(RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.zero)))
+                  style: TextButton.styleFrom(
+                    alignment: Alignment.centerLeft,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.zero))
                   ),
                   onPressed: () => onSelected(opt),
-                  child: Row(children: [VanBanHienThiNoiBat(vanBan: _layVanBanNoiBat(dayDu: opt, laPhanNoiDung: laONhapChinh))])
+                  child: VanBanHienThiNoiBat(vanBan: _layVanBanNoiBat(dayDu: opt, laPhanNoiDung: laONhapChinh), tuDongCat: TextOverflow.ellipsis)
                 );
               }
             )
