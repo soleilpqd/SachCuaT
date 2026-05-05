@@ -352,7 +352,13 @@ class _TrangThaiTruongVanBan extends TrangThaiCoSo<TruongVanBan> {
       if (textHienTai != text) { // Văn bản thay đổi trong khi tìm kiếm gợi ý
         return await vLap.tienHanhKoDB(null);
       }
-      return ketQua;
+      List<String> kqCuoi = [];
+      for (final String muc in ketQua) {
+        if (muc != text && !kqCuoi.contains(muc)) {
+          kqCuoi.add(muc);
+        }
+      }
+      return kqCuoi;
     }, gioiHan: 1);
     try {
       return await vongLap.tienHanhKoDB(null);

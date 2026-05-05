@@ -1,3 +1,4 @@
 [submodule "libraries/man_hinh_ung_dung"]
 	path = libraries/man_hinh_ung_dung
 	url = https://github.com/soleilpqd/man_hinh_ung_dung.git
+	branch = develop
