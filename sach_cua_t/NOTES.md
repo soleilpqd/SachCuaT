@@ -11,12 +11,14 @@
 
 Info.plist:
 - Privacy - Camera
+Build settings: language
 
 ### Android:
 
 AndroidManifest.xml:
 - uses-feature: camera
 - uses-permission: camera
+- localeConfig
 
 app/build.gradle.kts:
 - buildFeatures: viewBinding & buildConfig.
