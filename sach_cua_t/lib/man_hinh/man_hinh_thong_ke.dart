@@ -21,6 +21,7 @@ import 'package:man_hinh_ung_dung/man_hinh_ung_dung.dart';
 import 'package:sach_cua_t/man_hinh/man_hinh_co_so.dart';
 import 'package:sach_cua_t/man_hinh/man_hinh_liet_ke_sach.dart';
 import 'package:sach_cua_t/models/dulieu.dart';
+import 'package:sach_cua_t/models/xu_ly_nut_lui_android.dart';
 import 'package:sach_cua_t/utils/vanbanhienthi.dart';
 import 'package:sach_cua_t/views/danh_sach_hien_thi.dart';
 import 'package:sach_cua_t/views/phong_cach_giao_dien.dart';
@@ -74,7 +75,7 @@ class _MucThongKe<T> {
 }
 
 /// Điều khiển màn hình thống kê
-class DieuKhienManHinhThongKe extends DieuKhienManHinh {
+class DieuKhienManHinhThongKe extends DieuKhienManHinh with XuLyNutLuiAndroid {
 
   /// Bộ đệm Văn bản hiển thị
   final BoDemVbht demVbht = BoDemVbht();
@@ -146,6 +147,12 @@ class DieuKhienManHinhThongKe extends DieuKhienManHinh {
         _phanTichDanhSach([sach.nhieuTap!], _kqSachNhieuTap);
       }
     }
+  }
+
+  @override
+  bool khiNhanNutLuiAndroid() {
+    _khiNhanQuayLai();
+    return false;
   }
 
   /// Khi nhấn Tiêu đề của màn hình

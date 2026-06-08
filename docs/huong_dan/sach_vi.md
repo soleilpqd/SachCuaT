@@ -10,9 +10,16 @@
 > Ghi chú: 2 trang trên không được cung cấp bởi ứng dụng này. Ứng dụng chỉ đóng vai trò như 1 trình duyệt web truy cập vào.
 
 - `Đã đọc xong`: đánh dấu cuốn sách là đã đọc xong.
-- Khung ảnh: nhấn vào để mở camera chụp ảnh. Nhấn 2 lần để xoá ảnh.
+- Khung ảnh: trường hợp chưa cài đặt ảnh nào thì nhấn vào vùng khung ảnh (số 3) để mở camera chụp ảnh.
 - Tên sách
 - ISBN: có thể nhập trực tiếp mã số ISBN của sách hoặc nhấn nút số 2 để mở camera và quét mã vạch.
+
+![mh_sach_1_1.png](mh_sach_1_1.png)
+
+Trường hợp khung ảnh có ảnh để hiển thị:
+- Nút số 1: mở camera và chụp ảnh thay thế.
+- Nút số 2: xem ảnh toàn màn hình. Hoặc có thể nhấn trực tiếp vào ảnh để xem toàn màn hình.
+- Nút số 3: xoá ảnh.
 
 ![mh_sach_2.png](mh_sach_2.png)
 
@@ -32,3 +39,9 @@
 ![mh_sach_5.png](mh_sach_5.png)
 
 - Xoá sách: với trường hợp màn hình hiển thị thông tin sách đã lưu trước đó, bạn có thể xoá toàn bộ thông tin với nút đỏ cuối màn hình.
+
+# Xem ảnh toàn màn hình
+
+Các thao tác trên màn hình xem ảnh toàn màn hình:
+- Nhấn kép để thu phóng hình ảnh nhanh.
+- Sử dụng 2 ngón tay di chuyển đồng thời trên màn hình theo 2 hướng ngược nhau (lại gần nhau hoặc tiến ra xa nhau) để thu phóng hình ảnh.

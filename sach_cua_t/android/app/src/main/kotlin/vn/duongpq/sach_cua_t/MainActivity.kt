@@ -124,4 +124,9 @@ class MainActivity: FlutterActivity() {
         startActivity(intent)
     }
 
+    override fun onBackPressed() {
+        // New flutter => onBackPressedDispatcher
+        HeThongMay.duyNhat.khiNhanNutLui { super.onBackPressed() }
+    }
+
 }

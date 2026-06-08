@@ -18,10 +18,12 @@
 
 import 'package:flutter/material.dart' as Ui;
 import 'package:image/image.dart' as Img;
+import 'dart:ui' as DartUi;
 import 'package:sach_cua_t/utils/common.dart';
 
 typedef UiImage = Ui.Image;
 typedef ImgImage = Img.Image;
+typedef DUiImage = DartUi.Image;
 
 /// Sách
 class Sach {

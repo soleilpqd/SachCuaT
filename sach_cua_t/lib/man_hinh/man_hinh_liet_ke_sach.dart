@@ -21,11 +21,12 @@ import 'package:man_hinh_ung_dung/man_hinh_ung_dung.dart';
 import 'package:sach_cua_t/man_hinh/man_hinh_co_so.dart';
 import 'package:sach_cua_t/man_hinh/man_hinh_sach.dart';
 import 'package:sach_cua_t/models/dulieu.dart';
+import 'package:sach_cua_t/models/xu_ly_nut_lui_android.dart';
 import 'package:sach_cua_t/utils/vanbanhienthi.dart';
 import 'package:sach_cua_t/views/truong_sach.dart';
 
 /// Điều khiển màn hình liệt kê sách
-class DieuKhienManHinhLietKeSach extends DieuKhienManHinh {
+class DieuKhienManHinhLietKeSach extends DieuKhienManHinh with XuLyNutLuiAndroid {
 
   /// Bộ đệm Văn bản hiển thị
   final BoDemVbht demVbht = BoDemVbht();
@@ -35,6 +36,12 @@ class DieuKhienManHinhLietKeSach extends DieuKhienManHinh {
 
   DieuKhienManHinhLietKeSach({required this.dsSach}) {
     widgetCuaManHinh = _ManHinhLietKeSach(dieuKhienManHinh: this);
+  }
+
+  @override
+  bool khiNhanNutLuiAndroid() {
+    _khiNhanQuayLai();
+    return false;
   }
 
   /// Khi nhấn Tiêu đề của màn hình

@@ -39,8 +39,6 @@ enum TK {
   khongCoMayAnh,
   /// Thông tin sách
   thongTinSach,
-  /// Hướng dẫn sử dụng ảnh: 1 chạm để chụp ảnh, 2 chạm để xoá ảnh
-  hdsdAnh,
   /// Sách mới
   sachMoi,
   /// Tra cứu lưu chiểu

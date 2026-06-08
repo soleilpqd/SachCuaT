@@ -52,8 +52,9 @@ enum class TenHamTuFlutter(val value: String) {
 /// Tên hàm gọi từ Native về Flutter
 enum class TenHamDenFlutter(val value: String) {
 
-    kiemTraISBN("kiemTraISBN");
+    kiemTraISBN("kiemTraISBN"),
 //    capNhatHienThi("capNhatHienThi");
+    khiNhanNutLui("nutLuiAndroid");
 
 }
 
@@ -202,5 +203,15 @@ class HeThongMay(kenh: MethodChannel, main: MainActivity): MethodCallHandler {
 //    fun thongBaoCapNhatHienThi(thongTin: Map<String, Any>) {
 //        kenhKetNoi.invokeMethod(TenHamDenFlutter.capNhatHienThi.value, thongTin)
 //    }
+
+    fun khiNhanNutLui(xuLyHeThong: () -> Unit) {
+        val callback = NhanKetQuaKenhFlutter()
+        callback.khiThanhCong = { ketQua ->
+            if (ketQua is Boolean && ketQua) {
+                xuLyHeThong()
+            }
+        }
+        kenhKetNoi.invokeMethod(TenHamDenFlutter.khiNhanNutLui.value, null, callback)
+    }
 
 }

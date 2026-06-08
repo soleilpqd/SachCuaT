@@ -18,11 +18,13 @@
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:sach_cua_t/main.dart';
+import 'package:sach_cua_t/man_hinh/man_hinh_xem_anh.dart';
 import 'package:sach_cua_t/utils/common.dart';
 import 'package:sach_cua_t/utils/vanbanhienthi.dart';
 import 'package:sach_cua_t/views/dieu_khien_co_so.dart';
+import 'package:sach_cua_t/views/nut_bam_bieu_tuong.dart';
 import 'package:sach_cua_t/views/phong_cach_giao_dien.dart';
-import 'package:sach_cua_t/views/van_ban_hien_thi_widget.dart';
 
 /// Thuộc tính trường hình ảnh
 enum ThuocTinhTruongHinhAnh {
@@ -92,6 +94,7 @@ class _TrangThaiTruongHinhAnh extends TrangThaiCoSo<TruongHinhAnh> {
       ),
       _xayDungKhungAnh(khaDung ? phongCach.mauNoiDungChinh : phongCach.mauNoiDungKhoaChinh)
     ];
+
     final AspectRatio khungVuong = AspectRatio(
       aspectRatio: 1,
       child: Stack(
@@ -100,22 +103,35 @@ class _TrangThaiTruongHinhAnh extends TrangThaiCoSo<TruongHinhAnh> {
       )
     );
     Widget khungChinh = khungVuong;
-    if (khaDung) {
+    if (widget.dieuKhien?.hinhAnh != null) {
       khungChinh = Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           khungVuong,
-          VbhtWidget(
-            text: Vbht.tuKhoa(TK.hdsdAnh, dem: widget.dem),
-            coChu: CoChu.nho,
-            style: TextStyle(color: phongCach.mauVien, fontStyle: FontStyle.italic),
-            textAlign: TextAlign.right
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              NutBamBieuTuong(
+                bieuTuong: Icons.camera_alt_outlined,
+                thuocThanhDieuHuong: false,
+                khiNhan: _khiNhanChonAnh,
+              ),
+              NutBamBieuTuong(
+                bieuTuong: Icons.fullscreen,
+                thuocThanhDieuHuong: false,
+                khiNhan: _khiXemAnhToanManHinh,
+              ),
+              NutBamBieuTuong(
+                bieuTuong: Icons.delete_outline,
+                thuocThanhDieuHuong: false,
+                khiNhan: _khiXoaAnh,
+              )
+            ],
           )
         ],
       );
     }
     return GestureDetector(
-      onTap: khaDung ? _khiNhanChonAnh : null,
+      onTap: khaDung ? (widget.dieuKhien?.hinhAnh != null ? _khiXemAnhToanManHinh : _khiNhanChonAnh) : null,
       onDoubleTap: khaDung ? _khiXoaAnh : null,
       child: khungChinh
     );
@@ -138,6 +154,11 @@ class _TrangThaiTruongHinhAnh extends TrangThaiCoSo<TruongHinhAnh> {
   /// Khi nhấn xoá ảnh (2 nhấn)
   void _khiXoaAnh() {
     widget.dieuKhien?.hinhAnh = null;
+  }
+
+  void _khiXemAnhToanManHinh() {
+    final DieuKhienManHinhXemAnh mhAnh = DieuKhienManHinhXemAnh(duongDanAnh: widget.dieuKhien!.hinhAnh!);
+    MainApp.luongMHGoc.themManHinh(manHinh: mhAnh);
   }
 
 }

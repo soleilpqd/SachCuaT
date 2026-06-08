@@ -34,6 +34,7 @@ import 'package:sach_cua_t/models/operations/thao_tac_luu_sach.dart';
 import 'package:sach_cua_t/models/operations/thao_tac_nap_sach.dart';
 import 'package:sach_cua_t/models/operations/thao_tac_so_sanh_sach.dart';
 import 'package:sach_cua_t/models/operations/thao_tac_xoa_sach.dart';
+import 'package:sach_cua_t/models/xu_ly_nut_lui_android.dart';
 import 'package:sach_cua_t/utils/hopthoai.dart';
 import 'package:sach_cua_t/utils/vanbanhienthi.dart';
 import 'package:sach_cua_t/views/danh_sach_hien_thi.dart';
@@ -89,7 +90,7 @@ enum _PhanDoanManHinhSach {
 }
 
 /// Điều khiển màn hình hiển thị và chỉnh sửa thông tin sách
-class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo {
+class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo, XuLyNutLuiAndroid {
 
   /// Mã sách gán từ màn hình trước.
   /// Null là tạo sách mới.
@@ -204,6 +205,12 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo {
     if (nguon == _dkHienThiDSTapDayDu) {
       _khiThayDoiHienThiDSTapDayDu();
     }
+  }
+
+  @override
+  bool khiNhanNutLuiAndroid() {
+    _khiNhanQuayLai();
+    return false;
   }
 
   void _khiNhanTieuDeManHinh() {

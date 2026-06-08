@@ -24,3 +24,9 @@ Trong ứng dụng có liên kết đến 2 trang web công cộng bên ngoài [
 
 - Các chức năng cơ bản
 - Dùng thử, sửa lỗi.
+
+### 1.1.0
+
+- Sửa các lỗi lặt vặt.
+- Lọc bỏ các mục đã nhập ở chức năng gợi ý nhập ở màn hình nhập thông tin sách.
+- Màn hình xem ảnh.

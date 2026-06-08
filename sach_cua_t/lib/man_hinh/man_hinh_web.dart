@@ -23,6 +23,7 @@ import 'package:man_hinh_ung_dung/man_hinh_ung_dung.dart';
 import 'package:sach_cua_t/man_hinh/man_hinh_co_so.dart';
 import 'package:sach_cua_t/man_hinh/man_hinh_tro_giup.dart';
 import 'package:sach_cua_t/models/luutrucauhinh.dart';
+import 'package:sach_cua_t/models/xu_ly_nut_lui_android.dart';
 import 'package:sach_cua_t/utils/common.dart';
 import 'package:sach_cua_t/utils/hopthoai.dart';
 import 'package:sach_cua_t/utils/vanbanhienthi.dart';
@@ -33,7 +34,7 @@ import 'package:sach_cua_t/views/van_ban_hien_thi_widget.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
-class DieuKhienManHinhWeb extends DieuKhienManHinh {
+class DieuKhienManHinhWeb extends DieuKhienManHinh with XuLyNutLuiAndroid {
 
   /// URL
   final String url;
@@ -115,6 +116,12 @@ class DieuKhienManHinhWeb extends DieuKhienManHinh {
         _webController.loadRequest(uri);
       }
     });
+  }
+
+  @override
+  bool khiNhanNutLuiAndroid() {
+    _khiNhanQuayLai();
+    return false;
   }
 
   void _khiNhanQuayLai() {

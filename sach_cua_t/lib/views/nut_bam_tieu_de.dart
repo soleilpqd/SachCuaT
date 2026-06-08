@@ -56,12 +56,13 @@ class NutBamBieuTuongTieuDe extends IconButton {
     required bool thuocThanhDieuHuong,
     required bool khaDung,
     bool canChuY = false,
+    List<Shadow>? doBongBieuTuong,
     void Function()? khiNhan,
   }) : super(style: const ButtonStyle(
       overlayColor: WidgetStatePropertyAll(Colors.transparent),
       splashFactory: NoSplash.splashFactory
     ),
-    icon: Icon(bieuTuong, color: khaDung ?
+    icon: Icon(bieuTuong, shadows: doBongBieuTuong, color: khaDung ?
       (canChuY ? PhongCachGiaoDien().mauThaoTacCanChuY : (thuocThanhDieuHuong ? PhongCachGiaoDien().mauNoiDungChinh : PhongCachGiaoDien().mauChinh)) :
       (thuocThanhDieuHuong ? PhongCachGiaoDien().mauNoiDungKhoaChinh : PhongCachGiaoDien().mauNoiDungKhoaNen)
     ),

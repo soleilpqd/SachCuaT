@@ -28,6 +28,7 @@ import 'package:sach_cua_t/man_hinh/man_hinh_tro_giup.dart';
 import 'package:sach_cua_t/models/dulieu.dart';
 import 'package:sach_cua_t/models/operations/thao_tac_tim_kiem.dart';
 import 'package:sach_cua_t/models/vanbannoibat.dart';
+import 'package:sach_cua_t/models/xu_ly_nut_lui_android.dart';
 import 'package:sach_cua_t/utils/vanbanhienthi.dart';
 import 'package:sach_cua_t/views/danh_sach_hien_thi.dart';
 import 'package:sach_cua_t/views/dieu_khien_co_so.dart';
@@ -107,7 +108,7 @@ class _LocTimKiem {
 }
 
 /// Điều khiển màn hình tìm kiếm
-class DieuKhienManHinhTimKiem extends DieuKhienManHinh with TheoDoiDieuKhienCoSo {
+class DieuKhienManHinhTimKiem extends DieuKhienManHinh with TheoDoiDieuKhienCoSo, XuLyNutLuiAndroid {
 
   /// Bộ đệm Văn bản hiển thị
   final BoDemVbht demVbht = BoDemVbht();
@@ -268,6 +269,12 @@ class DieuKhienManHinhTimKiem extends DieuKhienManHinh with TheoDoiDieuKhienCoSo
   }
 
   // --- Xử lý hành động người dùng
+
+  @override
+  bool khiNhanNutLuiAndroid() {
+    _khiNhanQuayLai();
+    return false;
+  }
 
   /// Khi nhấn Tiêu đề của màn hình
   void _khiNhanTieuDeMh() {

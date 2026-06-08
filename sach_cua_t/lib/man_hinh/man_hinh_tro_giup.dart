@@ -24,6 +24,7 @@ import 'package:man_hinh_ung_dung/man_hinh_ung_dung.dart';
 import 'package:man_hinh_ung_dung/widget_luong_man_hinh_xep_lop.dart';
 import 'package:man_hinh_ung_dung/xay_dung_widget_hoat_hinh.dart';
 import 'package:sach_cua_t/man_hinh/man_hinh_co_so.dart';
+import 'package:sach_cua_t/models/xu_ly_nut_lui_android.dart';
 import 'package:sach_cua_t/utils/common.dart';
 import 'package:sach_cua_t/utils/vanbanhienthi.dart';
 import 'package:sach_cua_t/views/nut_bam_bieu_tuong.dart';
@@ -44,7 +45,7 @@ enum KieuHuongDan {
 }
 
 /// Điều khiển màn hình hướng dẫn
-class DieuKhienManHinhHuongDan extends DieuKhienManHinh {
+class DieuKhienManHinhHuongDan extends DieuKhienManHinh with XuLyNutLuiAndroid {
 
   final KieuHuongDan kieu;
   final BoDemVbht _demVbht = BoDemVbht();
@@ -57,6 +58,7 @@ class DieuKhienManHinhHuongDan extends DieuKhienManHinh {
     _napPdf();
   }
 
+  /// Nạp PDF
   void _napPdf() async {
     final String fName = switch (kieu) {
       KieuHuongDan.chinh => "mo_dau",
@@ -87,11 +89,20 @@ class DieuKhienManHinhHuongDan extends DieuKhienManHinh {
     luongManHinh?.loaiManHinh(manHinh: this);
   }
 
+  /// Khi nhấn vùng tiêu đề
   void _khiNhanTieuDe() {
     _pdfController?.setPage(0);
   }
 
-   @override
+  @override
+  /// Khi nhấn nút Lùi của Android
+  bool khiNhanNutLuiAndroid() {
+    _khiNhanDong();
+    return false;
+  }
+
+  @override
+  /// Xây dựng giao diện người dùng
   Widget xayDungGiaoDienNguoiDung(BuildContext context, Map<String, dynamic>? thamSo) {
     AnimationController? dkHoatHinh;
     final temp = thamSo?[WidgetLuongManHinhXepLop.kKeyDieuKhienHoatHoa];

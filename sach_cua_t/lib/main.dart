@@ -18,11 +18,13 @@
 
 import 'package:flutter/material.dart';
 import 'package:man_hinh_ung_dung/luong_man_hinh.dart';
+import 'package:man_hinh_ung_dung/man_hinh_ung_dung.dart';
 import 'package:man_hinh_ung_dung/widget_luong_man_hinh_truot.dart';
 import 'package:man_hinh_ung_dung/widget_luong_man_hinh_xep_lop.dart';
 import 'package:sach_cua_t/man_hinh/man_hinh_khoi_dong.dart';
 import 'package:sach_cua_t/man_hinh/man_hinh_mo_dau.dart';
 import 'package:sach_cua_t/models/database.dart';
+import 'package:sach_cua_t/models/xu_ly_nut_lui_android.dart';
 
 void main() {
   runApp(MainApp());
@@ -59,5 +61,20 @@ class MainApp extends StatelessWidget {
       ),
     );
   }
+
+  static bool? _xuLyNutLuiAndroidLuongManHinh(LuongManHinh luong) {
+    final DieuKhienManHinh? manHinhCuoi = luong.manHinhHienTai;
+    if (manHinhCuoi != null) {
+      if (manHinhCuoi is XuLyNutLuiAndroid) {
+        return (manHinhCuoi as XuLyNutLuiAndroid).khiNhanNutLuiAndroid();
+      }
+      if (manHinhCuoi is LuongManHinh) {
+        return _xuLyNutLuiAndroidLuongManHinh(manHinhCuoi);
+      }
+    }
+    return null;
+  }
+
+  static bool? xuLyNutLuiAndroid() => _xuLyNutLuiAndroidLuongManHinh(luongMHGoc);
 
 }

@@ -17,17 +17,20 @@
  */
 
 import 'package:flutter/services.dart';
+import 'package:sach_cua_t/main.dart';
 // import 'package:sach_cua_t/models/hienthinentang.dart';
 import 'package:sach_cua_t/utils/common.dart';
 
 enum _MethodFromNative {
-  kiemTraISBN;
+  kiemTraISBN,
   // capNhatHienThi;
+  khiNhanNutLui;
 
   static _MethodFromNative? init(String raw) {
     return switch (raw) {
       "kiemTraISBN" => _MethodFromNative.kiemTraISBN,
       // "capNhatHienThi" => _MethodFromNative.capNhatHienThi,
+      "nutLuiAndroid" => _MethodFromNative.khiNhanNutLui,
       _ => null
     };
   }
@@ -67,6 +70,8 @@ class HeThongMay {
         switch (method) {
         case _MethodFromNative.kiemTraISBN:
           return _kiemTraISBN(call.arguments);
+        case _MethodFromNative.khiNhanNutLui:
+          return _xuLyNutLuiAndroid();
         // case _MethodFromNative.capNhatHienThi:
         //   _xuLyThongTinHienThi(call.arguments);
         //   _thongBaoCapNhatHienThi(call.arguments);
@@ -135,5 +140,9 @@ class HeThongMay {
   // }
 
   Future<String?> layThongTinPhienBan() async => _kenhKetNoi.invokeMethod<String>(_MethodToNative.phienBan.value);
+
+  Future<bool?> _xuLyNutLuiAndroid() {
+    return Future.value(MainApp.xuLyNutLuiAndroid());
+  }
 
 }

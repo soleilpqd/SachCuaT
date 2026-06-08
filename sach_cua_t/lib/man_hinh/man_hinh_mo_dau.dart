@@ -28,6 +28,7 @@ import 'package:sach_cua_t/models/database.dart';
 import 'package:sach_cua_t/models/dulieu.dart';
 import 'package:sach_cua_t/models/native.dart';
 import 'package:sach_cua_t/models/operations/thao_tac_nap_man_hinh_mo_dau.dart';
+import 'package:sach_cua_t/models/xu_ly_nut_lui_android.dart';
 import 'package:sach_cua_t/utils/hopthoai.dart';
 import 'package:sach_cua_t/utils/vanbanhienthi.dart';
 import 'package:sach_cua_t/views/danh_sach_hien_thi.dart';
@@ -62,7 +63,7 @@ enum _PhanDoanManHinhMoDau {
   static int tongSo() => values.length;
 }
 
-class DieuKhienManHinhMoDau extends DieuKhienManHinh {
+class DieuKhienManHinhMoDau extends DieuKhienManHinh with XuLyNutLuiAndroid {
 
   final BoDemVbht _boDemVbht = BoDemVbht();
   final ScrollController _dkCuon = ScrollController();
@@ -79,6 +80,9 @@ class DieuKhienManHinhMoDau extends DieuKhienManHinh {
     super.manHinhSeThanhManHinhChinhTrongLuong();
     _truyVanDuLieu();
   }
+
+  @override
+  bool khiNhanNutLuiAndroid() => true;
 
   void _cauHinhNutDieuHuong() {
     List<NutBamBieuTuong> nutPhai = [];
