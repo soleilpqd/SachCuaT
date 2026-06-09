@@ -973,6 +973,8 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo, X
         _khiDanhSachCacTapThayDoi();
         trangThaiWidgetManHinh?.capNhatGiaoDienCuaManHinh(dieuKhienManHinh: this);
       }
+    } else {
+      _lapDSGoiYLoaiBo(muc);
     }
     if (_choKetThucSoanThao != null) {
       _choKetThucSoanThao?.call();
@@ -1080,6 +1082,42 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo, X
       khiLuuSach?.call();
       luongManHinh?.loaiManHinh(manHinh: this);
     });
+  }
+
+  /// Lập danh sách các gợi ý cần loại bỏ
+  void _lapDSGoiYLoaiBo(DieuKhienTruongVanBan dk) {
+    List<List<DieuKhienTruongVanBan>> dsNhomDk = [
+      _dsDkTacGia,
+      _dsDkDichGia,
+      _dsDkNxb
+    ];
+    List<GoiYVanBan> dsGoiY = [
+      _goiYTg,
+      _goiYDg,
+      _goiYNxb
+    ];
+    int stt = 0;
+    for (final List<DieuKhienTruongVanBan> dsDk in dsNhomDk) {
+      _lapDSGoiYLoaiBoTrongDS(dk, dsDk, dsGoiY[stt]);
+      stt += 1;
+    }
+    if (dk.trangThaiNhap == TrangThaiNhapVanBan.tieuDe) {
+      _lapDSGoiYLoaiBoTrongDS(dk, _dsDkNhan, _goiYTenNhan);
+    }
+  }
+
+  /// Lập danh sách các gợi ý tên tác giả cần loại bỏ
+  void _lapDSGoiYLoaiBoTrongDS(DieuKhienTruongVanBan dk, Iterable<DieuKhienTruongVanBan> ds, GoiYVanBan goiY) {
+    if (!ds.contains(dk)) {
+      return;
+    }
+    List<String> ketQua = [];
+    for (DieuKhienTruongVanBan vb in ds) {
+      if (vb != dk && vb.vanBan.isNotEmpty) {
+        ketQua.add(vb.vanBan);
+      }
+    }
+    goiY.danhSachGoiYTieuDeCanLoaiBo = ketQua;
   }
 
 }

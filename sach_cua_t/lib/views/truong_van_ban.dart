@@ -31,6 +31,8 @@ import 'package:sach_cua_t/views/van_ban_hien_thi_widget.dart';
 /// Gợi ý văn bản cơ sở
 abstract class GoiYVanBan {
 
+  Iterable<String>? danhSachGoiYTieuDeCanLoaiBo;
+
   static double get chieuCaoHienThiGoiY => 125;
 
   /// Trả lại danh sách các vị trí (index) của danh sách gợi ý
@@ -352,9 +354,10 @@ class _TrangThaiTruongVanBan extends TrangThaiCoSo<TruongVanBan> {
       if (textHienTai != text) { // Văn bản thay đổi trong khi tìm kiếm gợi ý
         return await vLap.tienHanhKoDB(null);
       }
+      Iterable<String> dsGoiYLoaiBo = goiY?.danhSachGoiYTieuDeCanLoaiBo ?? [];
       List<String> kqCuoi = [];
       for (final String muc in ketQua) {
-        if (muc != text && !kqCuoi.contains(muc)) {
+        if (muc != text && !kqCuoi.contains(muc) && !dsGoiYLoaiBo.contains(muc)) {
           kqCuoi.add(muc);
         }
       }
