@@ -18,6 +18,13 @@ Tôi hi vọng ứng dụng này có ích với bạn nhưng tôi không cung c�
 
 Trong ứng dụng có liên kết đến 2 trang web công cộng bên ngoài [https://ppdvn.gov.vn/web/guest/tra-cuu-luu-chieu](https://ppdvn.gov.vn/web/guest/tra-cuu-luu-chieu) và [https://ppdvn.gov.vn/web/guest/ke-hoach-xuat-ban](https://ppdvn.gov.vn/web/guest/ke-hoach-xuat-ban). 2 trang web này không được cung cấp bởi tôi và không có mối quan hệ nào tới việc phát triển ứng dụng này. Ứng dụng chỉ đóng vai trò như 1 trình duyệt giúp bạn truy cập vào 2 trang web trên.
 
+## Môi trường phát triển
+
+- MacOS X 12.7.
+- Flutter 3.38.10; Dart 3.10.9.
+- XCode 14.2.
+- Android Studio 2025.2.
+
 ## Phiên bản
 
 ### 1.0.0
