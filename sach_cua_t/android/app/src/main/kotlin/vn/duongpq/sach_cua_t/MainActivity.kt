@@ -19,10 +19,12 @@
 package vn.duongpq.sach_cua_t
 
 import android.content.Intent
-import io.flutter.embedding.android.FlutterActivity
+import android.os.Bundle
+import androidx.activity.OnBackPressedCallback
+import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
 
-class MainActivity: FlutterActivity() {
+class MainActivity: FlutterFragmentActivity() {
 
 //    private fun getRootView(): View { return findViewById(android.R.id.content) }
 
@@ -60,15 +62,16 @@ class MainActivity: FlutterActivity() {
         HeThongMay.register(flutterEngine, this)
     }
 
-//    override fun onCreate(savedInstanceState: Bundle?) {
-//        super.onCreate(savedInstanceState)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        langNgheNutLui()
 //        lastOrientation = resources.configuration.orientation
 //        val rootView = getRootView()
 //        val rect = Rect()
 //        rootView.getWindowVisibleDisplayFrame(rect)
 //        originDisplayRect[lastOrientation] = rect
 //        rootView.viewTreeObserver.addOnGlobalLayoutListener(layoutListener)
-//    }
+    }
 
 //    override fun onDestroy() {
 //        super.onDestroy()
@@ -124,9 +127,22 @@ class MainActivity: FlutterActivity() {
         startActivity(intent)
     }
 
-    override fun onBackPressed() {
-        // New flutter => onBackPressedDispatcher
-        HeThongMay.duyNhat.khiNhanNutLui { super.onBackPressed() }
+//    override fun onBackPressed() {
+//        // New flutter => onBackPressedDispatcher
+//        HeThongMay.duyNhat.khiNhanNutLui { super.onBackPressed() }
+//    }
+
+    private fun langNgheNutLui() {
+        val callback = object : OnBackPressedCallback(true) { // 'true' means the callback is enabled
+            override fun handleOnBackPressed() {
+                HeThongMay.duyNhat.khiNhanNutLui {
+                    isEnabled = false
+                    onBackPressedDispatcher.onBackPressed()
+                    isEnabled = true
+                }
+            }
+        }
+        onBackPressedDispatcher.addCallback(callback)
     }
 
 }
