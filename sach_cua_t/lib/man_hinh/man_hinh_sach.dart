@@ -16,6 +16,8 @@
   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:man_hinh_ung_dung/luong_man_hinh.dart';
@@ -1118,6 +1120,17 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo, X
       }
     }
     goiY.danhSachGoiYTieuDeCanLoaiBo = ketQua;
+  }
+
+  /// Người dùng nhập ảnh vào ứng dụng trên màn hình hiện tại là màn hình sách
+  void xuLyTepDuocChiaSe(Iterable<File> dsTep) async {
+    for (final File tep in dsTep) {
+      final bool laAnh = await LinhTinh.kiemTraCoPhaiAnh(tep.path);
+      if (laAnh) {
+        _dkHinhAnh.hinhAnh = LinhTinh.taoDuongDan(phanLoai: PhanLoaiDuongDan.file, duongDan: tep.path);
+        break;
+      }
+    }
   }
 
 }

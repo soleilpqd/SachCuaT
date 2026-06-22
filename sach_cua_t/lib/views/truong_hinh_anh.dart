@@ -20,10 +20,12 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:sach_cua_t/main.dart';
 import 'package:sach_cua_t/man_hinh/man_hinh_xem_anh.dart';
+import 'package:sach_cua_t/models/du_lieu_tam.dart';
+import 'package:sach_cua_t/models/native.dart';
 import 'package:sach_cua_t/utils/common.dart';
 import 'package:sach_cua_t/utils/vanbanhienthi.dart';
 import 'package:sach_cua_t/views/dieu_khien_co_so.dart';
-import 'package:sach_cua_t/views/nut_bam_bieu_tuong.dart';
+import 'package:sach_cua_t/views/nut_bam_tieu_de.dart';
 import 'package:sach_cua_t/views/phong_cach_giao_dien.dart';
 
 /// Thuộc tính trường hình ảnh
@@ -51,8 +53,6 @@ class DieuKhienTruongHinhAnh extends DieuKhienCoSo {
 
 }
 
-// TODO: màn hình xem ảnh
-
 /// Trường hình ảnh và chụp ảnh
 /// - Nhấn 1 lần để chụp ảnh.
 /// - Nhấn 2 lần để xoá ảnh.
@@ -74,13 +74,35 @@ class TruongHinhAnh extends GiaoDienCoSo<DieuKhienTruongHinhAnh> {
 class _TrangThaiTruongHinhAnh extends TrangThaiCoSo<TruongHinhAnh> {
 
   Widget _xayDungKhungAnh(Color mauNen) {
+    final bool khaDung = widget.dieuKhien!.khaDung;
     if (widget.dieuKhien?.hinhAnh != null) {
       return LinhTinh.taoWidgetAnh(widget.dieuKhien!.hinhAnh!);
     }
-    return Icon(
-      Icons.camera_alt,
-      size: 60,
-      color: mauNen,
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        NutBamBieuTuongTieuDe(
+          khaDung: khaDung,
+          bieuTuong: Icons.paste,
+          kichThuocBieuTuong: 60,
+          thuocThanhDieuHuong: true,
+          khiNhan: _khiNhanDan,
+        ),
+        NutBamBieuTuongTieuDe(
+          khaDung: khaDung,
+          bieuTuong: Icons.camera_alt,
+          kichThuocBieuTuong: 60,
+          thuocThanhDieuHuong: true,
+          khiNhan: _khiNhanChonAnh,
+        ),
+        NutBamBieuTuongTieuDe(
+          khaDung: khaDung,
+          bieuTuong: Icons.photo_library,
+          kichThuocBieuTuong: 60,
+          thuocThanhDieuHuong: true,
+          khiNhan: _khiNhanKhoAnh,
+        )
+      ],
     );
   }
 
@@ -102,25 +124,39 @@ class _TrangThaiTruongHinhAnh extends TrangThaiCoSo<TruongHinhAnh> {
         children: children
       )
     );
-    Widget khungChinh = khungVuong;
     if (widget.dieuKhien?.hinhAnh != null) {
-      khungChinh = Column(
+      Widget khungChinh = Column(
         children: [
           khungVuong,
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              NutBamBieuTuong(
+              NutBamBieuTuongTieuDe(
+                khaDung: khaDung,
+                bieuTuong: Icons.paste_outlined,
+                thuocThanhDieuHuong: false,
+                khiNhan: _khiNhanDan,
+              ),
+              NutBamBieuTuongTieuDe(
+                khaDung: khaDung,
                 bieuTuong: Icons.camera_alt_outlined,
                 thuocThanhDieuHuong: false,
                 khiNhan: _khiNhanChonAnh,
               ),
-              NutBamBieuTuong(
+              NutBamBieuTuongTieuDe(
+                khaDung: khaDung,
+                bieuTuong: Icons.photo_library_outlined,
+                thuocThanhDieuHuong: false,
+                khiNhan: _khiNhanKhoAnh,
+              ),
+              NutBamBieuTuongTieuDe(
+                khaDung: khaDung,
                 bieuTuong: Icons.fullscreen,
                 thuocThanhDieuHuong: false,
                 khiNhan: _khiXemAnhToanManHinh,
               ),
-              NutBamBieuTuong(
+              NutBamBieuTuongTieuDe(
+                khaDung: khaDung,
                 bieuTuong: Icons.delete_outline,
                 thuocThanhDieuHuong: false,
                 khiNhan: _khiXoaAnh,
@@ -129,26 +165,31 @@ class _TrangThaiTruongHinhAnh extends TrangThaiCoSo<TruongHinhAnh> {
           )
         ],
       );
+      return GestureDetector(
+        onTap: khaDung ? _khiXemAnhToanManHinh : null,
+        onDoubleTap: khaDung ? _khiXoaAnh : null,
+        child: khungChinh
+      );
     }
-    return GestureDetector(
-      onTap: khaDung ? (widget.dieuKhien?.hinhAnh != null ? _khiXemAnhToanManHinh : _khiNhanChonAnh) : null,
-      onDoubleTap: khaDung ? _khiXoaAnh : null,
-      child: khungChinh
-    );
+    return khungVuong;
   }
 
-  /// Khi nhấn chọn ảnh (1 nhấn)
-  void _khiNhanChonAnh() async {
+  Future<void> _chonAnh(ImageSource nguon) async {
     final ImagePicker picker = ImagePicker();
     XFile? file;
     try {
-      file = await picker.pickImage(source: ImageSource.camera);
+      file = await picker.pickImage(source: nguon);
     } catch (error) {
       widget.khiKhongCoMayAnh();
     }
     if (file != null) {
       widget.dieuKhien?.hinhAnh = LinhTinh.taoDuongDan(phanLoai: PhanLoaiDuongDan.file, duongDan: file.path);
     }
+  }
+
+  /// Khi nhấn chọn ảnh (1 nhấn)
+  void _khiNhanChonAnh() {
+    _chonAnh(ImageSource.camera);
   }
 
   /// Khi nhấn xoá ảnh (2 nhấn)
@@ -159,6 +200,25 @@ class _TrangThaiTruongHinhAnh extends TrangThaiCoSo<TruongHinhAnh> {
   void _khiXemAnhToanManHinh() {
     final DieuKhienManHinhXemAnh mhAnh = DieuKhienManHinhXemAnh(duongDanAnh: widget.dieuKhien!.hinhAnh!);
     MainApp.luongMHGoc.themManHinh(manHinh: mhAnh);
+  }
+
+  void _khiNhanDan() async {
+    await HeThongMay.duyNhat.dan([.anh]);
+    final Iterable<String> dsAnhDcChiaSe = await DuLieuTam().layDsCacTepDuocChiaSe();
+    String? duongDanHienTai = widget.dieuKhien?.hinhAnh?.path;
+    if (duongDanHienTai == null || !dsAnhDcChiaSe.contains(duongDanHienTai)) {
+      for (final String muc in dsAnhDcChiaSe) {
+        if (await LinhTinh.kiemTraCoPhaiAnh(muc)) {
+          widget.dieuKhien?.hinhAnh = LinhTinh.taoDuongDan(phanLoai: PhanLoaiDuongDan.file, duongDan: muc);
+          return;
+        }
+      }
+    }
+    print("PICK FILE");
+  }
+
+  void _khiNhanKhoAnh() {
+    _chonAnh(ImageSource.gallery);
   }
 
 }

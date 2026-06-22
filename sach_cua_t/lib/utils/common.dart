@@ -17,8 +17,10 @@
  */
 
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:mime/mime.dart';
 import 'package:sach_cua_t/models/dulieu.dart';
 
 enum PhanLoaiDuongDan {
@@ -290,6 +292,34 @@ class LinhTinh {
       ketQua += dem;
     }
     return ketQua;
+  }
+
+  static Future<String?> kiemTraMime(String duongDan) async {
+    String? mime = lookupMimeType(duongDan);
+    if (mime != null) {
+      return mime;
+    }
+    final File tep = File(duongDan);
+    final RandomAccessFile reader = await tep.open(mode: FileMode.read);
+    try {
+      await reader.setPosition(0);
+      final Uint8List mau = await reader.read(20);
+      reader.close();
+      return lookupMimeType(tep.path, headerBytes: mau);
+    } catch (_) {
+      reader.close();
+      return null;
+    }
+  }
+
+  static Future<bool> kiemTraCoPhaiAnh(String duongDan) async {
+    final List<String> cacKieuAnhPhuHop = [
+      "image/webp",
+      "image/jpeg",
+      "image/png"
+    ];
+    final String? mime = await kiemTraMime(duongDan);
+    return cacKieuAnhPhuHop.contains(mime ?? "");
   }
 
 }

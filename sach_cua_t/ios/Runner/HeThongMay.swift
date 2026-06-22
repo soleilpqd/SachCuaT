@@ -30,12 +30,47 @@ final class HeThongMay {
         case luuAnhSach
         /// Phiên bản
         case phienBan
+        /// Dán tệp từ pasteboard
+        case dan
+        /// Mở màn hình chọn tệp
+        case chonTep
     }
 
     /// Tên hàm từ native module tới Flutter module
     enum TenHamDenFlutter: String {
         /// Kiểm tra ISBN
         case kiemTraISBN
+        /// Nhận được tệp
+        case nhanDuocTep
+    }
+
+    enum KieuTep: Int {
+        case anh = 0
+        case zip
+        case p7zip
+    }
+
+    enum Uti: String {
+        case meta = "com.apple.DocumentManager.FPItem.File"
+        case jpeg = "public.jpeg"
+        case png = "public.png"
+        case zip = "public.zip-archive"
+        case p7z = "org.7-zip.7-zip-archive"
+
+        var fileExtension: String {
+            switch self {
+            case .meta:
+                return "bin"
+            case .jpeg:
+                return "jpg"
+            case .png:
+                return "png"
+            case .zip:
+                return "zip"
+            case .p7z:
+                return "7z"
+            }
+        }
     }
 
     /// Duy nhất (Singleton)
@@ -128,6 +163,23 @@ final class HeThongMay {
         case .phienBan:
             let phienBan = (Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String) ?? ""
             result(phienBan)
+        case .dan:
+            if let thamSo = call.arguments as? [String: Any],
+               let duongDanChua = thamSo["duong_dan"] as? String,
+               let locTho = thamSo["loc"] as? [Int] {
+                var loc = [KieuTep]()
+                for muc in locTho {
+                    if let gt = KieuTep(rawValue: muc) {
+                        loc.append(gt)
+                    }
+                }
+                let dsDuongDan = dan(duongDanLuu: duongDanChua, loc: loc)
+                result(dsDuongDan)
+            } else {
+                result(FlutterError(code: "dan_1", message: "Tham số không phù hợp", details: call.method))
+            }
+        case .chonTep:
+            break
         }
     }
 
@@ -204,5 +256,106 @@ final class HeThongMay {
 //    @IBAction private func keyboardOnDisappear(_ notif: Notification) {
 ////        kbToolbarView.isHidden = true
 //    }
+
+    func nhanDuocTep(dsDuongDan: [String]) {
+        kenhKetNoi.invokeMethod(TenHamDenFlutter.nhanDuocTep.rawValue, arguments: dsDuongDan)
+    }
+
+    private func taoTen(thuMuc: String, tenGoc: String?, uti: Uti) -> String {
+        let urlCoSo = URL(fileURLWithPath: thuMuc)
+        var tenCoSo = ""
+        let ext = uti.fileExtension
+        if let ten = tenGoc {
+            let url = urlCoSo.appendingPathComponent(ten)
+            if !FileManager.default.fileExists(atPath: url.path) {
+                return url.path
+            }
+            tenCoSo = url.deletingPathExtension().lastPathComponent
+        }
+
+        var stt = 1;
+        while true {
+            let url = urlCoSo.appendingPathComponent("\(tenCoSo)_\(stt).\(ext)")
+            if !FileManager.default.fileExists(atPath: url.path) {
+                return url.path
+            }
+            stt += 1
+        }
+    }
+
+    private func anhCoAlpha(anh: UIImage) -> Bool {
+        guard let thongTin = anh.cgImage?.alphaInfo else { return false }
+        switch thongTin {
+        case .none, .noneSkipLast, .noneSkipFirst:
+            return false
+        default:
+            return true
+        }
+    }
+
+    private func danDuLieu(duLieu: Data, duongDanLuu: String, tenGoc: String?, uti: Uti) -> String? {
+        do {
+            let ten = taoTen(thuMuc: duongDanLuu, tenGoc: tenGoc, uti: uti)
+            try duLieu.write(to: URL(fileURLWithPath: ten))
+            return ten
+        } catch _ {
+            return nil
+        }
+    }
+
+    private func dan(duongDanLuu: String, loc: [KieuTep]) -> [String] {
+//        ketQua.append("\(duongDanLuu); \(loc.map({ "\($0) \($0.rawValue)" }).joined(separator: ";; "))")
+        let pasteboard = UIPasteboard.general
+        var utis = [Uti]()
+        for kieu in loc {
+            switch kieu {
+            case .anh:
+                utis.append(.jpeg)
+                utis.append(.png)
+            case .zip:
+                utis.append(.zip)
+            case .p7zip:
+                utis.append(.p7z)
+            }
+        }
+        if !pasteboard.contains(pasteboardTypes: utis.map({ $0.rawValue })) {
+            return []
+        }
+        var ketQua = [String]()
+        for uti in utis {
+            if let dsChiSo = pasteboard.itemSet(withPasteboardTypes: [uti.rawValue]),
+               let dsDuLieu = pasteboard.data(forPasteboardType: uti.rawValue, inItemSet: dsChiSo) {
+                var dsTenTep = [String?]()
+                for chiSo in dsChiSo {
+                    var tenTep: String? = nil
+                    if let dsSieuDuLieu = pasteboard.data(forPasteboardType: Uti.meta.rawValue, inItemSet: IndexSet(integer: chiSo)),
+                       !dsSieuDuLieu.isEmpty {
+                        for sieuDl in dsSieuDuLieu {
+                            if let plist = try? PropertyListSerialization.propertyList(from: sieuDl, format: nil) as? NSDictionary,
+                               let objects = plist["$objects"] as? NSArray {
+                                let stt = objects.index(of: "NSFileProviderDomainDefaultIdentifier")
+                                if stt >= 0 && stt < objects.count - 1 {
+                                    tenTep = objects[stt + 1] as? String
+                                }
+                            }
+                            if tenTep != nil {
+                                break
+                            }
+                        }
+                    }
+                    dsTenTep.append(tenTep)
+                }
+                for (stt, muc) in dsDuLieu.enumerated() {
+                    if let ten = danDuLieu(duLieu: muc, duongDanLuu: duongDanLuu, tenGoc: dsTenTep[stt], uti: uti) {
+                        ketQua.append(ten)
+                    }
+                }
+            }
+        }
+        if !ketQua.isEmpty {
+            pasteboard.items = []
+        }
+        return ketQua
+    }
 
 }

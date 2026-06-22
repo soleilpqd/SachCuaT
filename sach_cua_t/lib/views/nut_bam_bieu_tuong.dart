@@ -25,6 +25,7 @@ class NutBamBieuTuong extends GiaoDienCoSo<DieuKhienCoSo> {
 
   /// Hình biểu tượng
   final IconData bieuTuong;
+  final double? kichThuocBieuTuong;
   /// Sử dụng trên thanh điều hướng (tiêu đề màn hình)
   final bool thuocThanhDieuHuong;
   /// Đổ bóng biểu tượng
@@ -33,7 +34,15 @@ class NutBamBieuTuong extends GiaoDienCoSo<DieuKhienCoSo> {
   final void Function()? khiNhan;
 
   /// CONSTRUCTOR
-  const NutBamBieuTuong({super.key, required this.bieuTuong, required this.thuocThanhDieuHuong, this.doBongBieuTuong, super.dieuKhien, this.khiNhan});
+  const NutBamBieuTuong({
+    super.key,
+    required this.bieuTuong,
+    this.kichThuocBieuTuong,
+    required this.thuocThanhDieuHuong,
+    this.doBongBieuTuong,
+    super.dieuKhien,
+    this.khiNhan
+  });
 
   @override
   State<StatefulWidget> createState() => _TrangThaiNutBamBieuTuong();
@@ -47,6 +56,7 @@ class _TrangThaiNutBamBieuTuong extends TrangThaiCoSo<NutBamBieuTuong> {
     final bool khaDung = widget.dieuKhien?.khaDung ?? true;
     return NutBamBieuTuongTieuDe(
       bieuTuong: widget.bieuTuong,
+      kichThuocBieuTuong: widget.kichThuocBieuTuong,
       khaDung: khaDung,
       thuocThanhDieuHuong: widget.thuocThanhDieuHuong,
       doBongBieuTuong: widget.doBongBieuTuong,

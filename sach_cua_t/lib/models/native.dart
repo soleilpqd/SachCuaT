@@ -16,30 +16,47 @@
   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import 'dart:io';
+
 import 'package:flutter/services.dart';
 import 'package:sach_cua_t/main.dart';
+import 'package:sach_cua_t/models/du_lieu_tam.dart';
 // import 'package:sach_cua_t/models/hienthinentang.dart';
 import 'package:sach_cua_t/utils/common.dart';
 
 enum _MethodFromNative {
+  /// Kiểm tra định dạng ISBN
   kiemTraISBN,
   // capNhatHienThi;
-  khiNhanNutLui;
+  /// Khi nhấn nút lùi (chỉ Android)
+  khiNhanNutLui,
+  /// Khi người dùng chọn tệp từ ngoài app
+  khiNhanDuocTep,
+  ;
 
   static _MethodFromNative? init(String raw) {
     return switch (raw) {
       "kiemTraISBN" => _MethodFromNative.kiemTraISBN,
       // "capNhatHienThi" => _MethodFromNative.capNhatHienThi,
       "nutLuiAndroid" => _MethodFromNative.khiNhanNutLui,
+      "nhanDuocTep" => _MethodFromNative.khiNhanDuocTep,
       _ => null
     };
   }
 }
 
 enum _MethodToNative {
+  /// Quét mã ISBN
   quetMaISBN,
+  /// Lưu ảnh sách
   luuAnhSach,
-  phienBan;
+  /// Lấy phiên bản
+  phienBan,
+  /// Dán pasteboard
+  dan,
+  /// Mở hộp thoại chọn tệp
+  chonTep
+  ;
   // layThongTinHienThi;
 
   String get value {
@@ -47,9 +64,21 @@ enum _MethodToNative {
       _MethodToNative.quetMaISBN => "quetMaISBN",
       _MethodToNative.luuAnhSach => "luuAnhSach",
       _MethodToNative.phienBan => "phienBan",
+      _MethodToNative.dan => "dan",
+      _MethodToNative.chonTep => "chonTep",
       // _MethodToNative.layThongTinHienThi => "layThongTinHienThi"
     };
   }
+}
+
+/// Kiểu tệp
+enum KieuTep {
+  /// Ảnh (JPEG, PNG, WEBP)
+  anh,
+  /// zip
+  zip,
+  /// 7zip
+  p7zip
 }
 
 // mixin TheoDoiHeThongMay {
@@ -72,6 +101,8 @@ class HeThongMay {
           return _kiemTraISBN(call.arguments);
         case _MethodFromNative.khiNhanNutLui:
           return _xuLyNutLuiAndroid();
+        case _MethodFromNative.khiNhanDuocTep:
+          _xuLyKhiNhanDuocTep(call.arguments);
         // case _MethodFromNative.capNhatHienThi:
         //   _xuLyThongTinHienThi(call.arguments);
         //   _thongBaoCapNhatHienThi(call.arguments);
@@ -143,6 +174,24 @@ class HeThongMay {
 
   Future<bool?> _xuLyNutLuiAndroid() {
     return Future.value(MainApp.xuLyNutLuiAndroid());
+  }
+
+  Future<List<String?>?> dan(List<KieuTep> loc) async {
+    final Directory duongDanTam = await DuLieuTam().duongDanThuMucDan();
+    final Map<String, Object?> thamSo = {};
+    thamSo["duong_dan"] = duongDanTam.path;
+    thamSo["loc"] = loc.map((muc) => muc.index).toList();
+    final List<Object?>? ketQua = await _kenhKetNoi.invokeMethod(_MethodToNative.dan.value, thamSo) as List<Object?>?;
+    final List<String>? dsDuongDan = ketQua?.cast<String>();
+    print("DAN $dsDuongDan");
+    return Future.value(dsDuongDan);
+  }
+
+  void _xuLyKhiNhanDuocTep(dynamic dsDuongDan) {
+    final List<String> dsDuongDanChuan = (dsDuongDan as List<Object?>).cast<String>();
+    DuLieuTam().nhapTepDuocChiaSe(dsDuongDanChuan).then((ketQua) {
+      MainApp.xuLyTepDuocChiaSe(ketQua);
+    });
   }
 
 }

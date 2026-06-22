@@ -53,6 +53,7 @@ class NutBamBieuTuongTieuDe extends IconButton {
   NutBamBieuTuongTieuDe({
     super.key,
     required IconData bieuTuong,
+    double? kichThuocBieuTuong,
     required bool thuocThanhDieuHuong,
     required bool khaDung,
     bool canChuY = false,
@@ -62,11 +63,11 @@ class NutBamBieuTuongTieuDe extends IconButton {
       overlayColor: WidgetStatePropertyAll(Colors.transparent),
       splashFactory: NoSplash.splashFactory
     ),
-    icon: Icon(bieuTuong, shadows: doBongBieuTuong, color: khaDung ?
+    icon: Icon(bieuTuong, size: kichThuocBieuTuong, shadows: doBongBieuTuong, color: khaDung ?
       (canChuY ? PhongCachGiaoDien().mauThaoTacCanChuY : (thuocThanhDieuHuong ? PhongCachGiaoDien().mauNoiDungChinh : PhongCachGiaoDien().mauChinh)) :
       (thuocThanhDieuHuong ? PhongCachGiaoDien().mauNoiDungKhoaChinh : PhongCachGiaoDien().mauNoiDungKhoaNen)
     ),
-    onPressed: khiNhan
+    onPressed: khaDung ? khiNhan : null
   );
 
 }
