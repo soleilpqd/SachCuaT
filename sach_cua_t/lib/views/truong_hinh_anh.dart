@@ -174,7 +174,7 @@ class _TrangThaiTruongHinhAnh extends TrangThaiCoSo<TruongHinhAnh> {
     return khungVuong;
   }
 
-  Future<void> _chonAnh(ImageSource nguon) async {
+  Future<void> _chonAnh1(ImageSource nguon) async {
     final ImagePicker picker = ImagePicker();
     XFile? file;
     try {
@@ -187,9 +187,20 @@ class _TrangThaiTruongHinhAnh extends TrangThaiCoSo<TruongHinhAnh> {
     }
   }
 
+  Future<void> _chonAnh(KieuMedia kieu) async {
+    try {
+      String? duongDan = await HeThongMay.duyNhat.chonAnh(kieu);
+      if (duongDan != null) {
+        widget.dieuKhien?.hinhAnh = LinhTinh.taoDuongDan(phanLoai: PhanLoaiDuongDan.file, duongDan: duongDan);
+      }
+    } catch (error) {
+      widget.khiKhongCoMayAnh();
+    }
+  }
+
   /// Khi nhấn chọn ảnh (1 nhấn)
   void _khiNhanChonAnh() {
-    _chonAnh(ImageSource.camera);
+    _chonAnh(KieuMedia.camera);
   }
 
   /// Khi nhấn xoá ảnh (2 nhấn)
@@ -218,7 +229,7 @@ class _TrangThaiTruongHinhAnh extends TrangThaiCoSo<TruongHinhAnh> {
   }
 
   void _khiNhanKhoAnh() {
-    _chonAnh(ImageSource.gallery);
+    _chonAnh(KieuMedia.khoAnh);
   }
 
 }

@@ -30,6 +30,8 @@ final class HeThongMay {
         case luuAnhSach
         /// Phiên bản
         case phienBan
+        /// Chọn ảnh
+        case chonAnh
         /// Dán tệp từ pasteboard
         case dan
         /// Mở màn hình chọn tệp
@@ -48,6 +50,11 @@ final class HeThongMay {
         case anh = 0
         case zip
         case p7zip
+    }
+
+    enum KieuMedia: Int {
+        case camera = 0
+        case khoAnh
     }
 
     enum Uti: String {
@@ -163,6 +170,8 @@ final class HeThongMay {
         case .phienBan:
             let phienBan = (Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String) ?? ""
             result(phienBan)
+        case .chonAnh:
+            chonAnh(call: call, result: result)
         case .dan:
             if let thamSo = call.arguments as? [String: Any],
                let duongDanChua = thamSo["duong_dan"] as? String,
@@ -256,6 +265,20 @@ final class HeThongMay {
 //    @IBAction private func keyboardOnDisappear(_ notif: Notification) {
 ////        kbToolbarView.isHidden = true
 //    }
+
+    /// Chọn ảnh
+    private func chonAnh(call: FlutterMethodCall, result: @escaping FlutterResult) {
+        guard let args = call.arguments as?  [String: Any],
+              let duongDan = args["duong_dan"] as? String,
+              let kieuTho = args["kieu"] as? Int,
+              let kieu = KieuMedia(rawValue: kieuTho)
+        else {
+            result(FlutterError(code: "chonAnh_1", message: "Tham số không đúng", details: call.method))
+            return
+        }
+        let boXl = BoXuLyChonAnh(nguon: kieu, duongDan: duongDan, xlKetQua: result)
+        boXl.batDau()
+    }
 
     func nhanDuocTep(dsDuongDan: [String]) {
         kenhKetNoi.invokeMethod(TenHamDenFlutter.nhanDuocTep.rawValue, arguments: dsDuongDan)

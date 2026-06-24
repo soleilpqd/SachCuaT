@@ -31,6 +31,8 @@ class DuLieuTam {
   final String _tenChiaSe = "chia_se";
   final String _tenDan = "dan";
 
+  Future<Directory> duongDanTam() async => await getTemporaryDirectory();
+
   /// Khởi đầu
   Future<void> khoiDau() async {
     final Directory duongDanTam = await getTemporaryDirectory();
@@ -99,5 +101,14 @@ class DuLieuTam {
 
   /// Lấy danh sách các tệp được chia sẻ
   Future<Iterable<String>> layDsCacTepDuocChiaSe() async => _layDsCacTepTrongThuMucTam(_tenChiaSe);
+
+  String suDungTepTam() {
+
+    return "";
+  }
+
+  void lamSachTepTam(String duongDan) {
+
+  }
 
 }

@@ -52,6 +52,8 @@ enum _MethodToNative {
   luuAnhSach,
   /// Lấy phiên bản
   phienBan,
+  /// Chụp ảnh hoặc mở kho ảnh
+  chonAnh,
   /// Dán pasteboard
   dan,
   /// Mở hộp thoại chọn tệp
@@ -64,6 +66,7 @@ enum _MethodToNative {
       _MethodToNative.quetMaISBN => "quetMaISBN",
       _MethodToNative.luuAnhSach => "luuAnhSach",
       _MethodToNative.phienBan => "phienBan",
+      _MethodToNative.chonAnh => "chonAnh",
       _MethodToNative.dan => "dan",
       _MethodToNative.chonTep => "chonTep",
       // _MethodToNative.layThongTinHienThi => "layThongTinHienThi"
@@ -73,12 +76,27 @@ enum _MethodToNative {
 
 /// Kiểu tệp
 enum KieuTep {
-  /// Ảnh (JPEG, PNG, WEBP)
+  /// Ảnh (JPEG, PNG)
   anh,
   /// zip
   zip,
   /// 7zip
   p7zip
+}
+
+/// Kiểu media
+enum KieuMedia {
+  /// Camera
+  camera,
+  /// Kho ảnh
+  khoAnh;
+
+  int get giaTri {
+    return switch (this) {
+      KieuMedia.camera => 0,
+      KieuMedia.khoAnh => 1
+    };
+  }
 }
 
 // mixin TheoDoiHeThongMay {
@@ -174,6 +192,14 @@ class HeThongMay {
 
   Future<bool?> _xuLyNutLuiAndroid() {
     return Future.value(MainApp.xuLyNutLuiAndroid());
+  }
+
+  /// Chụp ảnh hoặc mở kho ảnh
+  Future<String?> chonAnh(KieuMedia kieu) async {
+    final Map<String, Object?> thamSo = {};
+    thamSo["duong_dan"] = (await DuLieuTam().duongDanTam()).path;
+    thamSo["kieu"] = kieu.giaTri;
+    return _kenhKetNoi.invokeMethod<String>(_MethodToNative.chonAnh.value, thamSo);
   }
 
   Future<List<String?>?> dan(List<KieuTep> loc) async {
