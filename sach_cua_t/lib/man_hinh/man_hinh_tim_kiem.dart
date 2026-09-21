@@ -116,6 +116,7 @@ class DieuKhienManHinhTimKiem extends DieuKhienManHinh with TheoDoiDieuKhienCoSo
   final List<_LocTimKiem> _locTimKiem = [];
   /// Callback với chế độ `chonSachLapChuoi`
   final void Function(Sach)? khiChonSach;
+  final void Function(int)? khiChonBoSach;
   /// Điều khiển ô nhập từ khoá
   final DieuKhienTruongVanBan dkTuKhoa = DieuKhienTruongVanBan();
 
@@ -134,7 +135,7 @@ class DieuKhienManHinhTimKiem extends DieuKhienManHinh with TheoDoiDieuKhienCoSo
   List<SachNhieuTap> _kqSachNhieuTap = [];
   bool _canTimLai = false;
 
-  DieuKhienManHinhTimKiem({this.khiChonSach, List<int>? sachLoaiTru}) {
+  DieuKhienManHinhTimKiem({this.khiChonSach, this.khiChonBoSach, List<int>? sachLoaiTru}) {
     widgetCuaManHinh = _ManHinhTimKiem(dkMh: this);
     _congCuTimKiem.dsLoaiTru = sachLoaiTru;
   }
@@ -385,6 +386,10 @@ class DieuKhienManHinhTimKiem extends DieuKhienManHinh with TheoDoiDieuKhienCoSo
   /// Khi nhấn 1 dòng kết quả tìm kiếm Sách nhiều tập
   void _khiNhanKqSachNhieuTap(int stt) {
     SachNhieuTap nhieuTap = _kqSachNhieuTap.removeAt(stt);
+    if (khiChonBoSach != null) {
+      luongManHinh?.loaiManHinh(manHinh: this, khiHoanThanh: () => khiChonBoSach!.call(nhieuTap.maSo));
+      return;
+    }
     _LocTimKiem loc = _LocTimKiem(kieuLoc: _PhanDoanManHinhTimKiem.nhieuTap, giaTriLoc: nhieuTap.ten, duLieu: nhieuTap);
     _locTimKiem.add(loc);
     dkTuKhoa.vanBan = "";
@@ -586,7 +591,7 @@ class _TrangThaiNoiDungMhTimKiem extends TrangThaiWidgetCuaDieuKhien<_NoiDungMan
   Widget _xayDungONhapTuKhoa() => TruongVanBan(
     cauHinh: CauHinhTruongVanBan(
       kieuNutEnter: TextInputAction.search,
-      khiNhanEnter: (_) => widget.dieuKhienManHinh._khiNhanTimKiem()
+      khiNhanEnter: (_, _) => widget.dieuKhienManHinh._khiNhanTimKiem()
     ),
     trinhDieuKhien: widget.dieuKhienManHinh.dkTuKhoa,
     xayDungNutBenPhai: (_, khaDung) => NutBamBieuTuongTieuDe(

@@ -31,9 +31,6 @@ class GoiYCSDL extends GoiYVanBan {
   @override
   Future<List<String>> timKiemGoiY(String dauVao, TruongVanBan widget) async {
     _dsKetQua.clear();
-    if (dauVao.isEmpty) {
-      return [];
-    }
     _dsKetQua = await CoSoDuLieu().timKiemGoiY(bang, dauVao);
     _dsKetQua.sapXep();
     return _dsKetQua.map((e) => e.vanBanDayDu).toList();

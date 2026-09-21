@@ -53,6 +53,7 @@ final class BoXuLyChonAnh: NSObject, UINavigationControllerDelegate, UIImagePick
         neo = self
         let controller = UIImagePickerController()
         controller.modalPresentationStyle = .fullScreen
+        controller.sourceType = nguon
         controller.mediaTypes = [maKieuAnh]
         controller.delegate = self
         rootController.present(controller, animated: true)
@@ -66,13 +67,33 @@ final class BoXuLyChonAnh: NSObject, UINavigationControllerDelegate, UIImagePick
 
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
         var ketQua: String?
+        let fileMan = FileManager.default
         if let urlGoc = info[.imageURL] as? URL {
             let tenAnh = urlGoc.lastPathComponent
             let urlDich = URL(fileURLWithPath: thuMucChua).appendingPathComponent(tenAnh)
-            let fileMan = FileManager.default
-            ketQua = "\(urlGoc) => \(urlDich)"
+//            ketQua = "\(urlGoc) => \(urlDich)"
             do {
                 try fileMan.copyItem(at: urlGoc, to: urlDich)
+            } catch let err {
+                picker.dismiss(animated: true)
+                phanHoi(err)
+                neo = nil
+                return
+            }
+            if fileMan.fileExists(atPath: urlDich.path) {
+                ketQua = urlDich.path
+            }
+        } else if let anhGoc = info[.originalImage] as? UIImage, let duLieu = anhGoc.jpegData(compressionQuality: 1) {
+            var tenAnh = "1.JPG"
+            var stt = 1
+            var urlDich = URL(fileURLWithPath: thuMucChua).appendingPathExtension(tenAnh)
+            while fileMan.fileExists(atPath: urlDich.path) {
+                stt += 1
+                tenAnh = "\(stt).JPG"
+                urlDich = URL(fileURLWithPath: thuMucChua).appendingPathExtension(tenAnh)
+            }
+            do {
+                try duLieu.write(to: urlDich)
             } catch let err {
                 picker.dismiss(animated: true)
                 phanHoi(err)

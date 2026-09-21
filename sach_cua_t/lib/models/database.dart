@@ -856,12 +856,19 @@ WHERE "vi_tri" = ?;
     assert(_db != null, "CSDL chưa được khởi tạo.");
     final String tkKd = LinhTinh.loaiBoDautiengViet(tuKhoa);
     // print("TimKiemGoiY: $bang; $tuKhoa; $tkKd");
-    final ketQua = await _query(
-      bang,
-      columns: ["ten", "chon"],
-      where: "\"ten\" LIKE ? OR \"ten_kd\" LIKE ?",
-      whereArgs: ["%$tuKhoa%", "%$tkKd%"]
-    );
+    final ketQua = tuKhoa.isEmpty ?
+      await _query(
+        bang,
+        columns: ["ten", "chon"],
+        orderBy: "\"chon\" DESC",
+        limit: 5,
+      ) :
+      await _query(
+        bang,
+        columns: ["ten", "chon"],
+        where: "\"ten\" LIKE ? OR \"ten_kd\" LIKE ?",
+        whereArgs: ["%$tuKhoa%", "%$tkKd%"]
+      );
     return ketQua.map((muc) => VanBanNoiBat(vanBanDayDu: muc["ten"] as String, vanBanNoiBat: [tuKhoa], daChon: muc["chon"] as int?)).toList();
   }
 
@@ -877,7 +884,19 @@ WHERE "vi_tri" = ?;
   Future<List<VanBanNoiBat>> timKiemGiaTriNhan(String tenNhan, String tuKhoa) async {
     assert(_db != null, "CSDL chưa được khởi tạo.");
     final String tkKd = LinhTinh.loaiBoDautiengViet(tuKhoa);
-    final List<Map<String, Object?>> ketQua = await _rawQuery(
+    final List<Map<String, Object?>> ketQua = tuKhoa.isEmpty ?
+      await _rawQuery(
+        """
+SELECT "$BANG_NHAN_SACH"."gia_tri", MAX("$BANG_NHAN_SACH"."chon") AS "chon" FROM "$BANG_NHAN_SACH"
+INNER JOIN "$BANG_NHAN" ON "$BANG_NHAN_SACH"."nhan" = "$BANG_NHAN"."ma"
+WHERE "$BANG_NHAN"."ten" = ?
+GROUP BY "$BANG_NHAN_SACH"."gia_tri"
+ORDER BY "chon" DESC
+LIMIT 5;
+""",
+      [tenNhan]
+    ) :
+     await _rawQuery(
       """
 SELECT "$BANG_NHAN_SACH"."gia_tri", MAX("$BANG_NHAN_SACH"."chon") AS "chon" FROM "$BANG_NHAN_SACH"
 INNER JOIN "$BANG_NHAN" ON "$BANG_NHAN_SACH"."nhan" = "$BANG_NHAN"."ma"
@@ -1447,7 +1466,8 @@ WHERE "chuoi" = ?;
       sqlStatement += "\n${joinStatements.join("\n")}";
     }
     sqlStatement += "\nWHERE ${whereStatements.join(" AND ")}";
-    sqlStatement += "\nGROUP BY \"$BANG_SACH\".\"ma\";";
+    sqlStatement += "\nGROUP BY \"$BANG_SACH\".\"ma\"";
+    sqlStatement += "\nORDER BY \"$BANG_SACH\".\"xem\" DESC;";
     List<Map<String, Object?>> ketQua = await _rawQuery(sqlStatement, whereArgs);
     return _chuyenDoiDuLieuSach(ketQua);
   }

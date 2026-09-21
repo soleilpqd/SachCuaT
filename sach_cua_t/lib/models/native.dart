@@ -147,14 +147,25 @@ class HeThongMay {
   /// - [anhGoc]: đường dẫn ảnh gốc
   /// - [mucTieu]: đường dẫn lưu ảnh sách
   /// - [anhThuNho]; đường dẫn lưu ảnh thu nhỏ
-  /// - [chieuCao]: chiều cao ảnh thu nhỏ
-  Future<bool?> luuAnhSach({required String anhGoc, required String mucTieu, required String anhThuNho, int chieuCao = 100}) async {
+  /// - [gioiHan]: kích thước tối đa (các chiều) của ảnh
+  /// - [chieuCao]: kích thước ảnh thu nhỏ (lớn nhất trong 2 chiều)
+  /// - [chatLuong]: chất lượng ảnh (độ nén JPEG) (tỉ lệ %: 1-100)
+  Future<bool?> luuAnhSach({
+    required String anhGoc,
+    required String mucTieu,
+    required String anhThuNho,
+    int gioiHan = 3000,
+    int chieuCao = 100,
+    int chatLuong = 50
+  }) async {
     return _kenhKetNoi.invokeMethod<bool>(
       _MethodToNative.luuAnhSach.value, {
         "goc": anhGoc,
         "dich": mucTieu,
         "thunho": anhThuNho,
-        "cao": chieuCao
+        "gioi_han": gioiHan,
+        "cao": chieuCao,
+        "chat_luong": chatLuong
       });
   }
 
@@ -202,7 +213,7 @@ class HeThongMay {
     return _kenhKetNoi.invokeMethod<String>(_MethodToNative.chonAnh.value, thamSo);
   }
 
-  Future<List<String?>?> dan(List<KieuTep> loc) async {
+  Future<List<String>?> dan(List<KieuTep> loc) async {
     final Directory duongDanTam = await DuLieuTam().duongDanThuMucDan();
     final Map<String, Object?> thamSo = {};
     thamSo["duong_dan"] = duongDanTam.path;
@@ -218,6 +229,11 @@ class HeThongMay {
     DuLieuTam().nhapTepDuocChiaSe(dsDuongDanChuan).then((ketQua) {
       MainApp.xuLyTepDuocChiaSe(ketQua);
     });
+  }
+
+  Future<List<String>?> chonTep(List<KieuTep> loc) async {
+
+    return Future.value(null); // TODO
   }
 
 }

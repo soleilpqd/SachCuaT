@@ -102,13 +102,24 @@ class DuLieuTam {
   /// Lấy danh sách các tệp được chia sẻ
   Future<Iterable<String>> layDsCacTepDuocChiaSe() async => _layDsCacTepTrongThuMucTam(_tenChiaSe);
 
-  String suDungTepTam() {
-
-    return "";
+  Future<void> xoaTepTam(String duongDan) async {
+    final Directory thuMucChiaSe = await _duongDanThuMucTam(true, _tenChiaSe);
+    final Directory thuMucDan = await _duongDanThuMucTam(true, _tenDan);
+    final File target = File(duongDan);
+    if ((duongDan.startsWith(thuMucChiaSe.path) || duongDan.startsWith(thuMucDan.path)) && target.existsSync()) {
+      try {
+        await target.delete();
+      } catch (_) {}
+    }
   }
 
-  void lamSachTepTam(String duongDan) {
+  // String suDungTepTam() {
 
-  }
+  //   return "";
+  // }
+
+  // void lamSachTepTam(String duongDan) {
+
+  // }
 
 }

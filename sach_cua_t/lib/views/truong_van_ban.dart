@@ -273,17 +273,20 @@ class CauHinhTruongVanBan {
   final int? soKyTuToiDa;
   /// Tự động bật bàn phím
   final bool tuDongKichHoatNhap;
+  /// Thêm gợi ý là viết hoa tên riêng cho nội dung đã nhập
+  final bool laTenRieng;
   /// Kiểm soát ký tự nhập vào
   final List<TextInputFormatter>? kiemSoatNhapLieu;
   /// Kiểu nút Enter
   final TextInputAction? kieuNutEnter;
   /// Khi nhấn nút Enter
-  final void Function(String)? khiNhanEnter;
+  final void Function(String, bool)? khiNhanEnter;
 
   const CauHinhTruongVanBan({
     this.kieuBanPhim = TextInputType.text,
     this.soKyTuToiDa,
     this.kiemSoatNhapLieu,
+    this.laTenRieng = false,
     this.tuDongKichHoatNhap = false,
     this.kieuNutEnter,
     this.khiNhanEnter
@@ -346,9 +349,10 @@ class _TrangThaiTruongVanBan extends TrangThaiCoSo<TruongVanBan> {
 
   /// Tìm gợi ý
   Future<List<String>> _timGoiY(bool laPhanNoiDung) async {
+    bool laTenRieng = laPhanNoiDung && widget.cauHinh.laTenRieng;
     VongLapGioiHan vongLap = VongLapGioiHan.koDongBo((vLap, _) async {
-      final text = (laPhanNoiDung ? widget.dieuKhien?.vanBan : widget.dieuKhien?.vbTieuDe) ?? "";
-      final goiY = laPhanNoiDung ? widget.dieuKhien?.goiYNoiDung : widget.dieuKhien?.goiYTieuDe;
+      final String text = (laPhanNoiDung ? widget.dieuKhien?.vanBan : widget.dieuKhien?.vbTieuDe) ?? "";
+      final GoiYVanBan? goiY = laPhanNoiDung ? widget.dieuKhien?.goiYNoiDung : widget.dieuKhien?.goiYTieuDe;
       List<String> ketQua = await goiY?.timKiemGoiY(text, widget) ?? [];
       final textHienTai = (laPhanNoiDung ? widget.dieuKhien?.vanBan : widget.dieuKhien?.vbTieuDe) ?? "";
       if (textHienTai != text) { // Văn bản thay đổi trong khi tìm kiếm gợi ý
@@ -356,6 +360,12 @@ class _TrangThaiTruongVanBan extends TrangThaiCoSo<TruongVanBan> {
       }
       Iterable<String> dsGoiYLoaiBo = goiY?.danhSachGoiYTieuDeCanLoaiBo ?? [];
       List<String> kqCuoi = [];
+      if (laTenRieng && text.isNotEmpty) {
+        final String tenRieng = LinhTinh.vietHoaTenRieng(text);
+        if (tenRieng != text) {
+          kqCuoi.add(tenRieng);
+        }
+      }
       for (final String muc in ketQua) {
         if (muc != text && !kqCuoi.contains(muc) && !dsGoiYLoaiBo.contains(muc)) {
           kqCuoi.add(muc);
@@ -511,7 +521,7 @@ class _TrangThaiTruongVanBan extends TrangThaiCoSo<TruongVanBan> {
             maxLength: cauHinh.soKyTuToiDa,
             inputFormatters: cauHinh.kiemSoatNhapLieu,
             autofocus: cauHinh.tuDongKichHoatNhap,
-            onFieldSubmitted: cauHinh.khiNhanEnter
+            onFieldSubmitted: (noiDung) => cauHinh.khiNhanEnter?.call(noiDung, laONhapChinh)
           )
         );
       },

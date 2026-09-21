@@ -201,24 +201,50 @@ final class HeThongMay {
         }
     }
 
+    private func coDanAnh(dauVao: UIImage, toiDa: Int) -> UIImage? {
+        let caoF: CGFloat
+        let rongF:CGFloat
+        if dauVao.size.height > dauVao.size.width {
+            caoF = CGFloat(toiDa)
+            rongF = floor(caoF * dauVao.size.width / dauVao.size.height)
+        } else {
+            rongF = CGFloat(toiDa)
+            caoF = floor(rongF * dauVao.size.height / dauVao.size.width)
+        }
+        let rect = CGRect(x: 0, y: 0, width: rongF, height: caoF)
+        UIGraphicsBeginImageContextWithOptions(rect.size, false, 1.0)
+        dauVao.draw(in: rect)
+        let ketQua = UIGraphicsGetImageFromCurrentImageContext();
+        UIGraphicsEndImageContext();
+        return ketQua
+    }
+
     /// Lưu ảnh sách
     private func luuAnhSach(call: FlutterMethodCall, result: @escaping FlutterResult) {
         guard let args = call.arguments as? [String: Any],
               let anhGoc = args["goc"] as? String,
               let anhSach = args["dich"] as? String,
+              let gioiHan = args["gioi_han"] as? Int,
               let anhThuNho = args["thunho"] as? String,
-              let chieuCao = args["cao"] as? Int
+              let chieuCao = args["cao"] as? Int,
+              let chatLuong = args["chat_luong"] as? Int
         else {
             result(FlutterError(code: "luuAnhSach_1", message: "Tham số không đúng", details: call.method))
             return
         }
         // Nạp ảnh gốc
-        guard let image = UIImage(contentsOfFile: anhGoc) else {
+        guard let imgGoc = UIImage(contentsOfFile: anhGoc) else {
             result(FlutterError(code: "luuAnhSach_2", message: "Không nạp được ảnh gốc", details: anhGoc))
             return
         }
+        let chatLuongAnh = CGFloat(chatLuong) / 100.0
+        var anhLuu = imgGoc;
+        let gioiHanF = CGFloat(gioiHan)
+        if (anhLuu.size.height > gioiHanF || anhLuu.size.width > gioiHanF) {
+            anhLuu = coDanAnh(dauVao: imgGoc, toiDa: gioiHan) ?? imgGoc
+        }
         // Tạo JPEG
-        guard let jpeg = image.jpegData(compressionQuality: 1) else {
+        guard let jpeg = anhLuu.jpegData(compressionQuality: chatLuongAnh) else {
             result(FlutterError(code: "luuAnhSach_3", message: "Không tạo được JPEG data", details: anhGoc))
             return
         }
@@ -228,19 +254,12 @@ final class HeThongMay {
             result(FlutterError(code: "luuAnhSach_4", message: "Không ghi được tệp ảnh", details: error.localizedDescription))
         }
         // Tạo ảnh thu nhỏ
-        let caoF = CGFloat(chieuCao)
-        let rongF = floor(caoF * image.size.width / image.size.height)
-        let rect = CGRect(x: 0, y: 0, width: rongF, height: caoF)
-        UIGraphicsBeginImageContextWithOptions(rect.size, false, 1.0)
-        image.draw(in: rect)
-        let hinhTn = UIGraphicsGetImageFromCurrentImageContext();
-        UIGraphicsEndImageContext();
-        guard let hinh = hinhTn else {
+        guard let hinh = coDanAnh(dauVao: imgGoc, toiDa: chieuCao) else {
             result(FlutterError(code: "luuAnhSach_5", message: "Không vẽ được ảnh thu nhỏ", details: anhThuNho))
             return
         }
         // Lưu JPEG thu nhỏ
-        guard let jpegTn = hinh.jpegData(compressionQuality: 1) else {
+        guard let jpegTn = hinh.jpegData(compressionQuality: chatLuongAnh) else {
             result(FlutterError(code: "luuAnhSach_6", message: "Không tạo được JPEG data ảnh nhỏ", details: anhThuNho))
             return
         }

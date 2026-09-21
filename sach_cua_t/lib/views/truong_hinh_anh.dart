@@ -16,11 +16,14 @@
   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:sach_cua_t/main.dart';
 import 'package:sach_cua_t/man_hinh/man_hinh_xem_anh.dart';
 import 'package:sach_cua_t/models/du_lieu_tam.dart';
+import 'package:sach_cua_t/models/dulieu.dart';
 import 'package:sach_cua_t/models/native.dart';
 import 'package:sach_cua_t/utils/common.dart';
 import 'package:sach_cua_t/utils/vanbanhienthi.dart';
@@ -58,25 +61,59 @@ class DieuKhienTruongHinhAnh extends DieuKhienCoSo {
 /// - Nhấn 2 lần để xoá ảnh.
 class TruongHinhAnh extends GiaoDienCoSo<DieuKhienTruongHinhAnh> {
 
+  /// Hiển thị thông tin hình ảnh
+  final bool hienThiThongTinAnh;
   /// Hàm xử lý khi không bật được camera (quyền, phần cứng...)
   final Function() khiKhongCoMayAnh;
   /// Bộ đệm văn bản hiển thị (dùng cho tiêu đề)
   final BoDemVbht? dem;
 
   /// CONSTRUCTOR
-  const TruongHinhAnh({super.key, required DieuKhienTruongHinhAnh trinhDieuKhien, required this.khiKhongCoMayAnh, this.dem}) : super(dieuKhien: trinhDieuKhien);
+  const TruongHinhAnh({
+    super.key,
+    required DieuKhienTruongHinhAnh trinhDieuKhien,
+    required this.khiKhongCoMayAnh,
+    this.dem,
+    this.hienThiThongTinAnh = true
+  }) : super(dieuKhien: trinhDieuKhien);
 
   @override
   State<StatefulWidget> createState() => _TrangThaiTruongHinhAnh();
 
 }
 
+class _ThongTinAnh {
+  final int ngang;
+  final int doc;
+  final int kichThuocOCung;
+
+  _ThongTinAnh({required this.ngang, required this.doc, required this.kichThuocOCung});
+}
+
 class _TrangThaiTruongHinhAnh extends TrangThaiCoSo<TruongHinhAnh> {
+
+  final Map<String, _ThongTinAnh> _thongTinAnh = {};
 
   Widget _xayDungKhungAnh(Color mauNen) {
     final bool khaDung = widget.dieuKhien!.khaDung;
     if (widget.dieuKhien?.hinhAnh != null) {
-      return LinhTinh.taoWidgetAnh(widget.dieuKhien!.hinhAnh!);
+      final Uri duongDanAnh = widget.dieuKhien!.hinhAnh!;
+      final UiImage viewAnh = LinhTinh.taoWidgetAnh(widget.dieuKhien!.hinhAnh!);
+      if (widget.hienThiThongTinAnh && duongDanAnh.scheme == PhanLoaiDuongDan.file.name) {
+        _ThongTinAnh? thongTinAnh = _thongTinAnh[duongDanAnh.toString()];
+        if (thongTinAnh == null) {
+          _thongTinAnh.clear();
+          viewAnh.image.resolve(ImageConfiguration.empty).addListener(ImageStreamListener((thongTin, _) {
+            final File tepAnh = File(duongDanAnh.path);
+            final int ktTep = tepAnh.lengthSync();
+            final _ThongTinAnh ttAnh = _ThongTinAnh(ngang: thongTin.image.width, doc: thongTin.image.height, kichThuocOCung: ktTep);
+            setState(() {
+              _thongTinAnh[duongDanAnh.toString()] = ttAnh;
+            });
+          }));
+        }
+      }
+      return viewAnh;
     }
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -125,45 +162,48 @@ class _TrangThaiTruongHinhAnh extends TrangThaiCoSo<TruongHinhAnh> {
       )
     );
     if (widget.dieuKhien?.hinhAnh != null) {
-      Widget khungChinh = Column(
+      _ThongTinAnh? thongTinAnh = _thongTinAnh[widget.dieuKhien!.hinhAnh!.toString()];
+      List<Widget> dsViewConChinh = [khungVuong];
+      if (thongTinAnh != null) {
+        dsViewConChinh.add(Text("${thongTinAnh.ngang}x${thongTinAnh.doc}:${LinhTinh.dinhDangKichThuocTep(thongTinAnh.kichThuocOCung)}"));
+      }
+      dsViewConChinh.add(Row(
+        mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          khungVuong,
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              NutBamBieuTuongTieuDe(
-                khaDung: khaDung,
-                bieuTuong: Icons.paste_outlined,
-                thuocThanhDieuHuong: false,
-                khiNhan: _khiNhanDan,
-              ),
-              NutBamBieuTuongTieuDe(
-                khaDung: khaDung,
-                bieuTuong: Icons.camera_alt_outlined,
-                thuocThanhDieuHuong: false,
-                khiNhan: _khiNhanChonAnh,
-              ),
-              NutBamBieuTuongTieuDe(
-                khaDung: khaDung,
-                bieuTuong: Icons.photo_library_outlined,
-                thuocThanhDieuHuong: false,
-                khiNhan: _khiNhanKhoAnh,
-              ),
-              NutBamBieuTuongTieuDe(
-                khaDung: khaDung,
-                bieuTuong: Icons.fullscreen,
-                thuocThanhDieuHuong: false,
-                khiNhan: _khiXemAnhToanManHinh,
-              ),
-              NutBamBieuTuongTieuDe(
-                khaDung: khaDung,
-                bieuTuong: Icons.delete_outline,
-                thuocThanhDieuHuong: false,
-                khiNhan: _khiXoaAnh,
-              )
-            ],
+          NutBamBieuTuongTieuDe(
+            khaDung: khaDung,
+            bieuTuong: Icons.paste_outlined,
+            thuocThanhDieuHuong: false,
+            khiNhan: _khiNhanDan,
+          ),
+          NutBamBieuTuongTieuDe(
+            khaDung: khaDung,
+            bieuTuong: Icons.camera_alt_outlined,
+            thuocThanhDieuHuong: false,
+            khiNhan: _khiNhanChonAnh,
+          ),
+          NutBamBieuTuongTieuDe(
+            khaDung: khaDung,
+            bieuTuong: Icons.photo_library_outlined,
+            thuocThanhDieuHuong: false,
+            khiNhan: _khiNhanKhoAnh,
+          ),
+          NutBamBieuTuongTieuDe(
+            khaDung: khaDung,
+            bieuTuong: Icons.fullscreen,
+            thuocThanhDieuHuong: false,
+            khiNhan: _khiXemAnhToanManHinh,
+          ),
+          NutBamBieuTuongTieuDe(
+            khaDung: khaDung,
+            bieuTuong: Icons.delete_outline,
+            thuocThanhDieuHuong: false,
+            khiNhan: _khiXoaAnh,
           )
         ],
+      ));
+      Widget khungChinh = Column(
+        children: dsViewConChinh,
       );
       return GestureDetector(
         onTap: khaDung ? _khiXemAnhToanManHinh : null,
@@ -213,19 +253,40 @@ class _TrangThaiTruongHinhAnh extends TrangThaiCoSo<TruongHinhAnh> {
     MainApp.luongMHGoc.themManHinh(manHinh: mhAnh);
   }
 
-  void _khiNhanDan() async {
-    await HeThongMay.duyNhat.dan([.anh]);
-    final Iterable<String> dsAnhDcChiaSe = await DuLieuTam().layDsCacTepDuocChiaSe();
+  Future<bool> _xuLyTepDaChon(List<String> dsTep) async {
+    if (dsTep.isEmpty) { return false; }
     String? duongDanHienTai = widget.dieuKhien?.hinhAnh?.path;
-    if (duongDanHienTai == null || !dsAnhDcChiaSe.contains(duongDanHienTai)) {
-      for (final String muc in dsAnhDcChiaSe) {
+    if (duongDanHienTai != null && dsTep.contains(duongDanHienTai)) {
+      final int sttHienTai = dsTep.indexOf(duongDanHienTai);
+      for (int stt = sttHienTai + 1; stt < dsTep.length; stt += 1) {
+        final String muc = dsTep[stt];
         if (await LinhTinh.kiemTraCoPhaiAnh(muc)) {
           widget.dieuKhien?.hinhAnh = LinhTinh.taoDuongDan(phanLoai: PhanLoaiDuongDan.file, duongDan: muc);
-          return;
+          return true;
+        }
+      }
+    } else {
+      for (final String muc in dsTep) {
+        if (await LinhTinh.kiemTraCoPhaiAnh(muc)) {
+          widget.dieuKhien?.hinhAnh = LinhTinh.taoDuongDan(phanLoai: PhanLoaiDuongDan.file, duongDan: muc);
+          return true;
         }
       }
     }
-    print("PICK FILE");
+    return false;
+  }
+
+  void _khiNhanDan() async {
+    List<String> dsTep = (await HeThongMay.duyNhat.dan([.anh])) ?? [];
+    if (await _xuLyTepDaChon(dsTep)) {
+      return;
+    }
+    dsTep = (await DuLieuTam().layDsCacTepDuocChiaSe()).toList();
+    if (await _xuLyTepDaChon(dsTep)) {
+      return;
+    }
+    dsTep = (await HeThongMay.duyNhat.chonTep([.anh])) ?? [];
+    _xuLyTepDaChon(dsTep);
   }
 
   void _khiNhanKhoAnh() {

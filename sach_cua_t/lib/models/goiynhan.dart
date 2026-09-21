@@ -37,9 +37,6 @@ class GoiYNhan extends GoiYVanBan {
   @override
   Future<List<String>> timKiemGoiY(String dauVao, TruongVanBan widget) async {
     _dsKetQua.clear();
-    if (dauVao.isEmpty) {
-      return [];
-    }
     final String nhan = layTenNhan?.call() ?? "";
     if (nhan.isEmpty) {
       return [];

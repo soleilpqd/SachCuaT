@@ -322,6 +322,41 @@ class LinhTinh {
     return cacKieuAnhPhuHop.contains(mime ?? "");
   }
 
+  /// Viết hoa tên riêng
+  static String vietHoaTenRieng(String noiDung) {
+    final String dsKyTuDacBiet = " .,;:'\"<>/?[]{}\\|`~!@#\$%^&*()-=_+";
+    String ketQua = "";
+    bool canVietHoa = true;
+    for (final String kyTu in noiDung.characters) {
+      if (dsKyTuDacBiet.contains(kyTu)) {
+        canVietHoa = true;
+        ketQua += kyTu;
+      } else if (canVietHoa) {
+        ketQua += kyTu.toUpperCase();
+        canVietHoa = false;
+      } else {
+        ketQua += kyTu.toLowerCase();
+      }
+    }
+    return ketQua;
+  }
+
+  static String dinhDangKichThuocTep(int kichThuoc) {
+    final int kilo = 1024;
+    final int mega = kilo * kilo;
+    if (kichThuoc >= mega) {
+      final int kt = kichThuoc * 100 ~/ mega;
+      final double ktD = kt / 100;
+      return "${ktD}MB";
+    }
+    if (kichThuoc >= kilo) {
+      final int kt = kichThuoc * 100 ~/ kilo;
+      final double ktD = kt / 100;
+      return "${ktD}KB";
+    }
+    return "${kichThuoc}B";
+  }
+
 }
 
 extension ViTriWidget on GlobalKey {
