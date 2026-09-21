@@ -16,10 +16,13 @@
   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import 'dart:io';
+// TODO: android: chuẩn hoá ảnh, chọn ảnh, chọn tệp
 
+import 'dart:io';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:sach_cua_t/main.dart';
+import 'package:sach_cua_t/models/database.dart';
 import 'package:sach_cua_t/models/du_lieu_tam.dart';
 // import 'package:sach_cua_t/models/hienthinentang.dart';
 import 'package:sach_cua_t/utils/common.dart';
@@ -32,6 +35,8 @@ enum _MethodFromNative {
   khiNhanNutLui,
   /// Khi người dùng chọn tệp từ ngoài app
   khiNhanDuocTep,
+  /// Chuẩn hoá ảnh
+  chuanHoaAnh
   ;
 
   static _MethodFromNative? init(String raw) {
@@ -40,6 +45,7 @@ enum _MethodFromNative {
       // "capNhatHienThi" => _MethodFromNative.capNhatHienThi,
       "nutLuiAndroid" => _MethodFromNative.khiNhanNutLui,
       "nhanDuocTep" => _MethodFromNative.khiNhanDuocTep,
+      "chuanHoaAnh" => _MethodFromNative.chuanHoaAnh,
       _ => null
     };
   }
@@ -57,7 +63,9 @@ enum _MethodToNative {
   /// Dán pasteboard
   dan,
   /// Mở hộp thoại chọn tệp
-  chonTep
+  chonTep,
+  /// Chuẩn hoá ảnh
+  chuanHoaAnh
   ;
   // layThongTinHienThi;
 
@@ -69,6 +77,7 @@ enum _MethodToNative {
       _MethodToNative.chonAnh => "chonAnh",
       _MethodToNative.dan => "dan",
       _MethodToNative.chonTep => "chonTep",
+      _MethodToNative.chuanHoaAnh => "chuanHoaAnh",
       // _MethodToNative.layThongTinHienThi => "layThongTinHienThi"
     };
   }
@@ -105,6 +114,17 @@ enum KieuMedia {
 
 // }
 
+class TienTrinhChuanHoaAnh extends ChangeNotifier {
+
+  Map<String, int> thongTinChuanHoaAnh = {};
+
+  void capNhat(Map<String, int> duLieuMoi) {
+    thongTinChuanHoaAnh = duLieuMoi;
+    notifyListeners();
+  }
+
+}
+
 /// APIs trao đổi với module native
 class HeThongMay {
 
@@ -124,6 +144,8 @@ class HeThongMay {
         // case _MethodFromNative.capNhatHienThi:
         //   _xuLyThongTinHienThi(call.arguments);
         //   _thongBaoCapNhatHienThi(call.arguments);
+        case _MethodFromNative.chuanHoaAnh:
+          _xuLyKhiNhanDuocCapNhatChuanHoaAnh(call.arguments);
         }
       }
       return Future(() => null);
@@ -132,6 +154,9 @@ class HeThongMay {
   static final HeThongMay duyNhat = HeThongMay._internal();
   // final thongTinHienThi = HienThiNenTang();
   // final theoDoi = <TheoDoiHeThongMay>[];
+  final ValueNotifier test = ValueNotifier(1);
+
+  final TienTrinhChuanHoaAnh theoDoiTienTrinhChuanHoaAnh = TienTrinhChuanHoaAnh();
 
   /// Flutter -> Native: Bật camera để quét mã ISBN
   Future<String?> quetMaISBN() async {
@@ -220,7 +245,7 @@ class HeThongMay {
     thamSo["loc"] = loc.map((muc) => muc.index).toList();
     final List<Object?>? ketQua = await _kenhKetNoi.invokeMethod(_MethodToNative.dan.value, thamSo) as List<Object?>?;
     final List<String>? dsDuongDan = ketQua?.cast<String>();
-    print("DAN $dsDuongDan");
+    // print("DAN $dsDuongDan");
     return Future.value(dsDuongDan);
   }
 
@@ -234,6 +259,19 @@ class HeThongMay {
   Future<List<String>?> chonTep(List<KieuTep> loc) async {
 
     return Future.value(null); // TODO
+  }
+
+  Future<void> chuanHoaAnh({int gioiHan = 3000, int chatLuong = 50}) async {
+    final Map<String, Object?> thamSo = {};
+    thamSo["duong_dan"] = CoSoDuLieu().thuMucAnhSach;
+    thamSo["gioi_han"] = gioiHan;
+    thamSo["chat_luong"] = chatLuong;
+    return _kenhKetNoi.invokeMethod<void>(_MethodToNative.chuanHoaAnh.value, thamSo);
+  }
+
+  void _xuLyKhiNhanDuocCapNhatChuanHoaAnh(dynamic thongTin) {
+    final Map<Object?, Object?> ketQua = thongTin as Map<Object?, Object?>;
+    theoDoiTienTrinhChuanHoaAnh.capNhat(ketQua.cast<String, int>());
   }
 
 }

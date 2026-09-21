@@ -147,6 +147,22 @@ class HeThongMay(kenh: MethodChannel, main: MainActivity): MethodCallHandler {
         }
         kenhKetNoi.invokeMethod(TenHamDenFlutter.kiemTraISBN.value, giaTri, callback)
     }
+    
+    fun coDanAnh(dauVao: Bitmap, gioiHan: Int): Bitmap? {
+        val chieuRong: Int
+        val chieuCao: Int
+        if (dauVao.height > dauVao.width) {
+            chieuRong = gioiHan * dauVao.width / dauVao.height
+            chieuCao = gioiHan
+        } else {
+            chieuRong = gioiHan
+            chieuCao = gioiHan * dauVao.height / dauVao.width
+        }
+        try {
+            return Bitmap.createScaledBitmap(dauVao, chieuRong, chieuCao, false)
+        } catch (err: Exception) {}
+        return null
+    }
 
     /// Lưu ảnh sách (ảnh chính, ảnh thu nhỏ)
     private fun luuAnhSach(call: MethodCall, result: MethodChannel.Result) {
@@ -154,7 +170,9 @@ class HeThongMay(kenh: MethodChannel, main: MainActivity): MethodCallHandler {
         val anhSach = call.argument<String>("dich")
         val anhThuNho = call.argument<String>("thunho")
         val chieuCao = call.argument<Int>("cao")
-        if (anhGoc == null || anhSach == null || anhThuNho == null || chieuCao == null) {
+        val gioiHan = call.argument<Int>("gioi_han")
+        val chatLuong = call.argument<Int>("chat_luong")
+        if (anhGoc == null || anhSach == null || anhThuNho == null || chieuCao == null || gioiHan == null || chatLuong == null) {
             result.error("luuAnhSach_1", "Tham số không đúng", call.method)
             return
         }
@@ -167,10 +185,14 @@ class HeThongMay(kenh: MethodChannel, main: MainActivity): MethodCallHandler {
             result.error("luuAnhSach_2", "Không nạp được ảnh gốc", anhGoc)
             return
         }
+        var bitmapDeLuu = bitmap
+        if (bitmap.width >= gioiHan || bitmap.height >= gioiHan) {
+            bitmapDeLuu = coDanAnh(bitmap, gioiHan) ?: bitmap
+        }
         // Lưu vào CSDL dưới dạng JPEG
         try {
             val outStream = FileOutputStream(File(anhSach))
-            bitmap!!.compress(Bitmap.CompressFormat.JPEG, 100, outStream)
+            bitmapDeLuu!!.compress(Bitmap.CompressFormat.JPEG, chatLuong, outStream)
             outStream.flush()
             outStream.close()
         } catch (err: Exception) {
@@ -178,11 +200,7 @@ class HeThongMay(kenh: MethodChannel, main: MainActivity): MethodCallHandler {
             return
         }
         // Tạo ảnh thu nhỏ
-        val chieuRong = chieuCao * bitmap.width / bitmap.height
-        var bitmapTn: Bitmap? = null
-        try {
-            bitmapTn = Bitmap.createScaledBitmap(bitmap, chieuRong, chieuCao, false)
-        } catch (err: Exception) {}
+        val bitmapTn: Bitmap? = coDanAnh(bitmap, chieuCao)
         if (bitmapTn == null) {
             result.error("luuAnhSach_5", "Không vẽ được ảnh thu nhỏ", anhThuNho)
             return
@@ -190,7 +208,7 @@ class HeThongMay(kenh: MethodChannel, main: MainActivity): MethodCallHandler {
         // Lưu ảnh JPEG thu nhỏ
         try {
             val outStream = FileOutputStream(File(anhThuNho))
-            bitmapTn!!.compress(Bitmap.CompressFormat.JPEG, 100, outStream)
+            bitmapTn!!.compress(Bitmap.CompressFormat.JPEG, chatLuong, outStream)
             outStream.flush()
             outStream.close()
         } catch (err: Exception) {

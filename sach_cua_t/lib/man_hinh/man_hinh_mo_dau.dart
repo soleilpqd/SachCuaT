@@ -20,6 +20,7 @@ import 'package:flutter/material.dart';
 import 'package:man_hinh_ung_dung/luong_man_hinh.dart';
 import 'package:man_hinh_ung_dung/man_hinh_ung_dung.dart';
 import 'package:sach_cua_t/main.dart';
+import 'package:sach_cua_t/man_hinh/man_hinh_chuan_hoa_anh.dart';
 import 'package:sach_cua_t/man_hinh/man_hinh_co_so.dart';
 import 'package:sach_cua_t/man_hinh/man_hinh_sach.dart';
 import 'package:sach_cua_t/man_hinh/man_hinh_tim_kiem.dart';
@@ -181,6 +182,10 @@ class DieuKhienManHinhMoDau extends DieuKhienManHinh with XuLyNutLuiAndroid {
     MainApp.luongMHGoc.themManHinh(manHinh: DieuKhienManHinhHuongDan(kieu: KieuHuongDan.gioiThieu));
   }
 
+  void _khiNhanChuanHoaAnh() {
+    luongManHinh?.themManHinh(manHinh: DieuKhienManHinhChuanHoaAnh());
+  }
+
 }
 
 class _ManHinhMoDau extends StatelessWidget {
@@ -273,7 +278,7 @@ class _TrangThaiManHinhMoDau extends TrangThaiWidgetCuaDieuKhien<_NoiDungManHinh
       return switch(_PhanDoanManHinhMoDau.khoiTao(doan)) {
         _PhanDoanManHinhMoDau.danhDau => widget.dieuKhienManHinh.nguonDuLieu.dsDanhDau.length,
         _PhanDoanManHinhMoDau.ganDay => widget.dieuKhienManHinh.nguonDuLieu.dsGanDay.length,
-        _PhanDoanManHinhMoDau.gioiThieu => 1,
+        _PhanDoanManHinhMoDau.gioiThieu => 1, // TODO: 1 để ẩn dòng Chuẩn hoá ảnh, 2 để hiện
         _ => 0
       };
     }
@@ -314,7 +319,7 @@ class _TrangThaiManHinhMoDau extends TrangThaiWidgetCuaDieuKhien<_NoiDungManHinh
       return switch(_PhanDoanManHinhMoDau.khoiTao(doan)) {
         _PhanDoanManHinhMoDau.danhDau => _xayDungDanhDau(dong),
         _PhanDoanManHinhMoDau.ganDay => _xayDungTruongSach(dkMh.nguonDuLieu.dsGanDay[dong], false),
-        _PhanDoanManHinhMoDau.gioiThieu => _xayDuongTruongGioiThieu(),
+        _PhanDoanManHinhMoDau.gioiThieu => dong == 0 ? _xayDuongTruongGioiThieu() : _xayDuongTruongChuanHoaAnh(),
         _ => null
       };
     }
@@ -329,6 +334,12 @@ class _TrangThaiManHinhMoDau extends TrangThaiWidgetCuaDieuKhien<_NoiDungManHinh
     khiNhan: widget.dieuKhienManHinh._khiNhanGioiThieu,
     tieuDe: widget.dieuKhienManHinh.phienBan,
     icon: Icons.help_outline
+  );
+
+  Widget _xayDuongTruongChuanHoaAnh() => TruongNutBam(
+    khiNhan: widget.dieuKhienManHinh._khiNhanChuanHoaAnh,
+    tieuDe: Vbht.trucTiep("Chuẩn hoá ảnh"),
+    icon: Icons.image
   );
 
   Widget _xayDungTruongSach(Sach sach, bool hienThiDanhDau) {

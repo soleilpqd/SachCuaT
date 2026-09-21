@@ -36,6 +36,8 @@ final class HeThongMay {
         case dan
         /// Mở màn hình chọn tệp
         case chonTep
+        /// Chuẩn hoá ảnh
+        case chuanHoaAnh
     }
 
     /// Tên hàm từ native module tới Flutter module
@@ -44,6 +46,8 @@ final class HeThongMay {
         case kiemTraISBN
         /// Nhận được tệp
         case nhanDuocTep
+        /// Chuẩn hoá ảnh
+        case chuanHoaAnh
     }
 
     enum KieuTep: Int {
@@ -85,6 +89,8 @@ final class HeThongMay {
 
     /// Kênh kết nối
     private let kenhKetNoi: FlutterMethodChannel
+
+    private var chuanHoaAnh: ChuanHoaAnh?
 
 //    private let kbToolbarView = UIView(frame: CGRect(x: 0, y: 0, width: 100, height: 50))
 
@@ -189,6 +195,8 @@ final class HeThongMay {
             }
         case .chonTep:
             break
+        case .chuanHoaAnh:
+            chuanHoaAnh(call: call, result: result)
         }
     }
 
@@ -201,7 +209,7 @@ final class HeThongMay {
         }
     }
 
-    private func coDanAnh(dauVao: UIImage, toiDa: Int) -> UIImage? {
+    func coDanAnh(dauVao: UIImage, toiDa: Int) -> UIImage? {
         let caoF: CGFloat
         let rongF:CGFloat
         if dauVao.size.height > dauVao.size.width {
@@ -398,6 +406,34 @@ final class HeThongMay {
             pasteboard.items = []
         }
         return ketQua
+    }
+
+    /// Chữa cháy: giảm kích thước ảnh
+    private func chuanHoaAnh(call: FlutterMethodCall, result: @escaping FlutterResult) {
+        guard let args = call.arguments as? [String: Any],
+              let thuMucChua = args["duong_dan"] as? String,
+              let gioiHan = args["gioi_han"] as? Int,
+              let chatLuong = args["chat_luong"] as? Int
+        else {
+            result(FlutterError(code: "chuanHoaAnh_1", message: "Tham số không đúng", details: call.method))
+            return
+        }
+        if (chuanHoaAnh == nil) {
+            chuanHoaAnh = ChuanHoaAnh(thuMuc: thuMucChua, gioiHan: gioiHan, nen: chatLuong)
+            chuanHoaAnh?.batDau()
+        }
+        result(nil)
+    }
+
+    func capNhatChuanHoaAnh(hienTai: Int, tongSo: Int) {
+        var thamSo: [String: Int] = [:]
+        if hienTai == tongSo {
+            chuanHoaAnh = nil
+        } else {
+            thamSo["stt"] = hienTai
+            thamSo["tong"] = tongSo
+        }
+        kenhKetNoi.invokeMethod(TenHamDenFlutter.chuanHoaAnh.rawValue, arguments: thamSo)
     }
 
 }

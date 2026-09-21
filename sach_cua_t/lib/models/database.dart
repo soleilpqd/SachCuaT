@@ -54,6 +54,7 @@ class CoSoDuLieu {
   Database? _db;
   final int _dbVersion = 1;
   String _thuMucAnhSach = "";
+  String get thuMucAnhSach => _thuMucAnhSach;
   /// Đã mở hay chưa
   bool get daMo => _db != null;
   /// Thời điểm tham chiếu (thời điểm cài app)
