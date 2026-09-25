@@ -16,26 +16,26 @@
   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import 'package:flutter/foundation.dart';
-import 'package:image/image.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:sach_cua_t/models/dulieu.dart';
+// import 'package:flutter/foundation.dart';
+// import 'package:image/image.dart';
+// import 'package:image_picker/image_picker.dart';
+// import 'package:sach_cua_t/models/dulieu.dart';
 
-/// Xử lý bất đồng bộ
-class Isolations {
+// /// Xử lý bất đồng bộ
+// class Isolations {
 
-  /// Khởi tạo view hiển thị ảnh
-  // static Future<UiImage> napKhungAnh(ImgImage image) => compute((argImg) => UiImage.memory(encodePng(argImg)), image);
+//   /// Khởi tạo view hiển thị ảnh
+//   // static Future<UiImage> napKhungAnh(ImgImage image) => compute((argImg) => UiImage.memory(encodePng(argImg)), image);
 
-  /// Nạp ảnh từ XFile (lib image_picker)
-  static Future<ImgImage?> napAnhTuXFile(XFile file) => compute((argFile) async {
-    Uint8List data = await argFile.readAsBytes();
-    return decodeImage(data);
-  }, file);
+//   /// Nạp ảnh từ XFile (lib image_picker)
+//   static Future<ImgImage?> napAnhTuXFile(XFile file) => compute((argFile) async {
+//     Uint8List data = await argFile.readAsBytes();
+//     return decodeImage(data);
+//   }, file);
 
-  /// Tạo ảnh thu nhỏ
-  static Future<ImgImage?> taoAnhThuNho(ImgImage image) => compute((args) async {
-    return copyResize(args, height: 50);
-  }, image);
+//   /// Tạo ảnh thu nhỏ
+//   static Future<ImgImage?> taoAnhThuNho(ImgImage image) => compute((args) async {
+//     return copyResize(args, height: 50);
+//   }, image);
 
-}
+// }

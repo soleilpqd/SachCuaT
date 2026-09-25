@@ -65,7 +65,9 @@ enum _MethodToNative {
   /// Mở hộp thoại chọn tệp
   chonTep,
   /// Chuẩn hoá ảnh
-  chuanHoaAnh
+  chuanHoaAnh,
+  /// Tìm kiếm ảnh
+  timKiemAnh
   ;
   // layThongTinHienThi;
 
@@ -78,6 +80,7 @@ enum _MethodToNative {
       _MethodToNative.dan => "dan",
       _MethodToNative.chonTep => "chonTep",
       _MethodToNative.chuanHoaAnh => "chuanHoaAnh",
+      _MethodToNative.timKiemAnh => "timKiemAnh",
       // _MethodToNative.layThongTinHienThi => "layThongTinHienThi"
     };
   }
@@ -179,9 +182,9 @@ class HeThongMay {
     required String anhGoc,
     required String mucTieu,
     required String anhThuNho,
-    int gioiHan = 3000,
+    int gioiHan = 2000,
     int chieuCao = 100,
-    int chatLuong = 50
+    int chatLuong = 20
   }) async {
     return _kenhKetNoi.invokeMethod<bool>(
       _MethodToNative.luuAnhSach.value, {
@@ -261,7 +264,7 @@ class HeThongMay {
     return Future.value(null); // TODO
   }
 
-  Future<void> chuanHoaAnh({int gioiHan = 3000, int chatLuong = 50}) async {
+  Future<void> chuanHoaAnh({int gioiHan = 2000, int chatLuong = 20}) async {
     final Map<String, Object?> thamSo = {};
     thamSo["duong_dan"] = CoSoDuLieu().thuMucAnhSach;
     thamSo["gioi_han"] = gioiHan;
@@ -272,6 +275,16 @@ class HeThongMay {
   void _xuLyKhiNhanDuocCapNhatChuanHoaAnh(dynamic thongTin) {
     final Map<Object?, Object?> ketQua = thongTin as Map<Object?, Object?>;
     theoDoiTienTrinhChuanHoaAnh.capNhat(ketQua.cast<String, int>());
+  }
+
+  Future<List<String>?> moTimKiemAnh(String tuKhoa) async {
+    final Directory duongDanTam = await DuLieuTam().duongDanThuMucDan();
+    final Map<String, Object?> thamSo = {};
+    thamSo["duong_dan"] = duongDanTam.path;
+    thamSo["tu_khoa"] = tuKhoa;
+    final List<Object?>? ketQua = await _kenhKetNoi.invokeMethod(_MethodToNative.timKiemAnh.value, thamSo) as List<Object?>?;
+    final List<String>? dsDuongDan = ketQua?.cast<String>();
+    return Future.value(dsDuongDan);
   }
 
 }

@@ -206,6 +206,9 @@ class ManHinhCamera : AppCompatActivity() {
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode != 1) {
+            return
+        }
         if (kiemTraQuyenSuDungMayAnh()) {
             cauHinhMayAnh()
         } else {

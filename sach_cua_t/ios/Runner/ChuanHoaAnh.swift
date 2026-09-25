@@ -1,13 +1,25 @@
-//
-//  ChuanHoaAnh.swift
-//  Runner
-//
-//  Created by soleilpqd on 21/09/2026.
-//
+/*
+ Sách của T - Quản lý sách cá nhân
+ Copyright © 2026 SoleilPQD
+
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
 
 import Foundation
 import UIKit
 
+/// Chuẩn hoá ảnh (xử lý kích thước và chất lượng tất cả các ảnh trong thư mục chỉ định)
 final class ChuanHoaAnh {
 
     let duongDan: String
@@ -25,6 +37,7 @@ final class ChuanHoaAnh {
         luongThucThi.maxConcurrentOperationCount = 1
     }
 
+    /// Thực hiện việc chuẩn hoá
     private func chuanHoa(_ mucTieu: String) {
         let url = URL(fileURLWithPath: duongDan).appendingPathComponent(mucTieu)
         guard let anh = UIImage(contentsOfFile: url.path) else { return }
@@ -37,6 +50,7 @@ final class ChuanHoaAnh {
         try? jpeg.write(to: url)
     }
 
+    /// Bắt đầu
     func batDau() {
         let fileMan = FileManager.default
         let dsTep = (try? fileMan.contentsOfDirectory(atPath: duongDan)) ?? []

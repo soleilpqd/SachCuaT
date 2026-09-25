@@ -105,7 +105,14 @@ class TruongSach extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(padding: EdgeInsetsGeometry.directional(top: 2, bottom: 2), child: Container(width: 100, height: 100, color: Colors.transparent, child: hinhAnh)),
+        Padding(
+          padding: EdgeInsetsGeometry.directional(top: 2, bottom: 2),
+          child: Container(
+            width: 100,
+            height: 100,
+            color: Color(0xFFDEDEDE),
+            child: hinhAnh
+          )),
         const SizedBox(width: 5),
         Expanded(child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

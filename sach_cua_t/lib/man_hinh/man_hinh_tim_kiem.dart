@@ -32,6 +32,7 @@ import 'package:sach_cua_t/models/xu_ly_nut_lui_android.dart';
 import 'package:sach_cua_t/utils/vanbanhienthi.dart';
 import 'package:sach_cua_t/views/danh_sach_hien_thi.dart';
 import 'package:sach_cua_t/views/dieu_khien_co_so.dart';
+import 'package:sach_cua_t/views/dieu_khien_cuon.dart';
 import 'package:sach_cua_t/views/nut_bam_tieu_de.dart';
 import 'package:sach_cua_t/views/truong_nut_bam.dart';
 import 'package:sach_cua_t/views/truong_sach.dart';
@@ -121,7 +122,7 @@ class DieuKhienManHinhTimKiem extends DieuKhienManHinh with TheoDoiDieuKhienCoSo
   final DieuKhienTruongVanBan dkTuKhoa = DieuKhienTruongVanBan();
 
   final ThaoTacTimKiem _congCuTimKiem = ThaoTacTimKiem();
-  final ScrollController _dkCuon = ScrollController();
+  final DieuKhienCuon _dkCuon = DieuKhienCuon();
   // Kết quả tìm kiếm
   List<Sach> _kqTenSach = [];
   List<Sach> _kqISBN = [];
@@ -443,7 +444,7 @@ class _TrangThaiNoiDungMhTimKiem extends TrangThaiWidgetCuaDieuKhien<_NoiDungMan
   _TrangThaiNoiDungMhTimKiem();
 
   @override
-  Widget build(BuildContext context) => xayDungListView(context, scrollCtrl: widget.dieuKhienManHinh._dkCuon);
+  Widget build(BuildContext context) => xayDungListView(context, scrollCtrl: widget.dieuKhienManHinh._dkCuon.dkCuon);
 
   @override
   void capNhatGiaoDienCuaManHinh({required DieuKhienManHinh dieuKhienManHinh, ThamSoDieuKhienWidgetManHinh? duLieuDinhKem}) {

@@ -42,6 +42,7 @@ import 'package:sach_cua_t/utils/hopthoai.dart';
 import 'package:sach_cua_t/utils/vanbanhienthi.dart';
 import 'package:sach_cua_t/views/danh_sach_hien_thi.dart';
 import 'package:sach_cua_t/views/dieu_khien_co_so.dart';
+import 'package:sach_cua_t/views/dieu_khien_cuon.dart';
 import 'package:sach_cua_t/views/nut_bam_bieu_tuong.dart';
 import 'package:sach_cua_t/views/nut_bam_tieu_de.dart';
 import 'package:sach_cua_t/views/phong_cach_giao_dien.dart';
@@ -109,9 +110,11 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo, X
   ThaoTacNapThongTinSach? _thaoTacNap;
   final void Function()? khiLuuSach;
 
-  final ScrollController _dkCuon = ScrollController();
+  // final ScrollController _dkCuon = ScrollController();
+  final DieuKhienCuon _dkCuon = DieuKhienCuon();
   final DieuKhienCoSo _dkLuuChieu = DieuKhienCoSo();
   final DieuKhienCoSo _dkDkXuatBan = DieuKhienCoSo();
+  final DieuKhienCoSo _dkTimAnh = DieuKhienCoSo();
   final DieuKhienTruongBatTat _dkDaDocXong = DieuKhienTruongBatTat();
   final DieuKhienTruongHinhAnh _dkHinhAnh = DieuKhienTruongHinhAnh();
   final DieuKhienTruongVanBan _dkTenSach = DieuKhienTruongVanBan(goiYNoiDung: GoiYCSDL(bang: CoSoDuLieu.BANG_SACH));
@@ -186,6 +189,7 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo, X
   void manHinhBiLoaiBoKhoiLuong() {
     super.manHinhBiLoaiBoKhoiLuong();
     _lamSachTatCaDauVao();
+    _dkTimAnh.dispose();
     _dkLuuChieu.dispose();
     _dkDkXuatBan.dispose();
     _dkSuaTap.dispose();
@@ -211,6 +215,9 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo, X
     }
     if (nguon == _dkHienThiDSTapDayDu) {
       _khiThayDoiHienThiDSTapDayDu();
+    }
+    if (nguon == _dkTenSach && cacGiaTri.keys.contains(ThuocTinhTruongVanBan.vanBan.name)) {
+      _khiTenSachThayDoi();
     }
   }
 
@@ -382,6 +389,22 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo, X
     _moWebCucXuatBan(url: HangSo.urlDKXuatBan, tieuDe: TK.dkxb);
   }
 
+  /// Khi nhấn nút Tìm ảnh
+  void _khiNhanTimAnh() {
+    final String tuKhoa = _dkTenSach.vanBan;
+    if (tuKhoa.isNotEmpty) {
+      HeThongMay.duyNhat.moTimKiemAnh(tuKhoa).then((dsKetQua) {
+        if (dsKetQua != null && dsKetQua.isNotEmpty) {
+          _dkHinhAnh.hinhAnh = LinhTinh.taoDuongDan(phanLoai: PhanLoaiDuongDan.file, duongDan: dsKetQua.first);
+        }
+      });
+    }
+  }
+
+  void _khiTenSachThayDoi() {
+    _dkTimAnh.khaDung = _dkTenSach.vanBan.isNotEmpty;
+  }
+
   void _moWebCucXuatBan({required String url, required TK tieuDe}) {
     String urlCuoi = url;
     if (_dkTenSach.vanBan.isNotEmpty) {
@@ -486,11 +509,13 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo, X
 
   /// Khởi tạo dữ liệu
   void _khoiTaoDuLieu() {
+    _dkTimAnh.khaDung = false;
     _khoiTaoDSNhan().then((_) {
       if (maSach != null) {
         _thaoTacNap?.napThongTin(timSachTrongChuoi: true).then((value) {
           if (value) {
             _khoiTaoManHinhTheoThongTinSach();
+            _dkTimAnh.khaDung = _dkTenSach.vanBan.isNotEmpty;
             trangThaiWidgetManHinh?.capNhatGiaoDienCuaManHinh(dieuKhienManHinh: this);
           } else {
             trangThaiWidgetManHinh?.capNhatGiaoDienCuaManHinh(dieuKhienManHinh: this);
@@ -917,6 +942,7 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo, X
   /// Khoá (Disable) toàn màn hình
   void _khoaManHinh() {
     List<DieuKhienCoSo> tatCaDieuKhien = [
+      _dkTimAnh,
       _dkLuuChieu,
       _dkDkXuatBan,
       _dkTenSach,
@@ -1279,7 +1305,7 @@ class _TrangThaiNoiDungManHinhSach extends TrangThaiWidgetCuaDieuKhien<_NoiDungM
     if (!_sachTonTai()) {
       return Container(); // Hiển thị nền trống cho thông báo lỗi
     }
-    return xayDungListView(context, scrollCtrl: widget.dieuKhienManHinh._dkCuon);
+    return xayDungListView(context, scrollCtrl: widget.dieuKhienManHinh._dkCuon.dkCuon);
   }
 
   // --- Cấu hình danh sách hiển thị
@@ -1311,7 +1337,7 @@ class _TrangThaiNoiDungManHinhSach extends TrangThaiWidgetCuaDieuKhien<_NoiDungM
     final DieuKhienManHinhSach dkMh = widget.dieuKhienManHinh;
     final _PhanDoanManHinhSach? phanDoan = _PhanDoanManHinhSach.khoiTao(doan);
     return switch (phanDoan) {
-      _PhanDoanManHinhSach.chung => 6,
+      _PhanDoanManHinhSach.chung => 7,
       _PhanDoanManHinhSach.coBan => dkMh._dsDkTacGia.length + dkMh._dsDkDichGia.length + dkMh._dsDkNxb.length,
       _PhanDoanManHinhSach.viTri => dkMh._dsDkViTri.length,
       _PhanDoanManHinhSach.danhDau => dkMh._dsDkDanhDau.length,
@@ -1385,8 +1411,15 @@ class _TrangThaiNoiDungManHinhSach extends TrangThaiWidgetCuaDieuKhien<_NoiDungM
           khiNhanEnter: (_, laONhapChinh) => dkMh._khiNhanEnterTrenBanPhim(dkMh._dkTenSach, laONhapChinh)
         ),
       ),
+      // Tìm ảnh
+      5 => dkMh.chiDoc ? null : TruongNutBam(
+        khiNhan: dkMh._khiNhanTimAnh,
+        tieuDe: Vbht.trucTiep("GG Img"),
+        icon: Icons.arrow_forward,
+        dieuKhien: dkMh._dkTimAnh,
+      ),
       // Mã ISBN
-      5 => TruongVanBan(
+      6 => TruongVanBan(
         tieuDe: Vbht.tuKhoa(TK.isbn, dem: dkMh._demVbht),
         cauHinh: CauHinhTruongVanBan(
           kieuBanPhim: TextInputType.number,

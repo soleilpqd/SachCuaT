@@ -30,9 +30,11 @@ import 'package:sach_cua_t/models/dulieu.dart';
 import 'package:sach_cua_t/models/native.dart';
 import 'package:sach_cua_t/models/operations/thao_tac_nap_man_hinh_mo_dau.dart';
 import 'package:sach_cua_t/models/xu_ly_nut_lui_android.dart';
+import 'package:sach_cua_t/utils/common.dart';
 import 'package:sach_cua_t/utils/hopthoai.dart';
 import 'package:sach_cua_t/utils/vanbanhienthi.dart';
 import 'package:sach_cua_t/views/danh_sach_hien_thi.dart';
+import 'package:sach_cua_t/views/dieu_khien_cuon.dart';
 import 'package:sach_cua_t/views/nut_bam_bieu_tuong.dart';
 import 'package:sach_cua_t/views/phong_cach_giao_dien.dart';
 import 'package:sach_cua_t/views/truong_nut_bam.dart';
@@ -67,10 +69,11 @@ enum _PhanDoanManHinhMoDau {
 class DieuKhienManHinhMoDau extends DieuKhienManHinh with XuLyNutLuiAndroid {
 
   final BoDemVbht _boDemVbht = BoDemVbht();
-  final ScrollController _dkCuon = ScrollController();
+  final DieuKhienCuon _dkCuon = DieuKhienCuon();
   final Vbht phienBan = Vbht.gianTiep(HeThongMay.duyNhat.layThongTinPhienBan());
   final ThaoTacNapDuLieuManHinhMoDau nguonDuLieu = ThaoTacNapDuLieuManHinhMoDau();
   final DieuKhienTruongNutBamThanhDieuHuong _dkNutPhai = DieuKhienTruongNutBamThanhDieuHuong();
+  int _khoiLuongDuLieu = 0;
 
   DieuKhienManHinhMoDau() {
     widgetCuaManHinh = _ManHinhMoDau(dkMh: this);
@@ -106,6 +109,10 @@ class DieuKhienManHinhMoDau extends DieuKhienManHinh with XuLyNutLuiAndroid {
   void _truyVanDuLieu() {
     nguonDuLieu.napDuLieu().then((_) {
       _cauHinhNutDieuHuong();
+      trangThaiWidgetManHinh?.capNhatGiaoDienCuaManHinh(dieuKhienManHinh: this);
+    });
+    CoSoDuLieu().doKhoiLuongDuLieu().then((khoiLuong) {
+      _khoiLuongDuLieu = khoiLuong;
       trangThaiWidgetManHinh?.capNhatGiaoDienCuaManHinh(dieuKhienManHinh: this);
     });
     _cauHinhNutDieuHuong();
@@ -228,7 +235,7 @@ class _TrangThaiManHinhMoDau extends TrangThaiWidgetCuaDieuKhien<_NoiDungManHinh
   }
 
   @override
-  Widget build(BuildContext context) => xayDungListView(context, scrollCtrl: widget.dieuKhienManHinh._dkCuon);
+  Widget build(BuildContext context) => xayDungListView(context, scrollCtrl: widget.dieuKhienManHinh._dkCuon.dkCuon);
 
   /// Xây dựng màn hình lần đầu
   Widget _xayDungManHinhLanDau() {
@@ -254,7 +261,7 @@ class _TrangThaiManHinhMoDau extends TrangThaiWidgetCuaDieuKhien<_NoiDungManHinh
   @override
   double? khoangCachPhiaDuoi(int doan, int dong) {
     return switch (_PhanDoanManHinhMoDau.khoiTao(doan)) {
-      _PhanDoanManHinhMoDau.gioiThieu => 50.0,
+      _PhanDoanManHinhMoDau.gioiThieu => dong == 1 ? 50.0 : null, // TODO: xem bên dưới (áp dụng với dòng cuối cùng)
       _ => null
     };
   }
@@ -278,7 +285,7 @@ class _TrangThaiManHinhMoDau extends TrangThaiWidgetCuaDieuKhien<_NoiDungManHinh
       return switch(_PhanDoanManHinhMoDau.khoiTao(doan)) {
         _PhanDoanManHinhMoDau.danhDau => widget.dieuKhienManHinh.nguonDuLieu.dsDanhDau.length,
         _PhanDoanManHinhMoDau.ganDay => widget.dieuKhienManHinh.nguonDuLieu.dsGanDay.length,
-        _PhanDoanManHinhMoDau.gioiThieu => 1, // TODO: 1 để ẩn dòng Chuẩn hoá ảnh, 2 để hiện
+        _PhanDoanManHinhMoDau.gioiThieu => 2, // TODO: 2 để ẩn dòng Chuẩn hoá ảnh, 3 để hiện
         _ => 0
       };
     }
@@ -319,7 +326,12 @@ class _TrangThaiManHinhMoDau extends TrangThaiWidgetCuaDieuKhien<_NoiDungManHinh
       return switch(_PhanDoanManHinhMoDau.khoiTao(doan)) {
         _PhanDoanManHinhMoDau.danhDau => _xayDungDanhDau(dong),
         _PhanDoanManHinhMoDau.ganDay => _xayDungTruongSach(dkMh.nguonDuLieu.dsGanDay[dong], false),
-        _PhanDoanManHinhMoDau.gioiThieu => dong == 0 ? _xayDuongTruongGioiThieu() : _xayDuongTruongChuanHoaAnh(),
+        _PhanDoanManHinhMoDau.gioiThieu => switch (dong) {
+          0 => _xayDuongTruongKhoiLuongDuLieu(),
+          1 => _xayDuongTruongGioiThieu(),
+          3 => _xayDuongTruongChuanHoaAnh(),
+          _ => null
+        },
         _ => null
       };
     }
@@ -334,6 +346,11 @@ class _TrangThaiManHinhMoDau extends TrangThaiWidgetCuaDieuKhien<_NoiDungManHinh
     khiNhan: widget.dieuKhienManHinh._khiNhanGioiThieu,
     tieuDe: widget.dieuKhienManHinh.phienBan,
     icon: Icons.help_outline
+  );
+
+  Widget _xayDuongTruongKhoiLuongDuLieu() => VbhtWidget(
+    text: Vbht.trucTiep(LinhTinh.dinhDangKichThuocTep(widget.dieuKhienManHinh._khoiLuongDuLieu)),
+    coChu: CoChu.nho
   );
 
   Widget _xayDuongTruongChuanHoaAnh() => TruongNutBam(

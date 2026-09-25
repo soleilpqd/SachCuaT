@@ -99,6 +99,8 @@ class DuLieuTam {
     return ketQua;
   }
 
+  /// Lấy danh sách các tệp được dán
+  Future<Iterable<String>> layDsCacTepDuocDan() async => _layDsCacTepTrongThuMucTam(_tenDan);
   /// Lấy danh sách các tệp được chia sẻ
   Future<Iterable<String>> layDsCacTepDuocChiaSe() async => _layDsCacTepTrongThuMucTam(_tenChiaSe);
 

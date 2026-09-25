@@ -20,6 +20,7 @@ package vn.duongpq.sach_cua_t
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.net.Uri
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
@@ -33,7 +34,11 @@ enum class TenHamTuFlutter(val value: String) {
 
     quetMaISBN("quetMaISBN"),
     luuAnhSach("luuAnhSach"),
-    phienBan("phienBan");
+    phienBan("phienBan"),
+    chonAnh("chonAnh"),
+    dan("dan"),
+    chonTep("chonTep");
+
 //    layThongTinHienThi("layThongTinHienThi");
 
     companion object {
@@ -56,6 +61,24 @@ enum class TenHamDenFlutter(val value: String) {
 //    capNhatHienThi("capNhatHienThi");
     khiNhanNutLui("nutLuiAndroid");
 
+}
+
+/// Kiểu tệp
+enum class KieuTep(val value: Int) {
+    /// Ảnh (JPEG, PNG)
+    anh(0),
+    /// zip
+    zip(1),
+    /// 7zip
+    p7zip(2);
+}
+
+/// Kiểu media
+enum class KieuMedia(val value: Int) {
+    /// Camera
+    camera(0),
+    /// Kho ảnh
+    khoAnh(1);
 }
 
 /// Callback trả kết quả khi từ native gọi đến flutter
@@ -133,6 +156,15 @@ class HeThongMay(kenh: MethodChannel, main: MainActivity): MethodCallHandler {
 //                val ketQua = manHinhChinh.layThongTinManHinh()
 //                result.success(ketQua)
 //            }
+            TenHamTuFlutter.dan -> {
+                dan(call, result)
+            }
+            TenHamTuFlutter.chonAnh -> {
+                chonAnh(call, result)
+            }
+            TenHamTuFlutter.chonTep -> {
+                chonTep(call, result)
+            }
             null -> result.error("1", "Hàm không xác định", call.method)
         }
     }
@@ -230,6 +262,40 @@ class HeThongMay(kenh: MethodChannel, main: MainActivity): MethodCallHandler {
             }
         }
         kenhKetNoi.invokeMethod(TenHamDenFlutter.khiNhanNutLui.value, null, callback)
+    }
+
+//    private fun taoTepAnhTam(duongDan: String): Uri {
+//        var ten = "1.JPG"
+//        var stt = 1
+//        return Uri("")
+//    }
+
+    /// Chọn ảnh
+    private fun chonAnh(call: MethodCall, result: MethodChannel.Result) {
+        val duongDan = call.argument<String>("duong_dan")
+        val kieu = call.argument<Int>("kieu")
+        if (duongDan == null || kieu == null) {
+            result.error("chonAnh_1", "Tham số không đúng", call.method)
+            return
+        }
+        when (kieu) {
+            KieuMedia.khoAnh.value -> {
+                manHinhChinh.moChonAnh()
+            }
+            KieuMedia.camera.value -> {
+                manHinhChinh.moCameraChupAnh()
+            }
+        }
+    }
+
+    /// Dán
+    private fun dan(call: MethodCall, result: MethodChannel.Result) {
+        result.error("1", "Hàm không xác định", call.method)
+    }
+
+    /// Chọn tệp
+    private fun chonTep(call: MethodCall, result: MethodChannel.Result) {
+        result.error("1", "Hàm không xác định", call.method)
     }
 
 }

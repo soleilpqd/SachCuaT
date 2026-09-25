@@ -12,6 +12,9 @@
 		2B27AED72F925DDC00D154F2 /* ManHinhCamera.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B27AED52F925DDB00D154F2 /* ManHinhCamera.swift */; };
 		2B27AED82F925DDC00D154F2 /* HeThongMay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B27AED62F925DDC00D154F2 /* HeThongMay.swift */; };
 		2B4CEE862FEC0EC8002FAF74 /* BoXuLyChonAnh.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B4CEE852FEC0EC8002FAF74 /* BoXuLyChonAnh.swift */; };
+		2B5EB68230650CA9009A03EC /* ConsoleLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B5EB68130650CA9009A03EC /* ConsoleLog.swift */; };
+		2B5EB68430653CD6009A03EC /* BoXuLyTimKiemAnh.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B5EB68330653CD6009A03EC /* BoXuLyTimKiemAnh.swift */; };
+		2B61ECDF30669AFE003EA04D /* BoXuLyDuLieuTrungGian.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B61ECDE30669AFE003EA04D /* BoXuLyDuLieuTrungGian.swift */; };
 		331C808B294A63AB00263BE5 /* RunnerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 331C807B294A618700263BE5 /* RunnerTests.swift */; };
 		3AA439291177043A71D80E38 /* Pods_RunnerTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 46FAE7A45272366C1D2BB989 /* Pods_RunnerTests.framework */; };
 		3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */; };
@@ -55,6 +58,9 @@
 		2B27AED52F925DDB00D154F2 /* ManHinhCamera.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ManHinhCamera.swift; sourceTree = "<group>"; };
 		2B27AED62F925DDC00D154F2 /* HeThongMay.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HeThongMay.swift; sourceTree = "<group>"; };
 		2B4CEE852FEC0EC8002FAF74 /* BoXuLyChonAnh.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoXuLyChonAnh.swift; sourceTree = "<group>"; };
+		2B5EB68130650CA9009A03EC /* ConsoleLog.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConsoleLog.swift; sourceTree = "<group>"; };
+		2B5EB68330653CD6009A03EC /* BoXuLyTimKiemAnh.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoXuLyTimKiemAnh.swift; sourceTree = "<group>"; };
+		2B61ECDE30669AFE003EA04D /* BoXuLyDuLieuTrungGian.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoXuLyDuLieuTrungGian.swift; sourceTree = "<group>"; };
 		2EE7D00EEAE0534A70030A76 /* Pods-Runner.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.debug.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"; sourceTree = "<group>"; };
 		331C807B294A618700263BE5 /* RunnerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunnerTests.swift; sourceTree = "<group>"; };
 		331C8081294A63A400263BE5 /* RunnerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RunnerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -162,6 +168,7 @@
 		97C146F01CF9000F007C117D /* Runner */ = {
 			isa = PBXGroup;
 			children = (
+				2B5EB68130650CA9009A03EC /* ConsoleLog.swift */,
 				97C146FA1CF9000F007C117D /* Main.storyboard */,
 				97C146FD1CF9000F007C117D /* Assets.xcassets */,
 				97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */,
@@ -172,6 +179,8 @@
 				2B27AED62F925DDC00D154F2 /* HeThongMay.swift */,
 				2B03AD90306140860016FBCE /* ChuanHoaAnh.swift */,
 				2B4CEE852FEC0EC8002FAF74 /* BoXuLyChonAnh.swift */,
+				2B61ECDE30669AFE003EA04D /* BoXuLyDuLieuTrungGian.swift */,
+				2B5EB68330653CD6009A03EC /* BoXuLyTimKiemAnh.swift */,
 				2B27AED52F925DDB00D154F2 /* ManHinhCamera.swift */,
 				74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */,
 			);
@@ -411,9 +420,12 @@
 				2B03AD91306140860016FBCE /* ChuanHoaAnh.swift in Sources */,
 				74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */,
 				1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */,
+				2B5EB68430653CD6009A03EC /* BoXuLyTimKiemAnh.swift in Sources */,
 				2B4CEE862FEC0EC8002FAF74 /* BoXuLyChonAnh.swift in Sources */,
 				2B27AED72F925DDC00D154F2 /* ManHinhCamera.swift in Sources */,
 				2B27AED82F925DDC00D154F2 /* HeThongMay.swift in Sources */,
+				2B5EB68230650CA9009A03EC /* ConsoleLog.swift in Sources */,
+				2B61ECDF30669AFE003EA04D /* BoXuLyDuLieuTrungGian.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

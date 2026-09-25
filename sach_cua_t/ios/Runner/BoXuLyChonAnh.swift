@@ -1,6 +1,6 @@
 /*
  Sách của T - Quản lý sách cá nhân
- Copyright © 2025 SoleilPQD
+ Copyright © 2026 SoleilPQD
 
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@
 import UIKit
 import Flutter
 
+/// Xử lý UIImagePickerController (lưu lại ảnh được chọn/chụp thành ảnh JPEG không nén vào thư mục được chỉ định)
 final class BoXuLyChonAnh: NSObject, UINavigationControllerDelegate, UIImagePickerControllerDelegate {
 
     let phanHoi: FlutterResult

@@ -19,15 +19,6 @@
 import 'package:flutter/material.dart';
 import 'package:sach_cua_t/views/truong_tieu_de.dart';
 
-extension Scrolling on ScrollController {
-
-  /// Cuộn lên đầu
-  void cuonLenDau({Duration? thoiGianChuyenDong}) {
-    animateTo(0, duration: thoiGianChuyenDong ?? const Duration(milliseconds: 100), curve: Curves.bounceOut);
-  }
-
-}
-
 /// ListView theo phân đoạn
 mixin ListViewTheoPhanDoan {
 

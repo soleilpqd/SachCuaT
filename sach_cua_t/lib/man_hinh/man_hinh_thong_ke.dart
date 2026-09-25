@@ -24,6 +24,7 @@ import 'package:sach_cua_t/models/dulieu.dart';
 import 'package:sach_cua_t/models/xu_ly_nut_lui_android.dart';
 import 'package:sach_cua_t/utils/vanbanhienthi.dart';
 import 'package:sach_cua_t/views/danh_sach_hien_thi.dart';
+import 'package:sach_cua_t/views/dieu_khien_cuon.dart';
 import 'package:sach_cua_t/views/phong_cach_giao_dien.dart';
 import 'package:sach_cua_t/views/truong_tieu_de.dart';
 import 'package:sach_cua_t/views/van_ban_hien_thi_widget.dart';
@@ -95,7 +96,7 @@ class DieuKhienManHinhThongKe extends DieuKhienManHinh with XuLyNutLuiAndroid {
   /// Danh sách các chuỗi sách nhiều tập
   final List<_MucThongKe<String>> _kqSachNhieuTap = [];
 
-  final ScrollController _dkCuon = ScrollController();
+  final DieuKhienCuon _dkCuon = DieuKhienCuon();
 
   DieuKhienManHinhThongKe({required this.dsSach}) {
     widgetCuaManHinh = _ManHinhThongKe(dieuKhienManHinh: this);
@@ -215,7 +216,7 @@ class _ManHinhThongKe extends WidgetTinhCuaDieuKhienManHinh<DieuKhienManHinhThon
     tieuDe: Vbht.tuKhoa(TK.thongKe, dem: dieuKhienManHinh.demVbht),
     khiNhanQuayLai: dieuKhienManHinh._khiNhanQuayLai,
     khiNhanTieuDe: dieuKhienManHinh._khiNhanTieuDeMh,
-    noiDung: xayDungListView(context, scrollCtrl: dieuKhienManHinh._dkCuon)
+    noiDung: xayDungListView(context, scrollCtrl: dieuKhienManHinh._dkCuon.dkCuon)
   );
 
   @override

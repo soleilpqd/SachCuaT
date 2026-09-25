@@ -17,9 +17,7 @@
  */
 
 import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:sach_cua_t/main.dart';
 import 'package:sach_cua_t/man_hinh/man_hinh_xem_anh.dart';
 import 'package:sach_cua_t/models/du_lieu_tam.dart';
@@ -52,7 +50,12 @@ class DieuKhienTruongHinhAnh extends DieuKhienCoSo {
   /// Hình ảnh
   Uri? get hinhAnh => this[ThuocTinhTruongHinhAnh.hinhAnh.name];
   /// Hình ảnh
-  set hinhAnh(Uri? gt) => this[ThuocTinhTruongHinhAnh.hinhAnh.name] = gt;
+  set hinhAnh(Uri? gt) {
+    _thongTinAnh = null;
+    this[ThuocTinhTruongHinhAnh.hinhAnh.name] = gt;
+  }
+
+  _ThongTinAnh? _thongTinAnh = null;
 
 }
 
@@ -92,23 +95,20 @@ class _ThongTinAnh {
 
 class _TrangThaiTruongHinhAnh extends TrangThaiCoSo<TruongHinhAnh> {
 
-  final Map<String, _ThongTinAnh> _thongTinAnh = {};
-
   Widget _xayDungKhungAnh(Color mauNen) {
     final bool khaDung = widget.dieuKhien!.khaDung;
     if (widget.dieuKhien?.hinhAnh != null) {
       final Uri duongDanAnh = widget.dieuKhien!.hinhAnh!;
       final UiImage viewAnh = LinhTinh.taoWidgetAnh(widget.dieuKhien!.hinhAnh!);
       if (widget.hienThiThongTinAnh && duongDanAnh.scheme == PhanLoaiDuongDan.file.name) {
-        _ThongTinAnh? thongTinAnh = _thongTinAnh[duongDanAnh.toString()];
-        if (thongTinAnh == null) {
-          _thongTinAnh.clear();
+        if (widget.dieuKhien?._thongTinAnh == null) {
+          viewAnh.image.evict();
           viewAnh.image.resolve(ImageConfiguration.empty).addListener(ImageStreamListener((thongTin, _) {
             final File tepAnh = File(duongDanAnh.path);
             final int ktTep = tepAnh.lengthSync();
             final _ThongTinAnh ttAnh = _ThongTinAnh(ngang: thongTin.image.width, doc: thongTin.image.height, kichThuocOCung: ktTep);
             setState(() {
-              _thongTinAnh[duongDanAnh.toString()] = ttAnh;
+              widget.dieuKhien?._thongTinAnh = ttAnh;
             });
           }));
         }
@@ -162,10 +162,16 @@ class _TrangThaiTruongHinhAnh extends TrangThaiCoSo<TruongHinhAnh> {
       )
     );
     if (widget.dieuKhien?.hinhAnh != null) {
-      _ThongTinAnh? thongTinAnh = _thongTinAnh[widget.dieuKhien!.hinhAnh!.toString()];
+      final duongDanAnh = widget.dieuKhien!.hinhAnh!;
+      _ThongTinAnh? thongTinAnh = widget.dieuKhien?._thongTinAnh;
       List<Widget> dsViewConChinh = [khungVuong];
       if (thongTinAnh != null) {
-        dsViewConChinh.add(Text("${thongTinAnh.ngang}x${thongTinAnh.doc}:${LinhTinh.dinhDangKichThuocTep(thongTinAnh.kichThuocOCung)}"));
+        dsViewConChinh.add(Text(
+          """
+${duongDanAnh.pathSegments[duongDanAnh.pathSegments.length - 2]}/${duongDanAnh.pathSegments.last}
+${thongTinAnh.ngang}x${thongTinAnh.doc}:${LinhTinh.dinhDangKichThuocTep(thongTinAnh.kichThuocOCung)}
+""", textAlign: TextAlign.center,
+        ));
       }
       dsViewConChinh.add(Row(
         mainAxisAlignment: MainAxisAlignment.end,
@@ -214,18 +220,18 @@ class _TrangThaiTruongHinhAnh extends TrangThaiCoSo<TruongHinhAnh> {
     return khungVuong;
   }
 
-  Future<void> _chonAnh1(ImageSource nguon) async {
-    final ImagePicker picker = ImagePicker();
-    XFile? file;
-    try {
-      file = await picker.pickImage(source: nguon);
-    } catch (error) {
-      widget.khiKhongCoMayAnh();
-    }
-    if (file != null) {
-      widget.dieuKhien?.hinhAnh = LinhTinh.taoDuongDan(phanLoai: PhanLoaiDuongDan.file, duongDan: file.path);
-    }
-  }
+  // Future<void> _chonAnh1(ImageSource nguon) async {
+  //   final ImagePicker picker = ImagePicker();
+  //   XFile? file;
+  //   try {
+  //     file = await picker.pickImage(source: nguon);
+  //   } catch (error) {
+  //     widget.khiKhongCoMayAnh();
+  //   }
+  //   if (file != null) {
+  //     widget.dieuKhien?.hinhAnh = LinhTinh.taoDuongDan(phanLoai: PhanLoaiDuongDan.file, duongDan: file.path);
+  //   }
+  // }
 
   Future<void> _chonAnh(KieuMedia kieu) async {
     try {
@@ -246,6 +252,9 @@ class _TrangThaiTruongHinhAnh extends TrangThaiCoSo<TruongHinhAnh> {
   /// Khi nhấn xoá ảnh (2 nhấn)
   void _khiXoaAnh() {
     widget.dieuKhien?.hinhAnh = null;
+    final DuLieuTam boDem = DuLieuTam();
+    boDem.xoaCacTepDan();
+    boDem.xoaTepDuocChiaSe();
   }
 
   void _khiXemAnhToanManHinh() {
@@ -277,16 +286,24 @@ class _TrangThaiTruongHinhAnh extends TrangThaiCoSo<TruongHinhAnh> {
   }
 
   void _khiNhanDan() async {
-    List<String> dsTep = (await HeThongMay.duyNhat.dan([.anh])) ?? [];
+    final List<String>? kqDan = await HeThongMay.duyNhat.dan([.anh]);
+    if (kqDan != null && kqDan.isNotEmpty) {
+      widget.dieuKhien?.hinhAnh = null;
+    }
+    final Iterable<String> dsTepDan = await DuLieuTam().layDsCacTepDuocDan();
+    final Iterable<String> dsTepChiaSe = await DuLieuTam().layDsCacTepDuocChiaSe();
+    final List<String> dsTep = [];
+    dsTep.addAll(dsTepDan);
+    dsTep.addAll(dsTepChiaSe);
     if (await _xuLyTepDaChon(dsTep)) {
       return;
     }
-    dsTep = (await DuLieuTam().layDsCacTepDuocChiaSe()).toList();
-    if (await _xuLyTepDaChon(dsTep)) {
-      return;
+    final List<String>? kqChonTep = await HeThongMay.duyNhat.chonTep([.anh]);
+    if (kqChonTep != null && kqChonTep.isNotEmpty) {
+      widget.dieuKhien?.hinhAnh = LinhTinh.taoDuongDan(phanLoai: PhanLoaiDuongDan.file, duongDan: kqChonTep.first);
+    } else if (dsTep.isNotEmpty) {
+      widget.dieuKhien?.hinhAnh = LinhTinh.taoDuongDan(phanLoai: PhanLoaiDuongDan.file, duongDan: dsTep.first);
     }
-    dsTep = (await HeThongMay.duyNhat.chonTep([.anh])) ?? [];
-    _xuLyTepDaChon(dsTep);
   }
 
   void _khiNhanKhoAnh() {
