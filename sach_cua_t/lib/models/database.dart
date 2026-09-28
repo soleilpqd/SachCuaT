@@ -142,17 +142,7 @@ class CoSoDuLieu {
 
   Future<int> doKhoiLuongDuLieu() async {
     final String duongDanCoSo = await getDatabasesPath();
-    final Directory thuMucCoSo = Directory(duongDanCoSo);
-    if (await thuMucCoSo.exists()) {
-      int ketQua = 0;
-      final List<FileSystemEntity> danhSach = await thuMucCoSo.list(recursive: true).toList();
-      for (final muc in danhSach) {
-        final FileStat stat = await muc.stat();
-        ketQua += stat.size;
-      }
-      return Future.value(ketQua);
-    }
-    return Future.value(0);
+    return LinhTinh.doKhoiLuongThuMuc(duongDanCoSo);
   }
 
   // ------

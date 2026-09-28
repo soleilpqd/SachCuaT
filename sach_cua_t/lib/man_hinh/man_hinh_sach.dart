@@ -181,6 +181,7 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo, X
   @override
   void manHinhDuocThemVaoLuong() {
     super.manHinhDuocThemVaoLuong();
+    HeThongMay.duyNhat.urlSach.addListener(_khiNhanUrlSach);
     _khoiTaoDuLieu();
   }
 
@@ -203,6 +204,7 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo, X
     _goiYGiaTriNhan.dispose();
     _dkXoa.dispose();
     DuLieuTam().xoaCacTepDan();
+    HeThongMay.duyNhat.urlSach.removeListener(_khiNhanUrlSach);
   }
 
   // --- UI
@@ -395,6 +397,7 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo, X
     if (tuKhoa.isNotEmpty) {
       HeThongMay.duyNhat.moTimKiemAnh(tuKhoa).then((dsKetQua) {
         if (dsKetQua != null && dsKetQua.isNotEmpty) {
+          _dkHinhAnh.hinhAnh = null;
           _dkHinhAnh.hinhAnh = LinhTinh.taoDuongDan(phanLoai: PhanLoaiDuongDan.file, duongDan: dsKetQua.first);
         }
       });
@@ -505,6 +508,34 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo, X
     );
   }
 
+  /// Khi người dùng chọn đánh dấu URL sách từ màn hình tìm kiếm ảnh sách
+  void _khiNhanUrlSach() {
+    String urlStr = HeThongMay.duyNhat.urlSach.value;
+    if (urlStr.isEmpty) {
+      return;
+    }
+    HeThongMay.duyNhat.urlSach.value = "";
+    bool timThay = false;
+    for (final muc in _dsDkNhan) {
+      if (muc.vbTieuDe == "URL") {
+        muc.vanBan = urlStr;
+        timThay = true;
+        break;
+      }
+    }
+    if (!timThay) {
+      DieuKhienTruongVanBan dkVb = DieuKhienTruongVanBan(goiYNoiDung: _goiYGiaTriNhan, goiYTieuDe: _goiYTenNhan, luonHienThi: true);
+      dkVb.debugInfo = "NN URL";
+      dkVb.vanBan = urlStr;
+      dkVb.vbTieuDe = "URL";
+      dkVb.trangThaiNutBenPhai = null;
+      dkVb.themTheoDoi(this);
+      _dsDkNhan.add(dkVb);
+      _cauHinhLaiDauVao();
+      trangThaiWidgetManHinh?.capNhatGiaoDienCuaManHinh(dieuKhienManHinh: this);
+    }
+  }
+
   // --- Xử lý
 
   /// Khởi tạo dữ liệu
@@ -529,19 +560,7 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo, X
           }
         });
       } else {
-        if (_dsNhanLuonHien.isNotEmpty) {
-          int dem = 0;
-          for (final muc in _dsNhanLuonHien) {
-            DieuKhienTruongVanBan dkVb = DieuKhienTruongVanBan(goiYNoiDung: _goiYGiaTriNhan, goiYTieuDe: _goiYTenNhan, luonHienThi: true);
-            dkVb.debugInfo = "NN $dem";
-            dkVb.vanBan = "";
-            dkVb.vbTieuDe = muc;
-            dkVb.trangThaiNutBenPhai = null;
-            dkVb.themTheoDoi(this);
-            _dsDkNhan.add(dkVb);
-            dem += 1;
-          }
-        }
+        _taoDieuKhienNhanLuonHienThi();
         _cauHinhLaiDauVao();
         trangThaiWidgetManHinh?.capNhatGiaoDienCuaManHinh(dieuKhienManHinh: this);
       }
@@ -551,6 +570,22 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo, X
   /// Khởi tạo danh sách nhãn sách
   Future<void> _khoiTaoDSNhan() async {
     _dsNhanLuonHien = await CoSoDuLieu().layDSNhanLuonHien();
+  }
+
+  void _taoDieuKhienNhanLuonHienThi() {
+    if (_dsNhanLuonHien.isNotEmpty) {
+      int dem = 0;
+      for (final muc in _dsNhanLuonHien) {
+        DieuKhienTruongVanBan dkVb = DieuKhienTruongVanBan(goiYNoiDung: _goiYGiaTriNhan, goiYTieuDe: _goiYTenNhan, luonHienThi: true);
+        dkVb.debugInfo = "NN $dem";
+        dkVb.vanBan = "";
+        dkVb.vbTieuDe = muc;
+        dkVb.trangThaiNutBenPhai = null;
+        dkVb.themTheoDoi(this);
+        _dsDkNhan.add(dkVb);
+        dem += 1;
+      }
+    }
   }
 
   /// Làm sạch tất cả đầu vào: xoá các trường văn bản, hình ảnh
@@ -1121,6 +1156,7 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo, X
       }
     }
     _khoiTaoDSNhan().then((_) {
+      _taoDieuKhienNhanLuonHienThi();
       _cauHinhLaiDauVao();
       trangThaiWidgetManHinh?.capNhatGiaoDienCuaManHinh(dieuKhienManHinh: this);
     });

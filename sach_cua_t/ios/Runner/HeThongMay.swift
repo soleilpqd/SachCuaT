@@ -51,6 +51,8 @@ final class HeThongMay {
         case nhanDuocTep
         /// Chuẩn hoá ảnh
         case chuanHoaAnh
+        /// URL sách
+        case urlSach
     }
 
     enum KieuTep: Int {
@@ -282,23 +284,30 @@ final class HeThongMay {
             result(FlutterError(code: "timKiemAnh_1", message: "Tham số không đúng", details: call.method))
             return
         }
-        BoXuLyDuLieuTrungGian.duyNhat.xoaBoDuLieuTrungGianChoAnhVaUrl()
         if (!boTimKiemAnh.batDau(
             tuKhoa: tuKhoa,
             xong: { // Khi đóng SFSafari mà ko có kết quả
                 result(nil)
-            }, dan: {[weak self] in // Khi có kết quả dán
+            }, dan: {[weak self] (khiDanXong) in // Khi có kết quả dán
 //                ConsoleLog.shared.log("Khi dan")
                 BoXuLyDuLieuTrungGian.duyNhat.danAnh(duongDanLuu: thuMucChua) {[weak self] ketQua in
-                    guard let mmSelf = self, !ketQua.isEmpty else { return }
+                    guard let mmSelf = self, !ketQua.isEmpty else {
+                        khiDanXong(false)
+                        return
+                    }
                     // Đóng SFSafari và trả lại kết quả nếu dán thành công (không dán được ảnh nào thì vẫn tiếp tục mở SFSafari)
                     mmSelf.boTimKiemAnh.ketThuc()
                     result(ketQua)
+                    khiDanXong(true)
 //                    ConsoleLog.shared.log("KQ dan \(ketQua)")
                 }
             })) { // Khi không bật được SFSafari
             result(nil)
         }
+    }
+
+    func danhDauUrlSach(_ url: URL) {
+        kenhKetNoi.invokeMethod(TenHamDenFlutter.urlSach.rawValue, arguments: url.absoluteString)
     }
 
 }

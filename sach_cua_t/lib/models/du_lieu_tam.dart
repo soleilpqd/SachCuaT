@@ -19,6 +19,7 @@
 import 'dart:io';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:sach_cua_t/utils/common.dart';
 
 /// Dữ liệu tạm
 class DuLieuTam {
@@ -37,6 +38,11 @@ class DuLieuTam {
   Future<void> khoiDau() async {
     final Directory duongDanTam = await getTemporaryDirectory();
     print("TAM: ${duongDanTam.path}");
+  }
+
+  Future<int> doKhoiLuongTam() async {
+    final Directory duongDanTam = await getTemporaryDirectory();
+    return LinhTinh.doKhoiLuongThuMuc(duongDanTam.path);
   }
 
   Future<Directory> _duongDanThuMucTam(bool canTao, String ten) async {

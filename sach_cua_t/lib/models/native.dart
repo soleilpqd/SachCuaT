@@ -36,7 +36,9 @@ enum _MethodFromNative {
   /// Khi người dùng chọn tệp từ ngoài app
   khiNhanDuocTep,
   /// Chuẩn hoá ảnh
-  chuanHoaAnh
+  chuanHoaAnh,
+  /// URL sách
+  urlSach
   ;
 
   static _MethodFromNative? init(String raw) {
@@ -46,6 +48,7 @@ enum _MethodFromNative {
       "nutLuiAndroid" => _MethodFromNative.khiNhanNutLui,
       "nhanDuocTep" => _MethodFromNative.khiNhanDuocTep,
       "chuanHoaAnh" => _MethodFromNative.chuanHoaAnh,
+      "urlSach" => _MethodFromNative.urlSach,
       _ => null
     };
   }
@@ -149,6 +152,8 @@ class HeThongMay {
         //   _thongBaoCapNhatHienThi(call.arguments);
         case _MethodFromNative.chuanHoaAnh:
           _xuLyKhiNhanDuocCapNhatChuanHoaAnh(call.arguments);
+        case _MethodFromNative.urlSach:
+          _xuLyKhiNhanDuocUrlSach(call.arguments);
         }
       }
       return Future(() => null);
@@ -157,8 +162,7 @@ class HeThongMay {
   static final HeThongMay duyNhat = HeThongMay._internal();
   // final thongTinHienThi = HienThiNenTang();
   // final theoDoi = <TheoDoiHeThongMay>[];
-  final ValueNotifier test = ValueNotifier(1);
-
+  final ValueNotifier urlSach = ValueNotifier("");
   final TienTrinhChuanHoaAnh theoDoiTienTrinhChuanHoaAnh = TienTrinhChuanHoaAnh();
 
   /// Flutter -> Native: Bật camera để quét mã ISBN
@@ -285,6 +289,10 @@ class HeThongMay {
     final List<Object?>? ketQua = await _kenhKetNoi.invokeMethod(_MethodToNative.timKiemAnh.value, thamSo) as List<Object?>?;
     final List<String>? dsDuongDan = ketQua?.cast<String>();
     return Future.value(dsDuongDan);
+  }
+
+  void _xuLyKhiNhanDuocUrlSach(dynamic thongTin) {
+    urlSach.value = thongTin as String;
   }
 
 }

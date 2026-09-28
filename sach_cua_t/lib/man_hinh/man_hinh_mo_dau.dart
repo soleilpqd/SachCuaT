@@ -26,6 +26,7 @@ import 'package:sach_cua_t/man_hinh/man_hinh_sach.dart';
 import 'package:sach_cua_t/man_hinh/man_hinh_tim_kiem.dart';
 import 'package:sach_cua_t/man_hinh/man_hinh_tro_giup.dart';
 import 'package:sach_cua_t/models/database.dart';
+import 'package:sach_cua_t/models/du_lieu_tam.dart';
 import 'package:sach_cua_t/models/dulieu.dart';
 import 'package:sach_cua_t/models/native.dart';
 import 'package:sach_cua_t/models/operations/thao_tac_nap_man_hinh_mo_dau.dart';
@@ -74,6 +75,7 @@ class DieuKhienManHinhMoDau extends DieuKhienManHinh with XuLyNutLuiAndroid {
   final ThaoTacNapDuLieuManHinhMoDau nguonDuLieu = ThaoTacNapDuLieuManHinhMoDau();
   final DieuKhienTruongNutBamThanhDieuHuong _dkNutPhai = DieuKhienTruongNutBamThanhDieuHuong();
   int _khoiLuongDuLieu = 0;
+  int _khoiLuongTam = 0;
 
   DieuKhienManHinhMoDau() {
     widgetCuaManHinh = _ManHinhMoDau(dkMh: this);
@@ -113,6 +115,10 @@ class DieuKhienManHinhMoDau extends DieuKhienManHinh with XuLyNutLuiAndroid {
     });
     CoSoDuLieu().doKhoiLuongDuLieu().then((khoiLuong) {
       _khoiLuongDuLieu = khoiLuong;
+      trangThaiWidgetManHinh?.capNhatGiaoDienCuaManHinh(dieuKhienManHinh: this);
+    });
+    DuLieuTam().doKhoiLuongTam().then((khoiLuong) {
+      _khoiLuongTam = khoiLuong;
       trangThaiWidgetManHinh?.capNhatGiaoDienCuaManHinh(dieuKhienManHinh: this);
     });
     _cauHinhNutDieuHuong();
@@ -349,7 +355,7 @@ class _TrangThaiManHinhMoDau extends TrangThaiWidgetCuaDieuKhien<_NoiDungManHinh
   );
 
   Widget _xayDuongTruongKhoiLuongDuLieu() => VbhtWidget(
-    text: Vbht.trucTiep(LinhTinh.dinhDangKichThuocTep(widget.dieuKhienManHinh._khoiLuongDuLieu)),
+    text: Vbht.trucTiep("${LinhTinh.dinhDangKichThuocTep(widget.dieuKhienManHinh._khoiLuongDuLieu)} | ${LinhTinh.dinhDangKichThuocTep(widget.dieuKhienManHinh._khoiLuongTam)}"),
     coChu: CoChu.nho
   );
 

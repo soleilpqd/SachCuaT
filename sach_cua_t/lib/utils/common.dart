@@ -357,6 +357,20 @@ class LinhTinh {
     return "${kichThuoc}B";
   }
 
+  static Future<int> doKhoiLuongThuMuc(String duongDan) async {
+    final Directory thuMuc = Directory(duongDan);
+    if (await thuMuc.exists()) {
+      int ketQua = 0;
+      final List<FileSystemEntity> danhSach = await thuMuc.list(recursive: true).toList();
+      for (final muc in danhSach) {
+        final FileStat stat = await muc.stat();
+        ketQua += stat.size;
+      }
+      return ketQua;
+    }
+    return 0;
+  }
+
 }
 
 extension ViTriWidget on GlobalKey {

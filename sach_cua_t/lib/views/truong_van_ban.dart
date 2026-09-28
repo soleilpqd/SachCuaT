@@ -23,10 +23,12 @@ import 'package:sach_cua_t/utils/common.dart';
 import 'package:sach_cua_t/utils/vanbanhienthi.dart';
 import 'package:sach_cua_t/utils/vonglapgioihan.dart';
 import 'package:sach_cua_t/views/dieu_khien_co_so.dart';
+import 'package:sach_cua_t/views/nut_bam_bieu_tuong.dart';
 import 'package:sach_cua_t/views/phong_cach_giao_dien.dart';
 import 'package:sach_cua_t/views/truong_bat_tat.dart';
 import 'package:sach_cua_t/views/van_ban_hien_thi_noi_bat.dart';
 import 'package:sach_cua_t/views/van_ban_hien_thi_widget.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 /// Gợi ý văn bản cơ sở
 abstract class GoiYVanBan {
@@ -447,6 +449,16 @@ class _TrangThaiTruongVanBan extends TrangThaiCoSo<TruongVanBan> {
       final Widget oLuonHienThi = _xayDungOLuonHienThi();
       Widget? nutBenPhai = widget.xayDungNutBenPhai?.call(widget.dieuKhien!.trangThaiNutBenPhai, widget.dieuKhien!.khaDung);
       List<Widget> dsCacO = [oLuonHienThi];
+      if (widget.dieuKhien!.quanLyNhapTieuDe.text == "URL") {
+        try {
+          final Uri uriSach = Uri.parse(widget.dieuKhien!.quanLyNhapNoiDung.text);
+          dsCacO.add(NutBamBieuTuong(
+            bieuTuong: Icons.open_in_browser_outlined,
+            thuocThanhDieuHuong: false,
+            khiNhan: () => launchUrl(uriSach),
+          ));
+        } catch (_) {}
+      }
       if (nutBenPhai != null) {
         dsCacO.add(nutBenPhai);
       }
