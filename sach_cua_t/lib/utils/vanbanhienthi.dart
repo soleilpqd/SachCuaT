@@ -152,7 +152,9 @@ enum TK {
   /// Xoá
   xoa,
   /// Xoá "#_"
-  xoaNoiDung
+  xoaNoiDung,
+  /// Tìm hình ảnh
+  timAnh
   ;
 }
 

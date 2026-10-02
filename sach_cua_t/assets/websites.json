@@ -1,0 +1,134 @@
+[
+    {
+        "url": "https://www.google.com/search",
+        "tham_so": {
+            "q": "filetype:jpg %TK%",
+            "udm": "2"
+        }
+    }, {
+        "url": "https://nxbkimdong.com.vn/search",
+        "tham_so": {
+            "query": "%TK%"
+        }
+    }, {
+        "url": "https://nhanam.vn/search",
+        "tham_so": {
+            "query": "%TK%"
+        }
+    }, {
+        "url": "https://www.nxbtre.com.vn/tim-kiem",
+        "tham_so": {
+            "q": "%TK%"
+        }
+    }, {
+        "url": "https://thaihabooks.com/search",
+        "tham_so": {
+            "q": "%TK%"
+        }
+    }, {
+        "url": "https://azvietnam.vn/search",
+        "tham_so": {
+            "q": "%TK%"
+        }
+    }, {
+        "url": "https://sach.nxbphunu.com.vn/ket-qua-tim-kiem",
+        "tham_so": {
+            "keyword": "%TK%"
+        }
+    }, {
+        "url": "https://skybooks.vn/search",
+        "tham_so": {
+            "query": "%TK%"
+        }
+    }, {
+        "url": "https://1980books.com/search",
+        "tham_so": {
+            "q": "%TK%"
+        }
+    }, {
+        "url": "https://sachtaodan.vn/search",
+        "tham_so": {
+            "query": "%TK%"
+        }
+    }, {
+        "url": "https://shopee.vn/search",
+        "tham_so": {
+            "keyword": "sách %TK%"
+        }
+    }, {
+        "url": "https://tiki.vn/search",
+        "tham_so": {
+            "q": "sách %TK%"
+        }
+    }, {
+        "url": "https://sachdonga.vn/search",
+        "tham_so": {
+            "q": "%TK%"
+        }
+    }, {
+        "url": "https://nxbdantri.com.vn/",
+        "tham_so": {
+            "s": "%TK%"
+        }
+    }, {
+        "url": "https://www.phucminhbooks.vn/search",
+        "tham_so": {
+            "q": "%TK%"
+        }
+    }, {
+        "url": "https://sbooks.vn/",
+        "tham_so": {
+            "s": "%TK%",
+            "post_type": "product"
+        }
+    }, {
+        "url": "https://nxbdhsp.edu.vn/san-pham",
+        "tham_so": {
+            "searchContent": "%TK%",
+            "page": "1",
+            "objectType": "0,1,",
+            "rating": "1",
+            "priceFrom": "",
+            "priceTo": "",
+            "displaySelectionId": "",
+            "isHighest": "false",
+            "isLowest": "false"
+        }
+    }, {
+        "url": "https://dinhtibooks.com.vn/search/%TK%.html",
+        "tham_so": {
+            "": ""
+        }
+    }, {
+        "url": "https://www.trithucvietbook.com/search",
+        "tham_so": {
+            "query": "%TK%"
+        }
+    }, {
+        "url": "https://www.alphabooks.vn/search",
+        "tham_so": {
+            "query": "%TK%"
+        }
+    }, {
+        "url": "https://shop.comicola.com/",
+        "tham_so": {
+            "s": "%TK%"
+        }
+    }, {
+        "url": "https://ipm.vn/search",
+        "tham_so": {
+            "q": "%TK%"
+        }
+    }, {
+        "url": "https://sanhobooks.com/",
+        "tham_so": {
+            "s": "%TK%",
+            "post_type": "product"
+        }
+    }, {
+        "url": "https://linhlanbooks.vn/search",
+        "tham_so": {
+            "q": "%TK%"
+        }
+    }
+]

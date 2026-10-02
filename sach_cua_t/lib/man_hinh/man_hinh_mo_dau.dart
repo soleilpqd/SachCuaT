@@ -264,10 +264,12 @@ class _TrangThaiManHinhMoDau extends TrangThaiWidgetCuaDieuKhien<_NoiDungManHinh
     ));
   }
 
+  final int soDongPhanDoanCuoi = 2; // TODO: 2 để ẩn dòng Chuẩn hoá ảnh, 3 để hiện
+
   @override
   double? khoangCachPhiaDuoi(int doan, int dong) {
     return switch (_PhanDoanManHinhMoDau.khoiTao(doan)) {
-      _PhanDoanManHinhMoDau.gioiThieu => dong == 1 ? 50.0 : null, // TODO: xem bên dưới (áp dụng với dòng cuối cùng)
+      _PhanDoanManHinhMoDau.gioiThieu => dong == soDongPhanDoanCuoi - 1 ? 50.0 : null,
       _ => null
     };
   }
@@ -291,7 +293,7 @@ class _TrangThaiManHinhMoDau extends TrangThaiWidgetCuaDieuKhien<_NoiDungManHinh
       return switch(_PhanDoanManHinhMoDau.khoiTao(doan)) {
         _PhanDoanManHinhMoDau.danhDau => widget.dieuKhienManHinh.nguonDuLieu.dsDanhDau.length,
         _PhanDoanManHinhMoDau.ganDay => widget.dieuKhienManHinh.nguonDuLieu.dsGanDay.length,
-        _PhanDoanManHinhMoDau.gioiThieu => 2, // TODO: 2 để ẩn dòng Chuẩn hoá ảnh, 3 để hiện
+        _PhanDoanManHinhMoDau.gioiThieu => soDongPhanDoanCuoi,
         _ => 0
       };
     }
@@ -335,7 +337,7 @@ class _TrangThaiManHinhMoDau extends TrangThaiWidgetCuaDieuKhien<_NoiDungManHinh
         _PhanDoanManHinhMoDau.gioiThieu => switch (dong) {
           0 => _xayDuongTruongKhoiLuongDuLieu(),
           1 => _xayDuongTruongGioiThieu(),
-          3 => _xayDuongTruongChuanHoaAnh(),
+          2 => _xayDuongTruongChuanHoaAnh(),
           _ => null
         },
         _ => null
@@ -362,7 +364,7 @@ class _TrangThaiManHinhMoDau extends TrangThaiWidgetCuaDieuKhien<_NoiDungManHinh
   Widget _xayDuongTruongChuanHoaAnh() => TruongNutBam(
     khiNhan: widget.dieuKhienManHinh._khiNhanChuanHoaAnh,
     tieuDe: Vbht.trucTiep("Chuẩn hoá ảnh"),
-    icon: Icons.image
+    icon: Icons.image_outlined
   );
 
   Widget _xayDungTruongSach(Sach sach, bool hienThiDanhDau) {

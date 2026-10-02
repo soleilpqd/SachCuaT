@@ -18,47 +18,18 @@
 
 package vn.duongpq.sach_cua_t
 
-import android.Manifest
-import android.app.Activity
+import android.content.ClipboardManager
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.net.Uri
 import android.os.Bundle
-import android.provider.MediaStore
 import android.util.Log
 import androidx.activity.OnBackPressedCallback
-import androidx.activity.result.ActivityResult
-import androidx.activity.result.PickVisualMediaRequest
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
 
 class MainActivity: FlutterFragmentActivity() {
 
-    private var khiChupChonXongAnh: ((Bitmap?, Boolean) -> Unit)? = null
-    private val boKichHoatCameraChupAnh = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
-        var bitmap: Bitmap? = null
-        if (result.resultCode == Activity.RESULT_OK) {
-            bitmap = result.data?.extras?.get("data") as? Bitmap
-        }
-        khiChupChonXongAnh?.invoke(bitmap, true)
-        khiChupChonXongAnh = null
-    }
-    private val boKichHoatChonAnh = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
-        var bitmap: Bitmap? = null
-        if (uri != null) {
-            val inputStream = contentResolver.openInputStream(uri)
-            if (inputStream != null) {
-                bitmap = BitmapFactory.decodeStream(inputStream)
-            }
-        }
-        khiChupChonXongAnh?.invoke(bitmap, true)
-        khiChupChonXongAnh = null
-    }
+    lateinit var quanLyAnh: BoXuLyChonAnh
 
 //    private fun getRootView(): View { return findViewById(android.R.id.content) }
 
@@ -96,15 +67,46 @@ class MainActivity: FlutterFragmentActivity() {
         HeThongMay.register(flutterEngine, this)
     }
 
+    private fun kiemTraChiaSeTep(yDinh: Intent) {
+        if (yDinh.action == Intent.ACTION_SEND && (yDinh.type ?: "").startsWith("text/")) {
+            val vanBan = yDinh.getStringExtra(Intent.EXTRA_TEXT)
+            if (vanBan != null) {
+                HeThongMay.duyNhat.danhDauUrlSach(vanBan)
+            }
+        }
+        val kqChiaSe = BoXuLyDuLieuTrungGian.luuAnhChiaSe(yDinh)
+        if (kqChiaSe != null) {
+            HeThongMay.duyNhat.khiNhanDuocAnhChiaSe()
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         langNgheNutLui()
+        quanLyAnh = BoXuLyChonAnh(this, 2)
+        quanLyAnh.cauHinh()
+        BoXuLyDuLieuTrungGian.clipboard = getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
 //        lastOrientation = resources.configuration.orientation
 //        val rootView = getRootView()
 //        val rect = Rect()
 //        rootView.getWindowVisibleDisplayFrame(rect)
 //        originDisplayRect[lastOrientation] = rect
 //        rootView.viewTreeObserver.addOnGlobalLayoutListener(layoutListener)
+        if (intent != null) {
+            kiemTraChiaSeTep(intent)
+        }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        if (!BoTimKiemAnh.nhanDuocThaoTac(intent)) {
+            kiemTraChiaSeTep(intent)
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        BoTimKiemAnh.khiQuayLaiApp()
     }
 
 //    override fun onDestroy() {
@@ -179,34 +181,22 @@ class MainActivity: FlutterFragmentActivity() {
         onBackPressedDispatcher.addCallback(callback)
     }
 
-    fun moCameraChupAnh() {
-        if (kiemTraQuyenSuDungMayAnh()) {
-            moMayAnh()
+    fun moCameraChupAnh(khiXong: (Bitmap?, Boolean) -> Unit) {
+        quanLyAnh.khiChupChonXongAnh = khiXong
+        if (quanLyAnh.kiemTraQuyenSuDungMayAnh()) {
+            quanLyAnh.moMayAnh()
         } else {
-            yeuCauQuyenSuDungMayAnh()
+            quanLyAnh.yeuCauQuyenSuDungMayAnh()
         }
     }
 
-    fun moChonAnh() {
-        boKichHoatChonAnh.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-    }
-
-    private fun moMayAnh() {
-        val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-        boKichHoatCameraChupAnh.launch(intent)
-    }
-
-    private fun kiemTraQuyenSuDungMayAnh(): Boolean {
-        return ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
+    fun moChonAnh(khiXong: (Bitmap?, Boolean) -> Unit) {
+        quanLyAnh.khiChupChonXongAnh = khiXong
+        quanLyAnh.moChonAnh()
     }
 
     private fun khiKhongCoMayAnh() {
-        khiChupChonXongAnh?.invoke(null, false)
-        khiChupChonXongAnh = null
-    }
-
-    private fun yeuCauQuyenSuDungMayAnh() {
-        ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA), 2)
+        quanLyAnh.khiChupChonXongAnh?.invoke(null, false)
     }
 
     override fun onRequestPermissionsResult(
@@ -215,11 +205,11 @@ class MainActivity: FlutterFragmentActivity() {
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode != 2) {
+        if (requestCode != quanLyAnh.maYeuCauQuyenTruyCapMayAnh) {
             return
         }
-        if (kiemTraQuyenSuDungMayAnh()) {
-            moMayAnh()
+        if (quanLyAnh.kiemTraQuyenSuDungMayAnh()) {
+            quanLyAnh.moMayAnh()
         } else {
             khiKhongCoMayAnh()
         }

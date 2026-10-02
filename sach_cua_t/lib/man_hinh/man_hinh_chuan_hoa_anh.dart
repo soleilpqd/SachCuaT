@@ -51,7 +51,7 @@ class DieuKhienManHinhChuanHoaAnh extends DieuKhienManHinh {
   }
 
   void _khiNhanBatDau() {
-    HeThongMay.duyNhat.chuanHoaAnh();
+    HeThongMay.duyNhat.chuanHoaAnh(chiTn: true);
   }
 
 }

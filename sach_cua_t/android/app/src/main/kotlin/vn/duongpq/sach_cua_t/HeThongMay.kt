@@ -20,24 +20,27 @@ package vn.duongpq.sach_cua_t
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.net.Uri
+import android.util.Log
+import androidx.core.net.toUri
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import java.io.File
-import java.io.FileOutputStream
 import vn.duongpq.sach_cua_t.BuildConfig
 
 /// Tên hàm gọi từ Flutter đến native
 enum class TenHamTuFlutter(val value: String) {
 
+    batDau("batDau"),
     quetMaISBN("quetMaISBN"),
     luuAnhSach("luuAnhSach"),
     phienBan("phienBan"),
     chonAnh("chonAnh"),
     dan("dan"),
-    chonTep("chonTep");
+    chonTep("chonTep"),
+    timKiemAnh("timKiemAnh")
+    ;
 
 //    layThongTinHienThi("layThongTinHienThi");
 
@@ -59,7 +62,11 @@ enum class TenHamDenFlutter(val value: String) {
 
     kiemTraISBN("kiemTraISBN"),
 //    capNhatHienThi("capNhatHienThi");
-    khiNhanNutLui("nutLuiAndroid");
+    khiNhanNutLui("nutLuiAndroid"),
+    nhanDuocTep("nhanDuocTep"),
+    /// URL sách
+    urlSach("urlSach")
+;
 
 }
 
@@ -107,7 +114,7 @@ class HeThongMay(kenh: MethodChannel, main: MainActivity): MethodCallHandler {
     /// Kênh kết nối
     private val kenhKetNoi: MethodChannel = kenh
     /// Màn hình chính
-    private val manHinhChinh: MainActivity
+    val manHinhChinh: MainActivity
     /// Hàng đợi các đối tượng trả kết quả cho flutter
     private val dsTraKetQua = mutableMapOf<Int, MethodChannel.Result>()
 
@@ -142,6 +149,9 @@ class HeThongMay(kenh: MethodChannel, main: MainActivity): MethodCallHandler {
 
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
         when (TenHamTuFlutter.taoTuTenTho(call.method)) {
+            TenHamTuFlutter.batDau -> {
+                batDau(call, result)
+            }
             TenHamTuFlutter.quetMaISBN -> {
                 val ma = themHangDoiTraKetQua(result)
                 manHinhChinh.hienThiManHinhCamera(KieuQuetMaCamera.isbn, ma)
@@ -165,7 +175,19 @@ class HeThongMay(kenh: MethodChannel, main: MainActivity): MethodCallHandler {
             TenHamTuFlutter.chonTep -> {
                 chonTep(call, result)
             }
+            TenHamTuFlutter.timKiemAnh -> {
+                timKiemAnh(call, result)
+            }
             null -> result.error("1", "Hàm không xác định", call.method)
+        }
+    }
+
+    private fun batDau(call: MethodCall, result: MethodChannel.Result) {
+        val dsThuMuc: Map<String, String>? = call.arguments<Map<String, String>>()
+        if (dsThuMuc != null) {
+            result.success(BoQuanLyThuMuc.batDau(dsThuMuc))
+        } else {
+            result.error("batDau_1", "Tham số không đúng", call.method)
         }
     }
 
@@ -178,22 +200,6 @@ class HeThongMay(kenh: MethodChannel, main: MainActivity): MethodCallHandler {
             }
         }
         kenhKetNoi.invokeMethod(TenHamDenFlutter.kiemTraISBN.value, giaTri, callback)
-    }
-    
-    fun coDanAnh(dauVao: Bitmap, gioiHan: Int): Bitmap? {
-        val chieuRong: Int
-        val chieuCao: Int
-        if (dauVao.height > dauVao.width) {
-            chieuRong = gioiHan * dauVao.width / dauVao.height
-            chieuCao = gioiHan
-        } else {
-            chieuRong = gioiHan
-            chieuCao = gioiHan * dauVao.height / dauVao.width
-        }
-        try {
-            return Bitmap.createScaledBitmap(dauVao, chieuRong, chieuCao, false)
-        } catch (err: Exception) {}
-        return null
     }
 
     /// Lưu ảnh sách (ảnh chính, ảnh thu nhỏ)
@@ -219,31 +225,23 @@ class HeThongMay(kenh: MethodChannel, main: MainActivity): MethodCallHandler {
         }
         var bitmapDeLuu = bitmap
         if (bitmap.width >= gioiHan || bitmap.height >= gioiHan) {
-            bitmapDeLuu = coDanAnh(bitmap, gioiHan) ?: bitmap
+            bitmapDeLuu = BoXuLyAnh.coDanAnh(bitmap, gioiHan) ?: bitmap
         }
         // Lưu vào CSDL dưới dạng JPEG
-        try {
-            val outStream = FileOutputStream(File(anhSach))
-            bitmapDeLuu!!.compress(Bitmap.CompressFormat.JPEG, chatLuong, outStream)
-            outStream.flush()
-            outStream.close()
-        } catch (err: Exception) {
+        val kqLuuAnh = BoXuLyAnh.luuAnhJpeg(bitmapDeLuu, File(anhSach), chatLuong)
+        if (kqLuuAnh != null) {
             result.error("luuAnhSach_3", "Không tạo được JPEG data", anhGoc)
             return
         }
         // Tạo ảnh thu nhỏ
-        val bitmapTn: Bitmap? = coDanAnh(bitmap, chieuCao)
+        val bitmapTn: Bitmap? = BoXuLyAnh.coDanAnh(bitmap, chieuCao)
         if (bitmapTn == null) {
             result.error("luuAnhSach_5", "Không vẽ được ảnh thu nhỏ", anhThuNho)
             return
         }
         // Lưu ảnh JPEG thu nhỏ
-        try {
-            val outStream = FileOutputStream(File(anhThuNho))
-            bitmapTn!!.compress(Bitmap.CompressFormat.JPEG, chatLuong, outStream)
-            outStream.flush()
-            outStream.close()
-        } catch (err: Exception) {
+        val kqLuuAnhTn = BoXuLyAnh.luuAnhJpeg(bitmapTn, File(anhThuNho), chatLuong)
+        if (kqLuuAnhTn != null) {
             result.error("luuAnhSach_6", "Không tạo được JPEG data ảnh thu nhỏ", anhGoc)
             return
         }
@@ -264,38 +262,90 @@ class HeThongMay(kenh: MethodChannel, main: MainActivity): MethodCallHandler {
         kenhKetNoi.invokeMethod(TenHamDenFlutter.khiNhanNutLui.value, null, callback)
     }
 
-//    private fun taoTepAnhTam(duongDan: String): Uri {
-//        var ten = "1.JPG"
-//        var stt = 1
-//        return Uri("")
-//    }
-
     /// Chọn ảnh
     private fun chonAnh(call: MethodCall, result: MethodChannel.Result) {
-        val duongDan = call.argument<String>("duong_dan")
         val kieu = call.argument<Int>("kieu")
-        if (duongDan == null || kieu == null) {
+        if (kieu == null) {
             result.error("chonAnh_1", "Tham số không đúng", call.method)
             return
         }
         when (kieu) {
             KieuMedia.khoAnh.value -> {
-                manHinhChinh.moChonAnh()
+                manHinhChinh.moChonAnh({ anh, quyen ->
+                    khiChupChonXongAnh(anh, quyen, result)
+                })
             }
             KieuMedia.camera.value -> {
-                manHinhChinh.moCameraChupAnh()
+                manHinhChinh.moCameraChupAnh({ anh, quyen ->
+                    khiChupChonXongAnh(anh, quyen, result)
+                })
             }
+        }
+    }
+
+    private fun khiChupChonXongAnh(anh: Bitmap?, quyen: Boolean, phanHoi: MethodChannel.Result) {
+        manHinhChinh.quanLyAnh.khiChupChonXongAnh = null
+        if (anh != null) {
+            BoQuanLyThuMuc.donSachThuMuc(BoQuanLyThuMuc.thuMucMayAnh)
+            val tep = File(BoQuanLyThuMuc.thuMucMayAnh, "anh_chup.JPG")
+            val kqLuuAnh = BoXuLyAnh.luuAnhJpeg(anh,tep)
+            if (kqLuuAnh == null) {
+                phanHoi.success(tep.path)
+            } else {
+                phanHoi.error("chonAnh_2", "Không lưu được tệp", kqLuuAnh)
+            }
+        } else if (!quyen) {
+            phanHoi.error("2", "No camera", "")
+        } else {
+            phanHoi.success(null)
         }
     }
 
     /// Dán
     private fun dan(call: MethodCall, result: MethodChannel.Result) {
-        result.error("1", "Hàm không xác định", call.method)
+        val loc = call.argument<List<Int>>("loc")
+        if (loc != null) {
+            // TODO: hiện tại chỉ xử lý ảnh
+            BoXuLyDuLieuTrungGian.danAnh { dsKq ->
+                result.success(dsKq)
+            }
+        } else {
+            result.error("dan_1", "Tham số không phù hợp", call.method)
+        }
     }
 
     /// Chọn tệp
     private fun chonTep(call: MethodCall, result: MethodChannel.Result) {
         result.error("1", "Hàm không xác định", call.method)
+    }
+
+    fun khiNhanDuocAnhChiaSe() {
+        kenhKetNoi.invokeMethod(TenHamDenFlutter.nhanDuocTep.value, null)
+    }
+
+    private fun timKiemAnh(call: MethodCall, result: MethodChannel.Result) {
+        val tuKhoa = call.argument<String>("tu_khoa")
+        if (tuKhoa == null) {
+            result.error("timKiemAnh_1", "Tham số không đúng", call.method)
+            return
+        }
+        if (!BoTimKiemAnh.batDau(tuKhoa,{ dsKq ->
+//            Log.d("TIM ANH", "XONG $dsKq")
+            result.success(dsKq)
+        })) {
+            result.success(null)
+        }
+    }
+
+    fun danhDauUrlSach(vanBan: String): Boolean {
+        try {
+            val uri = vanBan.toUri()
+            if (uri.scheme == "http" || uri.scheme == "https") {
+                kenhKetNoi.invokeMethod(TenHamDenFlutter.urlSach.value, uri.toString())
+                return true
+            }
+        } catch (err: Exception) { }
+        return false
     }
 
 }

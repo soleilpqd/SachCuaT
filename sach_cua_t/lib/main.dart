@@ -16,7 +16,6 @@
   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:man_hinh_ung_dung/luong_man_hinh.dart';
 import 'package:man_hinh_ung_dung/man_hinh_ung_dung.dart';
@@ -27,6 +26,7 @@ import 'package:sach_cua_t/man_hinh/man_hinh_mo_dau.dart';
 import 'package:sach_cua_t/man_hinh/man_hinh_sach.dart';
 import 'package:sach_cua_t/models/database.dart';
 import 'package:sach_cua_t/models/du_lieu_tam.dart';
+import 'package:sach_cua_t/models/native.dart';
 import 'package:sach_cua_t/models/xu_ly_nut_lui_android.dart';
 
 void main() {
@@ -43,8 +43,24 @@ class MainApp extends StatelessWidget {
   }
 
   void _khoiTaoCacDichVu() async {
-    await CoSoDuLieu().khoiDau();
-    await DuLieuTam().khoiDau();
+    WidgetsFlutterBinding.ensureInitialized();
+    Map<String, String> dsThuMuc = {};
+    final csdl = CoSoDuLieu();
+    final dlTam = DuLieuTam();
+    dsThuMuc.addAll(dlTam.dsThuMuc());
+    dsThuMuc.addAll(csdl.dsThuMuc());
+    dsThuMuc = await HeThongMay.duyNhat.batDau(dsThuMuc) ?? {};
+    String mieuTa = "";
+    dsThuMuc.forEach((key, value) => mieuTa += "$key: $value\n");
+    print("DS THU MUC: $mieuTa");
+    final bool kqKhoiTaoCSDL = await csdl.khoiDau(dsThuMuc);
+    if (!kqKhoiTaoCSDL) {
+      throw Exception("Không khởi tạo được CSDL");
+    }
+    final bool kqKhoiTaoTam = dlTam.khoiDau(dsThuMuc);
+    if (!kqKhoiTaoTam) {
+      throw Exception("Không khởi tạo được dữ liệu tạm");
+    }
     _khoiTaoHeThongManHinh();
   }
 
@@ -81,13 +97,13 @@ class MainApp extends StatelessWidget {
 
   static bool? xuLyNutLuiAndroid() => _xuLyNutLuiAndroidLuongManHinh(luongMHGoc);
 
-  static void xuLyTepDuocChiaSe(Iterable<File> dsTep) {
+  static void xuLyTepDuocChiaSe() {
     final DieuKhienManHinh? manHinhCuoi = luongMHGoc.manHinhHienTai;
     if (manHinhCuoi != null && manHinhCuoi == luongMHGoc.danhSachManHinh.first) {
       final LuongManHinh luongChinh = manHinhCuoi as LuongManHinh;
       final DieuKhienManHinh? manHinhChinhCuoi = luongChinh.manHinhHienTai;
       if (manHinhChinhCuoi != null && manHinhChinhCuoi is DieuKhienManHinhSach) {
-        manHinhChinhCuoi.xuLyTepDuocChiaSe(dsTep);
+        manHinhChinhCuoi.xuLyTepDuocChiaSe();
       }
     }
   }

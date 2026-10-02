@@ -77,10 +77,12 @@ class ManHinhCamera : AppCompatActivity() {
     private lateinit var barcodeScanner: BarcodeScanner
     /// Mã để trả lại kết quả cho flutter (thông qua `HeThongMay`)
     private var maKetQua: Int = 0
+    private lateinit var quanLyMayAnh: BoXuLyChonAnh
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        quanLyMayAnh = BoXuLyChonAnh(this, 1)
         kieuQuet = KieuQuetMaCamera.taoTuGiaTriTho(intent.getIntExtra("mode", 0)) ?: KieuQuetMaCamera.isbn
         maKetQua = intent.getIntExtra("response", 0)
         binding = ActivityManHinhCameraBinding.inflate(layoutInflater)
@@ -107,8 +109,8 @@ class ManHinhCamera : AppCompatActivity() {
         nutDong = binding.nutDong
         nutDong.setOnTouchListener(khiNhanNutDong)
 
-        if (!kiemTraQuyenSuDungMayAnh()) {
-            yeuCauQuyenSuDungMayAnh()
+        if (!quanLyMayAnh.kiemTraQuyenSuDungMayAnh()) {
+            quanLyMayAnh.yeuCauQuyenSuDungMayAnh()
         } else {
             cauHinhMayAnh()
         }
@@ -189,16 +191,6 @@ class ManHinhCamera : AppCompatActivity() {
         }, ContextCompat.getMainExecutor(this))
     }
 
-    /// Kiểm tra quyền sử dụng máy ảnh
-    private fun kiemTraQuyenSuDungMayAnh(): Boolean {
-        return ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
-    }
-
-    /// Yêu cầu quyền sử dụng máy ảnh
-    private fun yeuCauQuyenSuDungMayAnh() {
-        ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA), 1)
-    }
-
     /// Hàm xử lý kết quả yêu cầu quyền
     override fun onRequestPermissionsResult(
         requestCode: Int,
@@ -206,10 +198,10 @@ class ManHinhCamera : AppCompatActivity() {
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode != 1) {
+        if (requestCode != quanLyMayAnh.maYeuCauQuyenTruyCapMayAnh) {
             return
         }
-        if (kiemTraQuyenSuDungMayAnh()) {
+        if (quanLyMayAnh.kiemTraQuyenSuDungMayAnh()) {
             cauHinhMayAnh()
         } else {
             khiKhongCoMayAnh()

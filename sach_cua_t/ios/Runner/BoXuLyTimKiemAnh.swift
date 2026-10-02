@@ -19,6 +19,41 @@
 import Foundation
 import SafariServices
 
+struct ThongTinWebsite: Decodable {
+    let url: String
+    let thamSo: [String: String]?
+
+    private enum CodingKeys: String, CodingKey {
+        case url
+        case thamSo = "tham_so"
+    }
+
+    func xayDungURL(_ tuKhoa: String) -> URL? {
+        let choCanDien = "%TK%"
+        var urlGoc = url
+        if urlGoc.contains(choCanDien) {
+            urlGoc = urlGoc.replacingOccurrences(
+                of: choCanDien,
+                with: (tuKhoa as NSString).addingPercentEncoding(withAllowedCharacters: CharacterSet()) ?? ""
+            )
+        }
+        guard var xayUrl = URLComponents(string: urlGoc) else { return nil }
+        var thamSoUrl = [URLQueryItem]()
+        for (ten, giaTri) in thamSo ?? [:] {
+            var gt = giaTri
+            if gt.contains(choCanDien) {
+                gt = gt.replacingOccurrences(
+                    of: choCanDien,
+                    with: tuKhoa
+                )
+            }
+            thamSoUrl.append(URLQueryItem(name: ten, value: gt))
+        }
+        xayUrl.queryItems = thamSoUrl
+        return xayUrl.url
+    }
+}
+
 /// Xử lý màn hình SFSafariViewController tại GG Search Images.
 /// Sử dụng timer để tự động phát hiện khi người dùng sao chép ảnh/url ảnh từ trên trang web.
 /// Sau đó tiến hành dán (bằng BoXuLyDuLieuTrungGian).
@@ -35,15 +70,65 @@ final class BoXuLyTimKiemAnh: NSObject {
     private weak var safari: SFSafariViewController?
     private var timer: Timer?
     private var tuKhoa = ""
-    private var mienHienTai = BoChuyenDoiTrangWeb.Web.ggImg
+    private weak var mienHienTai: BoChuyenDoiTrangWeb?
+    private var dsChuyenDoiWebsites = [BoChuyenDoiTrangWeb]()
+
+    @discardableResult
+    private func napDsChuyenDoiWebsites(_ duongDan: URL) -> Bool {
+        guard FileManager.default.fileExists(atPath: duongDan.path),
+              let jsonData = try? Data(contentsOf: duongDan),
+              let thongTin = try? JSONDecoder().decode([ThongTinWebsite].self, from: jsonData)
+        else {
+            return false
+        }
+        for muc in thongTin {
+            let boChuyenDoi = BoChuyenDoiTrangWeb(thongTin: muc)
+            boChuyenDoi.boTimKiem = self
+            dsChuyenDoiWebsites.append(boChuyenDoi)
+        }
+        return dsChuyenDoiWebsites.count > 1
+    }
+
+    override init() {
+        super.init()
+        dsChuyenDoiWebsites.append(BoChuyenDoiTrangWeb(thongTin: nil)) // Đánh dấu URL sách
+        dsChuyenDoiWebsites.first?.boTimKiem = self
+    }
+
+    private func napDsWebsitesTimAnh() {
+        guard dsChuyenDoiWebsites.count <= 1 else { return }
+
+        // Đọc từ Flutter assets
+        let tenTepDlWebsites = "websites.json"
+        let duongDanDoc = BoQuanLyThuMuc.duyNhat.thuMucCSDL.appendingPathComponent(tenTepDlWebsites)
+        napDsChuyenDoiWebsites(duongDanDoc)
+
+        if dsChuyenDoiWebsites.count <= 1,
+           //           let flutterBundleUrl = Bundle.main.url(
+           //            forResource: "App",
+            //            withExtension: "framework",
+            //            subdirectory: "Frameworks"
+            //           ),
+            //           let flutterBundle = Bundle(url: flutterBundleUrl),
+            //           let websitesJsonUrl = flutterBundle.url(
+            //            forResource: tenTepDlWebsites,
+            //            withExtension: duoiTepDLWebsites,
+            //            subdirectory: "flutter_assets/assets"
+            //           ) {
+           let duongDanFlutter = AppDelegate.app.rootViewController?.lookupKey(forAsset: "assets/\(tenTepDlWebsites)"),
+           let websitesJsonUrl = Bundle.main.url(forResource: duongDanFlutter, withExtension: nil) {
+            napDsChuyenDoiWebsites(websitesJsonUrl)
+        }
+    }
 
     /// Bắt đầu
     func batDau(tuKhoa: String, xong: @escaping () -> Void, dan: @escaping (@escaping (Bool) -> Void) -> Void) -> Bool {
-        mienHienTai = .ggImg
         khiXong = xong
         khiDan = dan
         self.tuKhoa = tuKhoa
-        if khoiDongSafari(.ggImg) {
+        napDsWebsitesTimAnh()
+        if dsChuyenDoiWebsites.count > 1, khoiDongSafari(dsChuyenDoiWebsites[1].cauHinh!) {
+            mienHienTai = dsChuyenDoiWebsites[1]
             batDauTimerTuDongDan()
             return true
         }
@@ -94,8 +179,8 @@ final class BoXuLyTimKiemAnh: NSObject {
         return boDL.hasURLs || boDL.hasImages
     }
 
-    private func khoiDongSafari(_ kieu: BoChuyenDoiTrangWeb.Web) -> Bool {
-        guard let url = kieu.xayDungUrl(tuKhoa), let rootController = AppDelegate.app.rootViewController
+    private func khoiDongSafari(_ thongTin: ThongTinWebsite) -> Bool {
+        guard let url = thongTin.xayDungURL(tuKhoa), let rootController = AppDelegate.app.rootViewController
         else { return false }
         let hoatHinh = safari == nil
         safari?.dismiss(animated: hoatHinh)
@@ -108,12 +193,12 @@ final class BoXuLyTimKiemAnh: NSObject {
     }
 
     fileprivate func khiChonActivity(_ sender: BoChuyenDoiTrangWeb) {
-        if sender.web == .danhDau {
-            HeThongMay.duyNhat.danhDauUrlSach(sender.url)
-            return
+        if let thongTin = sender.cauHinh {
+            mienHienTai = sender
+            _ = khoiDongSafari(thongTin)
+        } else if let url = sender.url {
+            HeThongMay.duyNhat.danhDauUrlSach(url)
         }
-        mienHienTai = sender.web
-        _ = khoiDongSafari(sender.web)
         sender.activityDidFinish(true)
     }
 
@@ -132,206 +217,37 @@ extension BoXuLyTimKiemAnh: SFSafariViewControllerDelegate {
     }
 
     func safariViewController(_ controller: SFSafariViewController, activityItemsFor URL: URL, title: String?) -> [UIActivity] {
-        let tatCa = BoChuyenDoiTrangWeb.Web.tatCa
         var ketQua = [BoChuyenDoiTrangWeb]()
-        for muc in tatCa where muc != mienHienTai {
-            let boChuyenDoi = BoChuyenDoiTrangWeb(mien: muc, link: URL)
-            boChuyenDoi.boTimKiem = self
-            ketQua.append(boChuyenDoi)
+        for muc in dsChuyenDoiWebsites where muc != mienHienTai {
+            muc.url = URL
+            ketQua.append(muc)
         }
         return ketQua
     }
 
 }
 
-
 class BoChuyenDoiTrangWeb: UIActivity {
 
-    enum Web {
-        case danhDau
-        case ggImg
-        case kimDong
-        case nhaNam
-        case tre
-        case thaiHa
-        case azvn
-        case phuNu
-        case sky
-        case one980
-        case taoDan
-        case shopee
-        case tiki
-        case dongA
-        case danTri
-        case phucMinh
-        case sbooks
-        case dhsp
-        case dinhTi
-        case triViet
-        case alpha
-        case comicola
-        case ipm
-        case sanHo
-        case linhLan
+    let cauHinh: ThongTinWebsite?
+    weak var boTimKiem: BoXuLyTimKiemAnh?
+    var url: URL?
 
-        static var tatCa: [Web] {[
-            .danhDau,
-            .ggImg,
-            .kimDong,
-            .nhaNam,
-            .tre,
-            .thaiHa,
-            .azvn,
-            .phuNu,
-            .sky,
-            .one980,
-            .taoDan,
-            .shopee,
-            .tiki,
-            .dongA,
-            .danTri,
-            .phucMinh,
-            .sbooks,
-            .dhsp,
-            .dinhTi,
-            .triViet,
-            .alpha,
-            .comicola,
-            .ipm,
-            .sanHo,
-            .linhLan
-        ]}
-
-        var tieuDe: String {
-            switch self {
-            case .danhDau:
-                return "📌 URL"
-            default:
-                return URL(string: duongDanGoc)?.host ?? "\(self)"
-            }
-        }
-
-        var duongDanGoc: String {
-            switch self {
-            case .danhDau:
-                return ""
-            case .ggImg:
-                return "https://www.google.com/search"
-            case .kimDong:
-                return "https://nxbkimdong.com.vn/search"
-            case .nhaNam:
-                return "https://nhanam.vn/search"
-            case .tre:
-                return "https://www.nxbtre.com.vn/tim-kiem"
-            case .thaiHa:
-                return "https://thaihabooks.com/search"
-            case .azvn:
-                return "https://azvietnam.vn/search"
-            case .phuNu:
-                return "https://sach.nxbphunu.com.vn/ket-qua-tim-kiem"
-            case .sky:
-                return "https://skybooks.vn/search"
-            case .one980:
-                return "https://1980books.com/search"
-            case .taoDan:
-                return "https://sachtaodan.vn/search"
-            case .shopee:
-                return "https://shopee.vn/search"
-            case .tiki:
-                return "https://tiki.vn/search"
-            case .dongA:
-                return "https://sachdonga.vn/search"
-            case .danTri:
-                return "https://nxbdantri.com.vn/"
-            case .phucMinh:
-                return "https://www.phucminhbooks.vn/search"
-            case .sbooks:
-                return "https://sbooks.vn/"
-            case .dhsp:
-                return "https://nxbdhsp.edu.vn/san-pham"
-            case .dinhTi:
-                return "https://dinhtibooks.com.vn/search/"
-            case .triViet:
-                return "https://www.trithucvietbook.com/search"
-            case .alpha:
-                return "https://www.alphabooks.vn/search"
-            case .comicola:
-                return "https://shop.comicola.com/"
-            case .ipm:
-                return "https://ipm.vn/search"
-            case .sanHo:
-                return "https://sanhobooks.com/"
-            case .linhLan:
-                return "https://linhlanbooks.vn/search"
-            }
-        }
-
-        private func xayDungDanhSachThamSo(_ tuKhoa: String) -> [URLQueryItem] {
-            switch self {
-            case .ggImg:
-                return [
-                    URLQueryItem(name: "q", value: "filetype:jpg \(tuKhoa)"),
-                    URLQueryItem(name: "udm", value: "2")
-                ]
-            case .kimDong, .nhaNam, .triViet, .alpha, .sky, .taoDan:
-                return [URLQueryItem(name: "query", value: tuKhoa)]
-            case .tre, .dongA, .thaiHa, .phucMinh, .azvn, .ipm, .one980, .linhLan:
-                return [URLQueryItem(name: "q", value: tuKhoa)]
-            case .phuNu:
-                return [URLQueryItem(name: "keyword", value: tuKhoa)]
-            case .shopee:
-                return [URLQueryItem(name: "keyword", value: "sách \(tuKhoa)")]
-            case .tiki:
-                return [URLQueryItem(name: "q", value: "sách \(tuKhoa)")]
-            case .danTri, .comicola:
-                return [URLQueryItem(name: "s", value: tuKhoa)]
-            case .sbooks, .sanHo:
-                return [
-                    URLQueryItem(name: "s", value: tuKhoa),
-                    URLQueryItem(name: "post_type", value: "product")
-                ]
-            case .dhsp:
-                return [
-                    URLQueryItem(name: "searchContent", value: tuKhoa),
-                    URLQueryItem(name: "page", value: "1"),
-                    URLQueryItem(name: "objectType", value: "0,1,"),
-                    URLQueryItem(name: "rating", value: "1"),
-                    URLQueryItem(name: "priceFrom", value: ""),
-                    URLQueryItem(name: "priceTo", value: ""),
-                    URLQueryItem(name: "displaySelectionId", value: ""),
-                    URLQueryItem(name: "isHighest", value: "false"),
-                    URLQueryItem(name: "isLowest", value: "false")
-                ]
-            case .danhDau, .dinhTi:
-                return []
-            }
-        }
-
-        func xayDungUrl(_ tuKhoa: String) -> URL? {
-            if var urlBuilder = URLComponents(string: duongDanGoc) {
-                urlBuilder.queryItems = xayDungDanhSachThamSo(tuKhoa)
-                let url = urlBuilder.url
-                if self == .dinhTi {
-                    return url?.appendingPathComponent("\(tuKhoa).html")
-                }
-                return url
-            }
-            return nil
-        }
-
+    init(thongTin: ThongTinWebsite?) {
+        cauHinh = thongTin
+        super.init()
     }
 
-    weak var boTimKiem: BoXuLyTimKiemAnh?
-
-    override var activityTitle: String? { web.tieuDe }
-
-    let web: Web
-    let url: URL
-
-    init(mien: Web, link: URL) {
-        web = mien
-        url = link
-        super.init()
+    override var activityTitle: String? {
+        if let thongTin = cauHinh {
+            let choCanDien = "%TK%"
+            var url = thongTin.url
+            if url.contains(choCanDien) {
+                url = url.replacingOccurrences(of: choCanDien, with: "index")
+            }
+            return URL(string: url)?.host ?? thongTin.url
+        }
+        return "📌 URL"
     }
 
     override func canPerform(withActivityItems activityItems: [Any]) -> Bool {

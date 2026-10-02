@@ -17,8 +17,6 @@
  */
 
 import 'dart:io';
-import 'package:path/path.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:sach_cua_t/utils/common.dart';
 
 /// Dữ liệu tạm
@@ -29,34 +27,46 @@ class DuLieuTam {
   static final DuLieuTam _duyNhat = DuLieuTam._internal();
   factory DuLieuTam() { return _duyNhat; }
 
-  final String _tenChiaSe = "chia_se";
-  final String _tenDan = "dan";
+  Map<String, String> dsThuMuc() => {
+    "chiaSe": "sct://tam.sach/chia_se",
+    "dan": "sct://tam.sach/dan",
+    "mayAnh": "sct://tam.sach/may_anh"
+  };
 
-  Future<Directory> duongDanTam() async => await getTemporaryDirectory();
+  String _thuMucChiaSe = "";
+  String _thuMucDan = "";
+  String _thuMucMayAnh = "";
 
   /// Khởi đầu
-  Future<void> khoiDau() async {
-    final Directory duongDanTam = await getTemporaryDirectory();
-    print("TAM: ${duongDanTam.path}");
+  bool khoiDau(Map<String, String> dsThuMuc) {
+    String? giaTri = dsThuMuc["dan"];
+    if (giaTri == null) {
+      return false;
+    }
+    _thuMucDan = giaTri;
+
+    giaTri = dsThuMuc["chiaSe"];
+    if (giaTri == null) {
+      return false;
+    }
+    _thuMucChiaSe = giaTri;
+
+    giaTri = dsThuMuc["mayAnh"];
+    if (giaTri == null) {
+      return false;
+    }
+    _thuMucMayAnh = giaTri;
+    return true;
   }
 
   Future<int> doKhoiLuongTam() async {
-    final Directory duongDanTam = await getTemporaryDirectory();
-    return LinhTinh.doKhoiLuongThuMuc(duongDanTam.path);
+    return (await LinhTinh.doKhoiLuongThuMuc(_thuMucDan)) +
+      (await LinhTinh.doKhoiLuongThuMuc(_thuMucChiaSe)) +
+      (await LinhTinh.doKhoiLuongThuMuc(_thuMucMayAnh));
   }
 
-  Future<Directory> _duongDanThuMucTam(bool canTao, String ten) async {
-    final Directory duongDanTam = await getTemporaryDirectory();
-    final String duongDan = join(duongDanTam.path, ten);
-    Directory ketQua = Directory(duongDan);
-    if (canTao && !await ketQua.exists()) {
-      ketQua = await ketQua.create();
-    }
-    return ketQua;
-  }
-
-  Future<Iterable<String>> _layDsCacTepTrongThuMucTam(String ten) async {
-    final Directory thuMucChua = await _duongDanThuMucTam(false, ten);
+  Future<Iterable<String>> _layDsCacTepTrongThuMucTam(String duongDan) async {
+    final Directory thuMucChua = Directory(duongDan);
     List<String> ketQua = [];
     if (await thuMucChua.exists()) {
       await for (final FileSystemEntity muc in thuMucChua.list()) {
@@ -66,8 +76,8 @@ class DuLieuTam {
     return ketQua;
   }
 
-  Future<void> _xoaCacTepTam(String tenThuMuc) async {
-    final Directory thuMucChua = await _duongDanThuMucTam(false, tenThuMuc);
+  Future<void> _xoaCacTepTam(String duongDan) async {
+    final Directory thuMucChua = Directory(duongDan);
     if (await thuMucChua.exists()) {
       await for (final FileSystemEntity muc in thuMucChua.list()) {
         try {
@@ -78,48 +88,42 @@ class DuLieuTam {
   }
 
   /// Lấy đường dẫn thư mục chứa các tệp được dán từ pasteboard
-  Future<Directory> duongDanThuMucDan() async => _duongDanThuMucTam(true, _tenDan);
-
-  /// Xoá các tệp được dán
-  Future<void> xoaCacTepDan() async => _xoaCacTepTam(_tenDan);
-
-  /// Xoá các tệp được chia sẻ
-  Future<void> xoaTepDuocChiaSe() async => _xoaCacTepTam(_tenChiaSe);
-
-  /// Nhập các tệp vào thư mục được chia sẻ
-  Future<Iterable<File>> nhapTepDuocChiaSe(Iterable<String> dsDuongDan) async {
-    xoaTepDuocChiaSe();
-    final Directory thuMucChua = await _duongDanThuMucTam(true, _tenChiaSe);
-    List<File> ketQua = [];
-    for (String duongDan in dsDuongDan) {
-      final File nguon = File(duongDan);
-      if (nguon.existsSync()) {
-        final String dich = join(thuMucChua.path, basename(duongDan));
-        final File kqDich = await nguon.copy(dich);
-        ketQua.add(kqDich);
-        try {
-          nguon.delete();
-        } catch (_) {}
-      }
-    }
-    return ketQua;
-  }
-
+  Directory duongDanThuMucDan() => Directory(_thuMucDan);
   /// Lấy danh sách các tệp được dán
-  Future<Iterable<String>> layDsCacTepDuocDan() async => _layDsCacTepTrongThuMucTam(_tenDan);
-  /// Lấy danh sách các tệp được chia sẻ
-  Future<Iterable<String>> layDsCacTepDuocChiaSe() async => _layDsCacTepTrongThuMucTam(_tenChiaSe);
+  Future<Iterable<String>> layDsCacTepDuocDan() async => _layDsCacTepTrongThuMucTam(_thuMucDan);
+  /// Xoá các tệp được dán
+  Future<void> xoaCacTepDan() async => _xoaCacTepTam(_thuMucDan);
 
-  Future<void> xoaTepTam(String duongDan) async {
-    final Directory thuMucChiaSe = await _duongDanThuMucTam(true, _tenChiaSe);
-    final Directory thuMucDan = await _duongDanThuMucTam(true, _tenDan);
-    final File target = File(duongDan);
-    if ((duongDan.startsWith(thuMucChiaSe.path) || duongDan.startsWith(thuMucDan.path)) && target.existsSync()) {
-      try {
-        await target.delete();
-      } catch (_) {}
-    }
+  /// Lấy đường dẫn thư mục chứa các tệp được dán từ pasteboard
+  Directory duongDanThuMucChiaSe() => Directory(_thuMucChiaSe);
+  /// Xoá các tệp được chia sẻ
+  Future<void> xoaTepDuocChiaSe() async => _xoaCacTepTam(_thuMucChiaSe);
+  /// Lấy danh sách các tệp được chia sẻ
+  Future<Iterable<String>> layDsCacTepDuocChiaSe() async => _layDsCacTepTrongThuMucTam(_thuMucChiaSe);
+
+  /// Lấy đường dẫn thư mục chứa các tệp ảnh từ máy ảnh hoặc thư viện
+  Directory duongDanThuMucMayAnh() => Directory(_thuMucMayAnh);
+  /// Lấy danh sách các tệp ảnh từ máy ảnh hoặc thư viện
+  Future<Iterable<String>> layDsCacTepMayAnh() async => _layDsCacTepTrongThuMucTam(_thuMucMayAnh);
+  /// Xoá các tệp ảnh từ máy ảnh hoặc thư viện
+  Future<void> xoaCacTepMayAnh() async => _xoaCacTepTam(_thuMucMayAnh);
+
+  void xoaTatCa() {
+    xoaCacTepMayAnh();
+    xoaCacTepDan();
+    xoaTepDuocChiaSe();
   }
+
+  // Future<void> xoaTepTam(String duongDan) async {
+  //   final Directory thuMucChiaSe = await _duongDanThuMucTam(true, _tenChiaSe);
+  //   final Directory thuMucDan = await _duongDanThuMucTam(true, _tenDan);
+  //   final File target = File(duongDan);
+  //   if ((duongDan.startsWith(thuMucChiaSe.path) || duongDan.startsWith(thuMucDan.path)) && target.existsSync()) {
+  //     try {
+  //       await target.delete();
+  //     } catch (_) {}
+  //   }
+  // }
 
   // String suDungTepTam() {
 

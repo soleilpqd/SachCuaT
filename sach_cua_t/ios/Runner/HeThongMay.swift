@@ -25,6 +25,8 @@ final class HeThongMay {
 
     /// Tên hàm từ Flutter module
     enum TenHamTuFlutter: String {
+        /// Bắt đầu
+        case batDau
         /// Quét mã ISBN
         case quetMaISBN
         /// Lưu ảnh sách
@@ -100,6 +102,8 @@ final class HeThongMay {
             return
         }
         switch ham {
+        case .batDau:
+            batDau(call: call, result: result)
         case .quetMaISBN:
             if let rootController = AppDelegate.app.rootViewController,
                let manHinh = rootController.storyboard?.instantiateViewController(withIdentifier: "ManHinhCamera") as? ManHinhCamera {
@@ -125,6 +129,15 @@ final class HeThongMay {
         case .timKiemAnh:
             timKiemAnh(call: call, result: result)
         }
+    }
+
+    private func batDau(call: FlutterMethodCall, result: @escaping FlutterResult) {
+        guard let dsThuMuc = call.arguments as? [String: String]
+        else {
+            result(FlutterError(code: "batDau_1", message: "Tham số không đúng", details: call.method))
+            return
+        }
+        result(BoQuanLyThuMuc.duyNhat.batDau(dsThuMuc))
     }
 
     /// Kiểm tra ISBN (hàm native -> Flutter)
@@ -163,7 +176,8 @@ final class HeThongMay {
               let gioiHan = args["gioi_han"] as? Int,
               let anhThuNho = args["thunho"] as? String,
               let chieuCao = args["cao"] as? Int,
-              let chatLuong = args["chat_luong"] as? Int
+              let chatLuong = args["chat_luong"] as? Int,
+              let chatLuongTn = args["chat_luong_tn"] as? Int
         else {
             result(FlutterError(code: "luuAnhSach_1", message: "Tham số không đúng", details: call.method))
             return
@@ -174,6 +188,7 @@ final class HeThongMay {
             return
         }
         let chatLuongAnh = CGFloat(chatLuong) / 100.0
+        let chatLuongAnhTn = CGFloat(chatLuongTn) / 100.0
         var anhLuu = imgGoc;
         let gioiHanF = CGFloat(gioiHan)
         if (anhLuu.size.height > gioiHanF || anhLuu.size.width > gioiHanF) {
@@ -195,7 +210,7 @@ final class HeThongMay {
             return
         }
         // Lưu JPEG thu nhỏ
-        guard let jpegTn = hinh.jpegData(compressionQuality: chatLuongAnh) else {
+        guard let jpegTn = hinh.jpegData(compressionQuality: chatLuongAnhTn) else {
             result(FlutterError(code: "luuAnhSach_6", message: "Không tạo được JPEG data ảnh nhỏ", details: anhThuNho))
             return
         }
@@ -211,26 +226,30 @@ final class HeThongMay {
     /// Chọn ảnh
     private func chonAnh(call: FlutterMethodCall, result: @escaping FlutterResult) {
         guard let args = call.arguments as?  [String: Any],
-              let duongDan = args["duong_dan"] as? String,
               let kieuTho = args["kieu"] as? Int,
               let kieu = KieuMedia(rawValue: kieuTho)
         else {
             result(FlutterError(code: "chonAnh_1", message: "Tham số không đúng", details: call.method))
             return
         }
-        let boXl = BoXuLyChonAnh(nguon: kieu, duongDan: duongDan, xlKetQua: result)
+        let boXl = BoXuLyChonAnh(
+            nguon: kieu,
+            xlKetQua: result
+        )
         boXl.batDau()
     }
 
     /// Từ AppDelegate
-    func nhanDuocTep(dsDuongDan: [String]) {
-        kenhKetNoi.invokeMethod(TenHamDenFlutter.nhanDuocTep.rawValue, arguments: dsDuongDan)
+    func nhanDuocTep(dsDuongDan: [URL]) {
+        let quanLy = BoQuanLyThuMuc.duyNhat
+        quanLy.donSachThuMuc(quanLy.thuMucChiaSe)
+        quanLy.saoChep(nguon: dsDuongDan, thuMucDich: quanLy.thuMucChiaSe)
+        kenhKetNoi.invokeMethod(TenHamDenFlutter.nhanDuocTep.rawValue, arguments: nil)
     }
 
     /// Dán
     private func dan(call: FlutterMethodCall, result: @escaping FlutterResult) {
         if let thamSo = call.arguments as? [String: Any],
-           let duongDanChua = thamSo["duong_dan"] as? String,
            let locTho = thamSo["loc"] as? [Int] {
             var loc = [KieuTep]()
             for muc in locTho {
@@ -238,7 +257,7 @@ final class HeThongMay {
                     loc.append(gt)
                 }
             }
-            BoXuLyDuLieuTrungGian.duyNhat.dan(duongDanLuu: duongDanChua, loc: loc) { dsDuongDan in
+            BoXuLyDuLieuTrungGian.duyNhat.dan(loc: loc) { dsDuongDan in
                 result(dsDuongDan)
             }
         } else {
@@ -249,15 +268,23 @@ final class HeThongMay {
     /// Chữa cháy: giảm kích thước ảnh
     private func chuanHoaAnh(call: FlutterMethodCall, result: @escaping FlutterResult) {
         guard let args = call.arguments as? [String: Any],
-              let thuMucChua = args["duong_dan"] as? String,
               let gioiHan = args["gioi_han"] as? Int,
-              let chatLuong = args["chat_luong"] as? Int
+              let gioiHanTn = args["gioi_han_tn"] as? Int,
+              let chatLuong = args["chat_luong"] as? Int,
+              let chatLuongTn = args["chat_luong_tn"] as? Int,
+              let chiTn = args["chi_tn"] as? Bool
         else {
             result(FlutterError(code: "chuanHoaAnh_1", message: "Tham số không đúng", details: call.method))
             return
         }
         if (chuanHoaAnh == nil) {
-            chuanHoaAnh = ChuanHoaAnh(thuMuc: thuMucChua, gioiHan: gioiHan, nen: chatLuong)
+            chuanHoaAnh = ChuanHoaAnh(
+                gioiHan: gioiHan,
+                gioiHanTn: gioiHanTn,
+                nen: chatLuong,
+                nenTn: chatLuongTn,
+                chiTn: chiTn
+            )
             chuanHoaAnh?.batDau()
         }
         result(nil)
@@ -278,7 +305,6 @@ final class HeThongMay {
     /// Tìm kiếm ảnh bằng GG Images thông qua Safari
     private func timKiemAnh(call: FlutterMethodCall, result: @escaping FlutterResult) {
         guard let args = call.arguments as? [String: Any],
-              let thuMucChua = args["duong_dan"] as? String,
               let tuKhoa = args["tu_khoa"] as? String
         else {
             result(FlutterError(code: "timKiemAnh_1", message: "Tham số không đúng", details: call.method))
@@ -290,7 +316,7 @@ final class HeThongMay {
                 result(nil)
             }, dan: {[weak self] (khiDanXong) in // Khi có kết quả dán
 //                ConsoleLog.shared.log("Khi dan")
-                BoXuLyDuLieuTrungGian.duyNhat.danAnh(duongDanLuu: thuMucChua) {[weak self] ketQua in
+                BoXuLyDuLieuTrungGian.duyNhat.danAnh() {[weak self] ketQua in
                     guard let mmSelf = self, !ketQua.isEmpty else {
                         khiDanXong(false)
                         return

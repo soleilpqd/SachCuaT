@@ -18,12 +18,9 @@
 
 // TODO: android: chuẩn hoá ảnh, chọn ảnh, chọn tệp
 
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:sach_cua_t/main.dart';
-import 'package:sach_cua_t/models/database.dart';
-import 'package:sach_cua_t/models/du_lieu_tam.dart';
 // import 'package:sach_cua_t/models/hienthinentang.dart';
 import 'package:sach_cua_t/utils/common.dart';
 
@@ -55,6 +52,8 @@ enum _MethodFromNative {
 }
 
 enum _MethodToNative {
+  /// Bắt đầu
+  batDau,
   /// Quét mã ISBN
   quetMaISBN,
   /// Lưu ảnh sách
@@ -76,6 +75,7 @@ enum _MethodToNative {
 
   String get value {
     return switch (this) {
+      _MethodToNative.batDau => "batDau",
       _MethodToNative.quetMaISBN => "quetMaISBN",
       _MethodToNative.luuAnhSach => "luuAnhSach",
       _MethodToNative.phienBan => "phienBan",
@@ -146,7 +146,7 @@ class HeThongMay {
         case _MethodFromNative.khiNhanNutLui:
           return _xuLyNutLuiAndroid();
         case _MethodFromNative.khiNhanDuocTep:
-          _xuLyKhiNhanDuocTep(call.arguments);
+          _xuLyKhiNhanDuocTep();
         // case _MethodFromNative.capNhatHienThi:
         //   _xuLyThongTinHienThi(call.arguments);
         //   _thongBaoCapNhatHienThi(call.arguments);
@@ -164,6 +164,10 @@ class HeThongMay {
   // final theoDoi = <TheoDoiHeThongMay>[];
   final ValueNotifier urlSach = ValueNotifier("");
   final TienTrinhChuanHoaAnh theoDoiTienTrinhChuanHoaAnh = TienTrinhChuanHoaAnh();
+
+  Future<Map<String, String>?> batDau(Map<String, String> dsTenThuMuc) async {
+    return _kenhKetNoi.invokeMapMethod(_MethodToNative.batDau.value, dsTenThuMuc);
+  }
 
   /// Flutter -> Native: Bật camera để quét mã ISBN
   Future<String?> quetMaISBN() async {
@@ -188,7 +192,8 @@ class HeThongMay {
     required String anhThuNho,
     int gioiHan = 2000,
     int chieuCao = 100,
-    int chatLuong = 20
+    int chatLuong = 20,
+    int chatLuongTn = 50
   }) async {
     return _kenhKetNoi.invokeMethod<bool>(
       _MethodToNative.luuAnhSach.value, {
@@ -197,7 +202,8 @@ class HeThongMay {
         "thunho": anhThuNho,
         "gioi_han": gioiHan,
         "cao": chieuCao,
-        "chat_luong": chatLuong
+        "chat_luong": chatLuong,
+        "chat_luong_tn": chatLuongTn
       });
   }
 
@@ -240,15 +246,12 @@ class HeThongMay {
   /// Chụp ảnh hoặc mở kho ảnh
   Future<String?> chonAnh(KieuMedia kieu) async {
     final Map<String, Object?> thamSo = {};
-    thamSo["duong_dan"] = (await DuLieuTam().duongDanTam()).path;
     thamSo["kieu"] = kieu.giaTri;
     return _kenhKetNoi.invokeMethod<String>(_MethodToNative.chonAnh.value, thamSo);
   }
 
   Future<List<String>?> dan(List<KieuTep> loc) async {
-    final Directory duongDanTam = await DuLieuTam().duongDanThuMucDan();
     final Map<String, Object?> thamSo = {};
-    thamSo["duong_dan"] = duongDanTam.path;
     thamSo["loc"] = loc.map((muc) => muc.index).toList();
     final List<Object?>? ketQua = await _kenhKetNoi.invokeMethod(_MethodToNative.dan.value, thamSo) as List<Object?>?;
     final List<String>? dsDuongDan = ketQua?.cast<String>();
@@ -256,11 +259,8 @@ class HeThongMay {
     return Future.value(dsDuongDan);
   }
 
-  void _xuLyKhiNhanDuocTep(dynamic dsDuongDan) {
-    final List<String> dsDuongDanChuan = (dsDuongDan as List<Object?>).cast<String>();
-    DuLieuTam().nhapTepDuocChiaSe(dsDuongDanChuan).then((ketQua) {
-      MainApp.xuLyTepDuocChiaSe(ketQua);
-    });
+  void _xuLyKhiNhanDuocTep() {
+    MainApp.xuLyTepDuocChiaSe();
   }
 
   Future<List<String>?> chonTep(List<KieuTep> loc) async {
@@ -268,11 +268,19 @@ class HeThongMay {
     return Future.value(null); // TODO
   }
 
-  Future<void> chuanHoaAnh({int gioiHan = 2000, int chatLuong = 20}) async {
+  Future<void> chuanHoaAnh({
+    int gioiHan = 2000,
+    int chatLuong = 20,
+    int chatLuongTn = 50,
+    int gioiHanTn = 100,
+    bool chiTn = false
+    }) async {
     final Map<String, Object?> thamSo = {};
-    thamSo["duong_dan"] = CoSoDuLieu().thuMucAnhSach;
     thamSo["gioi_han"] = gioiHan;
+    thamSo["gioi_han_tn"] = gioiHanTn;
     thamSo["chat_luong"] = chatLuong;
+    thamSo["chat_luong_tn"] = chatLuongTn;
+    thamSo["chi_tn"] = chiTn;
     return _kenhKetNoi.invokeMethod<void>(_MethodToNative.chuanHoaAnh.value, thamSo);
   }
 
@@ -282,9 +290,7 @@ class HeThongMay {
   }
 
   Future<List<String>?> moTimKiemAnh(String tuKhoa) async {
-    final Directory duongDanTam = await DuLieuTam().duongDanThuMucDan();
     final Map<String, Object?> thamSo = {};
-    thamSo["duong_dan"] = duongDanTam.path;
     thamSo["tu_khoa"] = tuKhoa;
     final List<Object?>? ketQua = await _kenhKetNoi.invokeMethod(_MethodToNative.timKiemAnh.value, thamSo) as List<Object?>?;
     final List<String>? dsDuongDan = ketQua?.cast<String>();

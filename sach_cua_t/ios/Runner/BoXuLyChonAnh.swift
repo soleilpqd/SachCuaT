@@ -23,13 +23,11 @@ import Flutter
 final class BoXuLyChonAnh: NSObject, UINavigationControllerDelegate, UIImagePickerControllerDelegate {
 
     let phanHoi: FlutterResult
-    let thuMucChua: String
     let kieu: HeThongMay.KieuMedia
     private var neo: BoXuLyChonAnh?
 
-    init(nguon: HeThongMay.KieuMedia, duongDan: String, xlKetQua: @escaping FlutterResult) {
+    init(nguon: HeThongMay.KieuMedia, xlKetQua: @escaping FlutterResult) {
         kieu = nguon
-        thuMucChua = duongDan
         phanHoi = xlKetQua
     }
 
@@ -70,8 +68,9 @@ final class BoXuLyChonAnh: NSObject, UINavigationControllerDelegate, UIImagePick
         var ketQua: String?
         let fileMan = FileManager.default
         if let urlGoc = info[.imageURL] as? URL {
+            BoQuanLyThuMuc.duyNhat.donSachThuMuc(BoQuanLyThuMuc.duyNhat.thuMucMayAnh)
             let tenAnh = urlGoc.lastPathComponent
-            let urlDich = URL(fileURLWithPath: thuMucChua).appendingPathComponent(tenAnh)
+            let urlDich = BoQuanLyThuMuc.duyNhat.thuMucMayAnh.appendingPathComponent(tenAnh)
 //            ketQua = "\(urlGoc) => \(urlDich)"
             do {
                 try fileMan.copyItem(at: urlGoc, to: urlDich)
@@ -85,14 +84,8 @@ final class BoXuLyChonAnh: NSObject, UINavigationControllerDelegate, UIImagePick
                 ketQua = urlDich.path
             }
         } else if let anhGoc = info[.originalImage] as? UIImage, let duLieu = anhGoc.jpegData(compressionQuality: 1) {
-            var tenAnh = "1.JPG"
-            var stt = 1
-            var urlDich = URL(fileURLWithPath: thuMucChua).appendingPathExtension(tenAnh)
-            while fileMan.fileExists(atPath: urlDich.path) {
-                stt += 1
-                tenAnh = "\(stt).JPG"
-                urlDich = URL(fileURLWithPath: thuMucChua).appendingPathExtension(tenAnh)
-            }
+            BoQuanLyThuMuc.duyNhat.donSachThuMuc(BoQuanLyThuMuc.duyNhat.thuMucMayAnh)
+            let urlDich = BoQuanLyThuMuc.duyNhat.thuMucMayAnh.appendingPathComponent("anh_chup.JPG")
             do {
                 try duLieu.write(to: urlDich)
             } catch let err {

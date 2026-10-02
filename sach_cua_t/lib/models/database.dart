@@ -51,6 +51,11 @@ class CoSoDuLieu {
   static final CoSoDuLieu _duyNhat = CoSoDuLieu._internal();
   factory CoSoDuLieu() { return _duyNhat; }
 
+  Map<String, String> dsThuMuc() => {
+    "dl": "sct://dulieu.sach/",
+    "anhSach": "sct://dulieu.sach/sach"
+  };
+
   Database? _db;
   final int _dbVersion = 1;
   String _thuMucAnhSach = "";
@@ -63,10 +68,8 @@ class CoSoDuLieu {
   /// Khởi đầu
   /// - Mở DB.
   /// - Tạo các thư mục ảnh.
-  Future<void> khoiDau() async {
+  Future<bool> khoiDau(Map<String, String> dsThuMuc) async {
     const tenDB = "sachcuat.db";
-    WidgetsFlutterBinding.ensureInitialized();
-
     final int? tdtc = await LuuTruCauHinh().layThoiDiemThamChieu();
     if (tdtc != null) {
       _thoiDiemThamChieu = tdtc;
@@ -76,29 +79,28 @@ class CoSoDuLieu {
       LuuTruCauHinh().luuThoiDiemThamChieu(now);
     }
     // Cơ sở dữ liệu
-    final duongDanCoSo = await getDatabasesPath();
-    final duongDanCSDL = join(duongDanCoSo, tenDB);
-    print("DB: $duongDanCSDL");
+    final String? duongDanCoSo = dsThuMuc["dl"];
+    if (duongDanCoSo == null) {
+      return false;
+    }
+    final String duongDanCSDL = join(duongDanCoSo, tenDB);
     final csdlTonTai = await databaseExists(duongDanCSDL);
     // final dbExisted = false; // DEBUG: overwrite
-    try {
-        await Directory(duongDanCoSo).create(recursive: true);
-      } catch (_) {}
     final ByteData data = await rootBundle.load(join("assets", tenDB));
     final List<int> bytes = data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
     if (!csdlTonTai) {
       await File(duongDanCSDL).writeAsBytes(bytes);
     }
     // Thư mục lưu ảnh
-    _thuMucAnhSach = join(duongDanCoSo, "sach");
-    final dirAnhSach = Directory(_thuMucAnhSach);
-    if (!await dirAnhSach.exists()) {
-      try {
-        dirAnhSach.create(recursive: true);
-      } catch (_) {}
+    final String? thuMucAnhSach = dsThuMuc["anhSach"];
+    if (thuMucAnhSach == null) {
+      return false;
     }
+    _thuMucAnhSach = thuMucAnhSach;
+
     _db = await openDatabase(duongDanCSDL, version: _dbVersion);
     await _kiemTraDuLieuChuan(bytes, duongDanCoSo);
+    return true;
   }
 
   /// Cập nhật lại dữ liệu chuẩn (văn bản hiển thị) từ DB gốc trong bundle

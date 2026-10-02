@@ -17,6 +17,7 @@
  */
 
 import Foundation
+import UIKit
 
 /// Xử lý UIPasteboard.general (lưu dữ liệu từ Pasteboard vào thư mục được chỉ định)
 /// TODO: hiện tại chỉ xử lý ảnh (lưu vào thư mục chỉ định là JPEG hoặc PNG tuỳ vào ảnh có kênh Alpha hay không).
@@ -79,30 +80,6 @@ final class BoXuLyDuLieuTrungGian {
         }
     }
 
-    /// Tạo mới 1 tên tệp chưa tồn tại trong thư mục chỉ định
-    /// theo định dạng: `<tenGoc>_<stt>.<ext>`
-    private func taoTen(thuMuc: String, tenGoc: String?, uti: Uti) -> String {
-        let urlCoSo = URL(fileURLWithPath: thuMuc)
-        var tenCoSo = ""
-        let ext = uti.fileExtension
-        if let ten = tenGoc {
-            let url = urlCoSo.appendingPathComponent(ten)
-            if !FileManager.default.fileExists(atPath: url.path) {
-                return url.path
-            }
-            tenCoSo = url.deletingPathExtension().lastPathComponent
-        }
-
-        var stt = 1;
-        while true {
-            let url = urlCoSo.appendingPathComponent("\(tenCoSo)_\(stt).\(ext)")
-            if !FileManager.default.fileExists(atPath: url.path) {
-                return url.path
-            }
-            stt += 1
-        }
-    }
-
     /// Ảnh có kênh Alpha (màu trong suốt) hay không
     ///  -> nếu có thì định dạng lưu trữ là PNG
     private func anhCoAlpha(anh: UIImage) -> Bool {
@@ -116,25 +93,19 @@ final class BoXuLyDuLieuTrungGian {
     }
 
     /// Tiến hành lưu dữ liệu (tệp được chỉ định trong hàm)
-    private func danDuLieu(duLieu: Data, duongDanLuu: String, tenGoc: String?, uti: Uti) -> String? {
+    private func danDuLieu(duLieu: Data, tenGoc: String?, uti: Uti) -> URL? {
+        let qlThuMuc = BoQuanLyThuMuc.duyNhat
         do {
-            let ten = taoTen(thuMuc: duongDanLuu, tenGoc: tenGoc, uti: uti)
-            try duLieu.write(to: URL(fileURLWithPath: ten))
-            return ten
+            let dich = qlThuMuc.taoTen(thuMuc: qlThuMuc.thuMucDan, tenGoc: tenGoc, ext: uti.fileExtension)
+            try duLieu.write(to: dich)
+            return dich
         } catch _ {
             return nil
         }
     }
 
-    /// Làm sạch thư mục chứa (xoá các tệp cũ) trước khi dán
-    private func lamSachThuMucChuaTruocKhiDan(duongDan: String) {
-        let fileMan = FileManager.default
-        try? fileMan.removeItem(atPath: duongDan)
-        try? fileMan.createDirectory(atPath: duongDan, withIntermediateDirectories: true)
-    }
-
     /// Dán đối tượng ảnh
-    private func danDoiTuongAnh(duongDanLuu: String, doiTuong: UIImage) -> String? {
+    private func danDoiTuongAnh(_ doiTuong: UIImage) -> URL? {
         let duLieuAnh: Data?
         let uti: Uti
         if anhCoAlpha(anh: doiTuong) {
@@ -144,21 +115,22 @@ final class BoXuLyDuLieuTrungGian {
             duLieuAnh = doiTuong.jpegData(compressionQuality: 1)
             uti = .jpeg
         }
-        if let duLieu = duLieuAnh, let kq = danDuLieu(duLieu: duLieu, duongDanLuu: duongDanLuu, tenGoc: nil, uti: uti) {
+        if let duLieu = duLieuAnh, let kq = danDuLieu(duLieu: duLieu, tenGoc: nil, uti: uti) {
             return kq
         }
         return nil
     }
 
     /// Dán ảnh (lấy dữ liệu ảnh hoặc URL từ pasteboard)
-    func danAnh(duongDanLuu: String, khiXong: @escaping ([String]) -> Void) {
+    func danAnh(_ khiXong: @escaping ([String]) -> Void) {
 //        ConsoleLog.shared.log("Paste URLs: \(pasteboard.hasURLs); \(pasteboard.urls)")
+        let qlThuMuc = BoQuanLyThuMuc.duyNhat
         if boDuLieuTrungGian.hasImages, let images = boDuLieuTrungGian.images, !images.isEmpty {
-            lamSachThuMucChuaTruocKhiDan(duongDan: duongDanLuu)
+            qlThuMuc.donSachThuMuc(qlThuMuc.thuMucDan)
             var ketQua = [String]()
             for image in images {
-                if let kq = danDoiTuongAnh(duongDanLuu: duongDanLuu, doiTuong: image) {
-                    ketQua.append(kq)
+                if let kq = danDoiTuongAnh(image) {
+                    ketQua.append(kq.path)
                 }
             }
             boDuLieuTrungGian.images = nil
@@ -167,8 +139,8 @@ final class BoXuLyDuLieuTrungGian {
         } else if boDuLieuTrungGian.hasURLs, let url = boDuLieuTrungGian.url {
             napAnhTuUrl(url: url) {[weak self] image in
                 guard let mSelf = self else { return }
-                if let img = image, let kq = mSelf.danDoiTuongAnh(duongDanLuu: duongDanLuu, doiTuong: img) {
-                    khiXong([kq])
+                if let img = image, let kq = mSelf.danDoiTuongAnh(img) {
+                    khiXong([kq.path])
                 } else {
                     khiXong([])
                 }
@@ -181,7 +153,7 @@ final class BoXuLyDuLieuTrungGian {
     }
 
     /// Dán các loại khác -> tạm thời chưa sử dụng
-    private func danKhac(duongDanLuu: String, utis: [Uti]) -> [String] {
+    private func danKhac(_ utis: [Uti]) -> [String] {
         if !boDuLieuTrungGian.contains(pasteboardTypes: utis.map({ $0.rawValue })) {
 //            ConsoleLog.shared.log("Pasteboard does not contain types: \(utis.map({ $0.rawValue }))")
             return []
@@ -213,11 +185,12 @@ final class BoXuLyDuLieuTrungGian {
                 }
 //                ConsoleLog.shared.log("Pasteboard data list: \(dsDuLieu.count) \(dsTenTep)")
                 if !dsDuLieu.isEmpty {
-                    lamSachThuMucChuaTruocKhiDan(duongDan: duongDanLuu)
+                    let qlThuMuc = BoQuanLyThuMuc.duyNhat
+                    qlThuMuc.donSachThuMuc(qlThuMuc.thuMucDan)
                 }
                 for (stt, muc) in dsDuLieu.enumerated() {
-                    if let ten = danDuLieu(duLieu: muc, duongDanLuu: duongDanLuu, tenGoc: dsTenTep[stt], uti: uti) {
-                        ketQua.append(ten)
+                    if let ten = danDuLieu(duLieu: muc, tenGoc: dsTenTep[stt], uti: uti) {
+                        ketQua.append(ten.path)
                     }
                 }
             }
@@ -229,7 +202,7 @@ final class BoXuLyDuLieuTrungGian {
     }
 
     /// Bắt đầu dán
-    func dan(duongDanLuu: String, loc: [HeThongMay.KieuTep], khiXong: @escaping ([String]) -> Void) {
+    func dan(loc: [HeThongMay.KieuTep], khiXong: @escaping ([String]) -> Void) {
 //        ketQua.append("\(duongDanLuu); \(loc.map({ "\($0) \($0.rawValue)" }).joined(separator: ";; "))")
         var utis = [Uti]()
         var coAnh = false
@@ -244,11 +217,11 @@ final class BoXuLyDuLieuTrungGian {
             }
         }
         if coAnh {
-            danAnh(duongDanLuu: duongDanLuu, khiXong: khiXong)
+            danAnh(khiXong)
             return
         }
         if !utis.isEmpty {
-            let ketQua = danKhac(duongDanLuu: duongDanLuu, utis: utis)
+            let ketQua = danKhac(utis)
             khiXong(ketQua)
         }
     }

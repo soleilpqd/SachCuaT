@@ -80,7 +80,8 @@ class LinhTinh {
     if (duongDan.scheme == PhanLoaiDuongDan.assets.name) {
       return UiImage.asset(duongDan.path);
     }
-    return UiImage.file(File(duongDan.path));
+    final File tep = File(duongDan.path);
+    return UiImage.file(File(duongDan.path), key: Key(tep.lastModifiedSync().toString()));
   }
 
   /// Kiểm tra xem mã có đúng chuẩn ISBN hay ko (13 chữ số, tiền tố, giá trị kiểm tra)

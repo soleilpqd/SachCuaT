@@ -53,7 +53,7 @@ import UIKit
 final class SceneDelegate: FlutterSceneDelegate {
 
     override func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
-        let dsDuongDan = URLContexts.map({ $0.url.path });
+        let dsDuongDan = URLContexts.map({ $0.url });
         HeThongMay.duyNhat.nhanDuocTep(dsDuongDan: dsDuongDan)
     }
 

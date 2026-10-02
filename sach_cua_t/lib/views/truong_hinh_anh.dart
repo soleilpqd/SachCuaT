@@ -52,10 +52,12 @@ class DieuKhienTruongHinhAnh extends DieuKhienCoSo {
   /// Hình ảnh
   set hinhAnh(Uri? gt) {
     _thongTinAnh = null;
+    // Ảnh có thể thay đổi nhưng Uri có thể không đổi => gán null để ép buộc thông báo thay đổi
+    this[ThuocTinhTruongHinhAnh.hinhAnh.name] = null;
     this[ThuocTinhTruongHinhAnh.hinhAnh.name] = gt;
   }
 
-  _ThongTinAnh? _thongTinAnh = null;
+  _ThongTinAnh? _thongTinAnh;
 
 }
 
@@ -252,9 +254,7 @@ ${thongTinAnh.ngang}x${thongTinAnh.doc}:${LinhTinh.dinhDangKichThuocTep(thongTin
   /// Khi nhấn xoá ảnh (2 nhấn)
   void _khiXoaAnh() {
     widget.dieuKhien?.hinhAnh = null;
-    final DuLieuTam boDem = DuLieuTam();
-    boDem.xoaCacTepDan();
-    boDem.xoaTepDuocChiaSe();
+    DuLieuTam().xoaTatCa();
   }
 
   void _khiXemAnhToanManHinh() {

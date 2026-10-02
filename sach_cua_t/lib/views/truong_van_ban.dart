@@ -449,16 +449,16 @@ class _TrangThaiTruongVanBan extends TrangThaiCoSo<TruongVanBan> {
       final Widget oLuonHienThi = _xayDungOLuonHienThi();
       Widget? nutBenPhai = widget.xayDungNutBenPhai?.call(widget.dieuKhien!.trangThaiNutBenPhai, widget.dieuKhien!.khaDung);
       List<Widget> dsCacO = [oLuonHienThi];
-      if (widget.dieuKhien!.quanLyNhapTieuDe.text == "URL") {
-        try {
+      try {
           final Uri uriSach = Uri.parse(widget.dieuKhien!.quanLyNhapNoiDung.text);
-          dsCacO.add(NutBamBieuTuong(
-            bieuTuong: Icons.open_in_browser_outlined,
-            thuocThanhDieuHuong: false,
-            khiNhan: () => launchUrl(uriSach),
-          ));
+          if (uriSach.scheme == "http" || uriSach.scheme == "https") {
+            dsCacO.add(NutBamBieuTuong(
+              bieuTuong: Icons.open_in_browser_outlined,
+              thuocThanhDieuHuong: false,
+              khiNhan: () => launchUrl(uriSach),
+            ));
+          }
         } catch (_) {}
-      }
       if (nutBenPhai != null) {
         dsCacO.add(nutBenPhai);
       }
