@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */ = {isa = PBXBuildFile; fileRef = 1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */; };
 		2B03AD91306140860016FBCE /* ChuanHoaAnh.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B03AD90306140860016FBCE /* ChuanHoaAnh.swift */; };
+		2B1B5D293073AB71002595EE /* BoXuLyChonTep.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B1B5D283073AB71002595EE /* BoXuLyChonTep.swift */; };
 		2B27AED72F925DDC00D154F2 /* ManHinhCamera.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B27AED52F925DDB00D154F2 /* ManHinhCamera.swift */; };
 		2B27AED82F925DDC00D154F2 /* HeThongMay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B27AED62F925DDC00D154F2 /* HeThongMay.swift */; };
 		2B4CEE862FEC0EC8002FAF74 /* BoXuLyChonAnh.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B4CEE852FEC0EC8002FAF74 /* BoXuLyChonAnh.swift */; };
@@ -56,6 +57,7 @@
 		2B00BE442FAA336D00F596C1 /* vi */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = vi; path = vi.lproj/Main.strings; sourceTree = "<group>"; };
 		2B00BE452FAA336D00F596C1 /* vi */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = vi; path = vi.lproj/LaunchScreen.strings; sourceTree = "<group>"; };
 		2B03AD90306140860016FBCE /* ChuanHoaAnh.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChuanHoaAnh.swift; sourceTree = "<group>"; };
+		2B1B5D283073AB71002595EE /* BoXuLyChonTep.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoXuLyChonTep.swift; sourceTree = "<group>"; };
 		2B27AED52F925DDB00D154F2 /* ManHinhCamera.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ManHinhCamera.swift; sourceTree = "<group>"; };
 		2B27AED62F925DDC00D154F2 /* HeThongMay.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HeThongMay.swift; sourceTree = "<group>"; };
 		2B4CEE852FEC0EC8002FAF74 /* BoXuLyChonAnh.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoXuLyChonAnh.swift; sourceTree = "<group>"; };
@@ -182,6 +184,7 @@
 				2B885716306E3C3F0071FB38 /* BoQuanLyThuMuc.swift */,
 				2B03AD90306140860016FBCE /* ChuanHoaAnh.swift */,
 				2B4CEE852FEC0EC8002FAF74 /* BoXuLyChonAnh.swift */,
+				2B1B5D283073AB71002595EE /* BoXuLyChonTep.swift */,
 				2B61ECDE30669AFE003EA04D /* BoXuLyDuLieuTrungGian.swift */,
 				2B5EB68330653CD6009A03EC /* BoXuLyTimKiemAnh.swift */,
 				2B27AED52F925DDB00D154F2 /* ManHinhCamera.swift */,
@@ -427,6 +430,7 @@
 				2B5EB68430653CD6009A03EC /* BoXuLyTimKiemAnh.swift in Sources */,
 				2B4CEE862FEC0EC8002FAF74 /* BoXuLyChonAnh.swift in Sources */,
 				2B27AED72F925DDC00D154F2 /* ManHinhCamera.swift in Sources */,
+				2B1B5D293073AB71002595EE /* BoXuLyChonTep.swift in Sources */,
 				2B27AED82F925DDC00D154F2 /* HeThongMay.swift in Sources */,
 				2B5EB68230650CA9009A03EC /* ConsoleLog.swift in Sources */,
 				2B61ECDF30669AFE003EA04D /* BoXuLyDuLieuTrungGian.swift in Sources */,

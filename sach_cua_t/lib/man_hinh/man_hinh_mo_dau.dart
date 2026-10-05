@@ -212,11 +212,11 @@ class _ManHinhMoDau extends StatelessWidget {
     return ManHinhCoSo(
       tieuDe: Vbht.tuKhoa(TK.sachCuaT),
       khiNhanTieuDe: dkMh._khiNhanTieuDeManHinh,
-      nutTrai: dkMh.nguonDuLieu.tongSoSach > 0 ? NutBamBieuTuong(
+      nutTrai: NutBamBieuTuong(
         bieuTuong: Icons.add,
         thuocThanhDieuHuong: true,
         khiNhan: dkMh._khiNhanThemSach
-      ) : null,
+      ),
       nutPhai: [TruongNutBamThanhDieuHuong(dieuKhien: dkMh._dkNutPhai)],
       noiDung: _NoiDungManHinhMoDau(dieuKhienManHinh: dkMh)
     );

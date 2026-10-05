@@ -30,6 +30,7 @@ import io.flutter.embedding.engine.FlutterEngine
 class MainActivity: FlutterFragmentActivity() {
 
     lateinit var quanLyAnh: BoXuLyChonAnh
+    lateinit var boChonTep: BoXuLyChonTep
 
 //    private fun getRootView(): View { return findViewById(android.R.id.content) }
 
@@ -85,6 +86,8 @@ class MainActivity: FlutterFragmentActivity() {
         langNgheNutLui()
         quanLyAnh = BoXuLyChonAnh(this, 2)
         quanLyAnh.cauHinh()
+        boChonTep = BoXuLyChonTep(this)
+        boChonTep.cauHinh()
         BoXuLyDuLieuTrungGian.clipboard = getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
 //        lastOrientation = resources.configuration.orientation
 //        val rootView = getRootView()
@@ -213,6 +216,10 @@ class MainActivity: FlutterFragmentActivity() {
         } else {
             khiKhongCoMayAnh()
         }
+    }
+
+    fun moChonTep(loc: List<Int>, khiXong: (Bitmap?) -> Unit) {
+        boChonTep.moChonTep(loc, khiXong)
     }
 
 }

@@ -57,14 +57,21 @@ final class HeThongMay {
         case urlSach
     }
 
+    /// Kiểu tệp
     enum KieuTep: Int {
+        /// Ảnh (JPEG, PNG)
         case anh = 0
+        /// Zip
         case zip
+        /// 7z
         case p7zip
     }
 
+    /// Kiểu chọn ảnh
     enum KieuMedia: Int {
+        /// Chụp ảnh
         case camera = 0
+        /// Kho ảnh
         case khoAnh
     }
 
@@ -123,7 +130,7 @@ final class HeThongMay {
         case .dan:
             dan(call: call, result: result)
         case .chonTep:
-            break
+            chonTep(call: call, result: result)
         case .chuanHoaAnh:
             chuanHoaAnh(call: call, result: result)
         case .timKiemAnh:
@@ -332,8 +339,26 @@ final class HeThongMay {
         }
     }
 
+    /// Gửi callback lên module Flutter khi user dán/chia sẻ URL trên màn hình tìm kiếm ảnh trên Internet
     func danhDauUrlSach(_ url: URL) {
         kenhKetNoi.invokeMethod(TenHamDenFlutter.urlSach.rawValue, arguments: url.absoluteString)
+    }
+
+    /// Chọn tệp
+    private func chonTep(call: FlutterMethodCall, result: @escaping FlutterResult) {
+        if let thamSo = call.arguments as? [String: Any],
+           let locTho = thamSo["loc"] as? [Int] {
+            var loc = [KieuTep]()
+            for muc in locTho {
+                if let gt = KieuTep(rawValue: muc) {
+                    loc.append(gt)
+                }
+            }
+            let boXuLy = BoXuLyChonTep(kieu: loc, traLoi: result)
+            boXuLy.batDau()
+        } else {
+            result(FlutterError(code: "chontep_1", message: "Tham số không phù hợp", details: call.method))
+        }
     }
 
 }

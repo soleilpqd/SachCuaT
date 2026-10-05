@@ -182,6 +182,7 @@ class HeThongMay(kenh: MethodChannel, main: MainActivity): MethodCallHandler {
         }
     }
 
+    /// Hàm khởi tạo khi ứng dùng bắt đầu chạy
     private fun batDau(call: MethodCall, result: MethodChannel.Result) {
         val dsThuMuc: Map<String, String>? = call.arguments<Map<String, String>>()
         if (dsThuMuc != null) {
@@ -251,7 +252,7 @@ class HeThongMay(kenh: MethodChannel, main: MainActivity): MethodCallHandler {
 //    fun thongBaoCapNhatHienThi(thongTin: Map<String, Any>) {
 //        kenhKetNoi.invokeMethod(TenHamDenFlutter.capNhatHienThi.value, thongTin)
 //    }
-
+    /// Gọi callback lên module Flutter khi người dùng nhấn nút Lùi của Android
     fun khiNhanNutLui(xuLyHeThong: () -> Unit) {
         val callback = NhanKetQuaKenhFlutter()
         callback.khiThanhCong = { ketQua ->
@@ -262,7 +263,7 @@ class HeThongMay(kenh: MethodChannel, main: MainActivity): MethodCallHandler {
         kenhKetNoi.invokeMethod(TenHamDenFlutter.khiNhanNutLui.value, null, callback)
     }
 
-    /// Chọn ảnh
+    /// Chọn ảnh từ kho ảnh hoặc chụp ảnh
     private fun chonAnh(call: MethodCall, result: MethodChannel.Result) {
         val kieu = call.argument<Int>("kieu")
         if (kieu == null) {
@@ -283,6 +284,7 @@ class HeThongMay(kenh: MethodChannel, main: MainActivity): MethodCallHandler {
         }
     }
 
+    /// Khi chụp ảnh / chọn ảnh từ kho ảnh xong
     private fun khiChupChonXongAnh(anh: Bitmap?, quyen: Boolean, phanHoi: MethodChannel.Result) {
         manHinhChinh.quanLyAnh.khiChupChonXongAnh = null
         if (anh != null) {
@@ -316,13 +318,31 @@ class HeThongMay(kenh: MethodChannel, main: MainActivity): MethodCallHandler {
 
     /// Chọn tệp
     private fun chonTep(call: MethodCall, result: MethodChannel.Result) {
-        result.error("1", "Hàm không xác định", call.method)
+        val loc = call.argument<List<Int>>("loc")
+        if (loc != null) {
+            manHinhChinh.moChonTep(loc) { bitmap ->
+                if (bitmap != null) {
+                    val tep = BoQuanLyThuMuc.taoTen(BoQuanLyThuMuc.thuMucChiaSe, null, "JPG")
+                    if (BoXuLyAnh.luuAnhJpeg(bitmap, tep) == null) {
+                        result.success(listOf(tep.path))
+                    } else {
+                        result.success(null)
+                    }
+                } else {
+                    result.success(null)
+                }
+            }
+        } else {
+            result.error("chontep_1", "Tham số không phù hợp", call.method)
+        }
     }
 
+    /// Khi nhận được ảnh chia sẻ từ ứng dụng ngoài
     fun khiNhanDuocAnhChiaSe() {
         kenhKetNoi.invokeMethod(TenHamDenFlutter.nhanDuocTep.value, null)
     }
 
+    /// Mở màn hình tìm kiếm ảnh trên Internet (trình duyệt web nhúng trong ứng dụng - Custom Tab Chrome)
     private fun timKiemAnh(call: MethodCall, result: MethodChannel.Result) {
         val tuKhoa = call.argument<String>("tu_khoa")
         if (tuKhoa == null) {
@@ -337,6 +357,7 @@ class HeThongMay(kenh: MethodChannel, main: MainActivity): MethodCallHandler {
         }
     }
 
+    /// Gọi callback lên module Flutter khi người dùng chia sẻ/sao chép URL trên màn hình tìm kiếm ảnh
     fun danhDauUrlSach(vanBan: String): Boolean {
         try {
             val uri = vanBan.toUri()

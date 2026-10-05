@@ -16,15 +16,13 @@
   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-// TODO: android: chuẩn hoá ảnh, chọn ảnh, chọn tệp
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:sach_cua_t/main.dart';
 // import 'package:sach_cua_t/models/hienthinentang.dart';
 import 'package:sach_cua_t/utils/common.dart';
 
-enum _MethodFromNative {
+enum _YeuCauTuNenTang {
   /// Kiểm tra định dạng ISBN
   kiemTraISBN,
   // capNhatHienThi;
@@ -38,20 +36,20 @@ enum _MethodFromNative {
   urlSach
   ;
 
-  static _MethodFromNative? init(String raw) {
+  static _YeuCauTuNenTang? init(String raw) {
     return switch (raw) {
-      "kiemTraISBN" => _MethodFromNative.kiemTraISBN,
+      "kiemTraISBN" => _YeuCauTuNenTang.kiemTraISBN,
       // "capNhatHienThi" => _MethodFromNative.capNhatHienThi,
-      "nutLuiAndroid" => _MethodFromNative.khiNhanNutLui,
-      "nhanDuocTep" => _MethodFromNative.khiNhanDuocTep,
-      "chuanHoaAnh" => _MethodFromNative.chuanHoaAnh,
-      "urlSach" => _MethodFromNative.urlSach,
+      "nutLuiAndroid" => _YeuCauTuNenTang.khiNhanNutLui,
+      "nhanDuocTep" => _YeuCauTuNenTang.khiNhanDuocTep,
+      "chuanHoaAnh" => _YeuCauTuNenTang.chuanHoaAnh,
+      "urlSach" => _YeuCauTuNenTang.urlSach,
       _ => null
     };
   }
 }
 
-enum _MethodToNative {
+enum _YeuCauDenNenTang {
   /// Bắt đầu
   batDau,
   /// Quét mã ISBN
@@ -75,15 +73,15 @@ enum _MethodToNative {
 
   String get value {
     return switch (this) {
-      _MethodToNative.batDau => "batDau",
-      _MethodToNative.quetMaISBN => "quetMaISBN",
-      _MethodToNative.luuAnhSach => "luuAnhSach",
-      _MethodToNative.phienBan => "phienBan",
-      _MethodToNative.chonAnh => "chonAnh",
-      _MethodToNative.dan => "dan",
-      _MethodToNative.chonTep => "chonTep",
-      _MethodToNative.chuanHoaAnh => "chuanHoaAnh",
-      _MethodToNative.timKiemAnh => "timKiemAnh",
+      _YeuCauDenNenTang.batDau => "batDau",
+      _YeuCauDenNenTang.quetMaISBN => "quetMaISBN",
+      _YeuCauDenNenTang.luuAnhSach => "luuAnhSach",
+      _YeuCauDenNenTang.phienBan => "phienBan",
+      _YeuCauDenNenTang.chonAnh => "chonAnh",
+      _YeuCauDenNenTang.dan => "dan",
+      _YeuCauDenNenTang.chonTep => "chonTep",
+      _YeuCauDenNenTang.chuanHoaAnh => "chuanHoaAnh",
+      _YeuCauDenNenTang.timKiemAnh => "timKiemAnh",
       // _MethodToNative.layThongTinHienThi => "layThongTinHienThi"
     };
   }
@@ -138,21 +136,21 @@ class HeThongMay {
 
   HeThongMay._internal() {
     _kenhKetNoi.setMethodCallHandler((call) {
-      final method = _MethodFromNative.init(call.method);
+      final method = _YeuCauTuNenTang.init(call.method);
       if (method != null) {
         switch (method) {
-        case _MethodFromNative.kiemTraISBN:
+        case _YeuCauTuNenTang.kiemTraISBN:
           return _kiemTraISBN(call.arguments);
-        case _MethodFromNative.khiNhanNutLui:
+        case _YeuCauTuNenTang.khiNhanNutLui:
           return _xuLyNutLuiAndroid();
-        case _MethodFromNative.khiNhanDuocTep:
+        case _YeuCauTuNenTang.khiNhanDuocTep:
           _xuLyKhiNhanDuocTep();
         // case _MethodFromNative.capNhatHienThi:
         //   _xuLyThongTinHienThi(call.arguments);
         //   _thongBaoCapNhatHienThi(call.arguments);
-        case _MethodFromNative.chuanHoaAnh:
+        case _YeuCauTuNenTang.chuanHoaAnh:
           _xuLyKhiNhanDuocCapNhatChuanHoaAnh(call.arguments);
-        case _MethodFromNative.urlSach:
+        case _YeuCauTuNenTang.urlSach:
           _xuLyKhiNhanDuocUrlSach(call.arguments);
         }
       }
@@ -166,12 +164,12 @@ class HeThongMay {
   final TienTrinhChuanHoaAnh theoDoiTienTrinhChuanHoaAnh = TienTrinhChuanHoaAnh();
 
   Future<Map<String, String>?> batDau(Map<String, String> dsTenThuMuc) async {
-    return _kenhKetNoi.invokeMapMethod(_MethodToNative.batDau.value, dsTenThuMuc);
+    return _kenhKetNoi.invokeMapMethod(_YeuCauDenNenTang.batDau.value, dsTenThuMuc);
   }
 
   /// Flutter -> Native: Bật camera để quét mã ISBN
   Future<String?> quetMaISBN() async {
-    return _kenhKetNoi.invokeMethod<String>(_MethodToNative.quetMaISBN.value);
+    return _kenhKetNoi.invokeMethod<String>(_YeuCauDenNenTang.quetMaISBN.value);
   }
 
   /// Flutter <- Native: kiểm tra định dạng ISBN
@@ -196,7 +194,7 @@ class HeThongMay {
     int chatLuongTn = 50
   }) async {
     return _kenhKetNoi.invokeMethod<bool>(
-      _MethodToNative.luuAnhSach.value, {
+      _YeuCauDenNenTang.luuAnhSach.value, {
         "goc": anhGoc,
         "dich": mucTieu,
         "thunho": anhThuNho,
@@ -237,8 +235,9 @@ class HeThongMay {
     // _xuLyThongTinHienThi(duLieu);
   // }
 
-  Future<String?> layThongTinPhienBan() async => _kenhKetNoi.invokeMethod<String>(_MethodToNative.phienBan.value);
+  Future<String?> layThongTinPhienBan() async => _kenhKetNoi.invokeMethod<String>(_YeuCauDenNenTang.phienBan.value);
 
+  /// Khi user nhấn nút Back của Android
   Future<bool?> _xuLyNutLuiAndroid() {
     return Future.value(MainApp.xuLyNutLuiAndroid());
   }
@@ -247,27 +246,33 @@ class HeThongMay {
   Future<String?> chonAnh(KieuMedia kieu) async {
     final Map<String, Object?> thamSo = {};
     thamSo["kieu"] = kieu.giaTri;
-    return _kenhKetNoi.invokeMethod<String>(_MethodToNative.chonAnh.value, thamSo);
+    return _kenhKetNoi.invokeMethod<String>(_YeuCauDenNenTang.chonAnh.value, thamSo);
   }
 
+  /// Dán
   Future<List<String>?> dan(List<KieuTep> loc) async {
     final Map<String, Object?> thamSo = {};
     thamSo["loc"] = loc.map((muc) => muc.index).toList();
-    final List<Object?>? ketQua = await _kenhKetNoi.invokeMethod(_MethodToNative.dan.value, thamSo) as List<Object?>?;
+    final List<Object?>? ketQua = await _kenhKetNoi.invokeMethod(_YeuCauDenNenTang.dan.value, thamSo) as List<Object?>?;
     final List<String>? dsDuongDan = ketQua?.cast<String>();
-    // print("DAN $dsDuongDan");
     return Future.value(dsDuongDan);
   }
 
+  /// Xử lý khi nhận được tệp chia sẻ từ hệ thống
   void _xuLyKhiNhanDuocTep() {
     MainApp.xuLyTepDuocChiaSe();
   }
 
+  /// Mở màn hình chọn tệp
   Future<List<String>?> chonTep(List<KieuTep> loc) async {
-
-    return Future.value(null); // TODO
+    final Map<String, Object?> thamSo = {};
+    thamSo["loc"] = loc.map((muc) => muc.index).toList();
+    final List<Object?>? ketQua = await _kenhKetNoi.invokeMethod(_YeuCauDenNenTang.chonTep.value, thamSo) as List<Object?>?;
+    final List<String>? dsDuongDan = ketQua?.cast<String>();
+    return Future.value(dsDuongDan);
   }
 
+  /// Chuẩn hoá dữ liệu TODO: hiện tại chỉ có trên iOS
   Future<void> chuanHoaAnh({
     int gioiHan = 2000,
     int chatLuong = 20,
@@ -281,22 +286,25 @@ class HeThongMay {
     thamSo["chat_luong"] = chatLuong;
     thamSo["chat_luong_tn"] = chatLuongTn;
     thamSo["chi_tn"] = chiTn;
-    return _kenhKetNoi.invokeMethod<void>(_MethodToNative.chuanHoaAnh.value, thamSo);
+    return _kenhKetNoi.invokeMethod<void>(_YeuCauDenNenTang.chuanHoaAnh.value, thamSo);
   }
 
+  /// Callback trong quá trình chuẩn hoá ảnh
   void _xuLyKhiNhanDuocCapNhatChuanHoaAnh(dynamic thongTin) {
     final Map<Object?, Object?> ketQua = thongTin as Map<Object?, Object?>;
     theoDoiTienTrinhChuanHoaAnh.capNhat(ketQua.cast<String, int>());
   }
 
+  /// Mở màn hình tìm kiếm ảnh trên Internet (trình duyệt web nhúng trong ứng dụng iOS: Safari/ Android: Chrome)
   Future<List<String>?> moTimKiemAnh(String tuKhoa) async {
     final Map<String, Object?> thamSo = {};
     thamSo["tu_khoa"] = tuKhoa;
-    final List<Object?>? ketQua = await _kenhKetNoi.invokeMethod(_MethodToNative.timKiemAnh.value, thamSo) as List<Object?>?;
+    final List<Object?>? ketQua = await _kenhKetNoi.invokeMethod(_YeuCauDenNenTang.timKiemAnh.value, thamSo) as List<Object?>?;
     final List<String>? dsDuongDan = ketQua?.cast<String>();
     return Future.value(dsDuongDan);
   }
 
+  /// Callback từ module native: khi user dán/chia sẻ URL trên màn hình tìm kiếm ảnh
   void _xuLyKhiNhanDuocUrlSach(dynamic thongTin) {
     urlSach.value = thongTin as String;
   }

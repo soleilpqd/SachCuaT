@@ -235,6 +235,7 @@ ${thongTinAnh.ngang}x${thongTinAnh.doc}:${LinhTinh.dinhDangKichThuocTep(thongTin
   //   }
   // }
 
+  /// Mở màn hình chọn ảnh (chụp ảnh hoặc kho ảnh)
   Future<void> _chonAnh(KieuMedia kieu) async {
     try {
       String? duongDan = await HeThongMay.duyNhat.chonAnh(kieu);
@@ -246,7 +247,7 @@ ${thongTinAnh.ngang}x${thongTinAnh.doc}:${LinhTinh.dinhDangKichThuocTep(thongTin
     }
   }
 
-  /// Khi nhấn chọn ảnh (1 nhấn)
+  /// Khi nhấn chụp ảnh
   void _khiNhanChonAnh() {
     _chonAnh(KieuMedia.camera);
   }
@@ -257,11 +258,13 @@ ${thongTinAnh.ngang}x${thongTinAnh.doc}:${LinhTinh.dinhDangKichThuocTep(thongTin
     DuLieuTam().xoaTatCa();
   }
 
+  /// Khi nhấn mở ảnh toàn màn hình
   void _khiXemAnhToanManHinh() {
     final DieuKhienManHinhXemAnh mhAnh = DieuKhienManHinhXemAnh(duongDanAnh: widget.dieuKhien!.hinhAnh!);
     MainApp.luongMHGoc.themManHinh(manHinh: mhAnh);
   }
 
+  /// Xử lý tệp đã chọn (chuyển sang tệp tiếp theo sau tệp đã chọn trong danh sách tệp được chỉ định)
   Future<bool> _xuLyTepDaChon(List<String> dsTep) async {
     if (dsTep.isEmpty) { return false; }
     String? duongDanHienTai = widget.dieuKhien?.hinhAnh?.path;
@@ -285,6 +288,7 @@ ${thongTinAnh.ngang}x${thongTinAnh.doc}:${LinhTinh.dinhDangKichThuocTep(thongTin
     return false;
   }
 
+  /// Khi nhấn nút Dán (Dán ảnh từ clipboard/pasteboard, lấy ảnh đã được chia sẻ từ ứng dụng ngoài, mở màn hình chọn tệp)
   void _khiNhanDan() async {
     final List<String>? kqDan = await HeThongMay.duyNhat.dan([.anh]);
     if (kqDan != null && kqDan.isNotEmpty) {
@@ -306,6 +310,7 @@ ${thongTinAnh.ngang}x${thongTinAnh.doc}:${LinhTinh.dinhDangKichThuocTep(thongTin
     }
   }
 
+  /// Khi nhấn nút Kho ảnh (Photos library)
   void _khiNhanKhoAnh() {
     _chonAnh(KieuMedia.khoAnh);
   }

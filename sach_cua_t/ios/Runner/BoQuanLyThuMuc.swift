@@ -18,6 +18,7 @@
 
 import Foundation
 
+/// Bộ quản lý thư mục sử dụng bởi ứng dụng
 final class BoQuanLyThuMuc {
 
     static let duyNhat = BoQuanLyThuMuc()
@@ -83,12 +84,18 @@ final class BoQuanLyThuMuc {
     }
 
     /// Sao chép các tệp nguồn vào thư mục đích
-    func saoChep(nguon: [URL], thuMucDich: URL) {
+    @discardableResult
+    func saoChep(nguon: [URL], thuMucDich: URL) -> [URL] {
         let fileMan = FileManager.default
+        var ketQua = [URL]()
         for muc in nguon {
             let tepDich = thuMucDich.appendingPathComponent(muc.lastPathComponent)
             try? fileMan.copyItem(at: muc, to: tepDich)
+            if fileMan.fileExists(atPath: tepDich.path) {
+                ketQua.append(tepDich)
+            }
         }
+        return ketQua
     }
 
     /// Tạo mới 1 tên tệp chưa tồn tại trong thư mục chỉ định
