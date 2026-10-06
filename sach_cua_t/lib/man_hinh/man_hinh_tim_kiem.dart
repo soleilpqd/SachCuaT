@@ -26,6 +26,7 @@ import 'package:sach_cua_t/man_hinh/man_hinh_sach.dart';
 import 'package:sach_cua_t/man_hinh/man_hinh_thong_ke.dart';
 import 'package:sach_cua_t/man_hinh/man_hinh_tro_giup.dart';
 import 'package:sach_cua_t/models/dulieu.dart';
+import 'package:sach_cua_t/models/goiylichsutimkiem.dart';
 import 'package:sach_cua_t/models/operations/thao_tac_tim_kiem.dart';
 import 'package:sach_cua_t/models/vanbannoibat.dart';
 import 'package:sach_cua_t/models/xu_ly_nut_lui_android.dart';
@@ -119,7 +120,8 @@ class DieuKhienManHinhTimKiem extends DieuKhienManHinh with TheoDoiDieuKhienCoSo
   final void Function(Sach)? khiChonSach;
   final void Function(int)? khiChonBoSach;
   /// Điều khiển ô nhập từ khoá
-  final DieuKhienTruongVanBan dkTuKhoa = DieuKhienTruongVanBan();
+  late final DieuKhienTruongVanBan dkTuKhoa;
+  final GoiYLichSuTimKiem _goiYLsTimKiem = GoiYLichSuTimKiem();
 
   final ThaoTacTimKiem _congCuTimKiem = ThaoTacTimKiem();
   final DieuKhienCuon _dkCuon = DieuKhienCuon();
@@ -139,6 +141,10 @@ class DieuKhienManHinhTimKiem extends DieuKhienManHinh with TheoDoiDieuKhienCoSo
   DieuKhienManHinhTimKiem({this.khiChonSach, this.khiChonBoSach, List<int>? sachLoaiTru}) {
     widgetCuaManHinh = _ManHinhTimKiem(dkMh: this);
     _congCuTimKiem.dsLoaiTru = sachLoaiTru;
+    dkTuKhoa = DieuKhienTruongVanBan(goiYNoiDung: _goiYLsTimKiem);
+    _goiYLsTimKiem.khiChonGoiY = (_) {
+      _khiNhanTimKiem();
+    };
   }
 
   // -- Delegate
@@ -198,6 +204,7 @@ class DieuKhienManHinhTimKiem extends DieuKhienManHinh with TheoDoiDieuKhienCoSo
     dkTuKhoa.trangThaiNhap = TrangThaiNhapVanBan.khong;
     _xoaKetQua();
     final String tuKhoa = dkTuKhoa.vanBan.trim();
+    _goiYLsTimKiem.capNhatLichSu(tuKhoa);
     dkTuKhoa.khaDung = false;
     _congCuTimKiem.batDauTimKiem(
       khiXong1Viec: () => trangThaiWidgetManHinh?.capNhatGiaoDienCuaManHinh(dieuKhienManHinh: this),

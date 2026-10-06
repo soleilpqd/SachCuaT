@@ -70,4 +70,14 @@ class LuuTruCauHinh {
     }
   }
 
+  Future<List<String>> layLichSuTimKiem() async {
+    await _khoiTaoNeuCan();
+    return _prefs!.getStringList("lstk") ?? [];
+  }
+
+  Future<void> luuLichSuTimKiem(List<String> dsTuKhoa) async {
+    await _khoiTaoNeuCan();
+    await _prefs!.setStringList("lstk", dsTuKhoa);
+  }
+
 }
