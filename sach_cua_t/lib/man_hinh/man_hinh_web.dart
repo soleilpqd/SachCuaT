@@ -17,14 +17,16 @@
  */
 
 import 'dart:io';
-
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:man_hinh_ung_dung/man_hinh_ung_dung.dart';
+import 'package:path/path.dart';
 import 'package:sach_cua_t/man_hinh/man_hinh_co_so.dart';
 import 'package:sach_cua_t/man_hinh/man_hinh_tro_giup.dart';
+import 'package:sach_cua_t/models/database.dart';
 import 'package:sach_cua_t/models/luutrucauhinh.dart';
 import 'package:sach_cua_t/models/xu_ly_nut_lui_android.dart';
-import 'package:sach_cua_t/utils/common.dart';
 import 'package:sach_cua_t/utils/hopthoai.dart';
 import 'package:sach_cua_t/utils/vanbanhienthi.dart';
 import 'package:sach_cua_t/views/dieu_khien_co_so.dart';
@@ -34,41 +36,122 @@ import 'package:sach_cua_t/views/van_ban_hien_thi_widget.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
-class DieuKhienManHinhWeb extends DieuKhienManHinh with XuLyNutLuiAndroid {
+/// Các khoá trường thông tin sách trả lại từ mã JS trích xuất thông tin web
+enum TruongThongTinSachTuInternet {
+  /// Số thứ tự
+  stt,
+  /// ISBN
+  isbn,
+  /// Tên sách
+  ten,
+  /// Tác giả
+  tacGia,
+  /// Biên tập viên
+  bienTapVien,
+  /// Nhà xuất bản
+  nxb,
+  /// Đối tác
+  doiTac,
+  /// In ấn (nhà in)
+  inAn,
+  /// Ngày tháng
+  ngay;
 
+  /// Giá trị khoá
+  String get giaTri {
+    return switch (this) {
+      tacGia => "tac_gia",
+      bienTapVien => "bien_tap_vien",
+      doiTac => "doi_tac",
+      inAn => "in",
+      _ => name
+    };
+  }
+}
+
+/// Website để nhập thông tin sách
+class WebsiteThongTinSach {
+  /// Tên hiển thị
+  final String ten;
   /// URL
   final String url;
-  /// Tiêu đề
-  final Vbht tieuDe;
+
+  const WebsiteThongTinSach({required this.ten, required this.url});
+}
+
+/// Mã lệnh JS để nhập thông tin sách
+class MaLenhNhapThongTinSach {
+  /// Mã lệnh
+  final String maLenh;
+  /// Lọc lấy chính xác (áp dụng mã lệnh với các URL chính xác trong danh sách)
+  final List<String> locChinhXac = [];
+  /// Lọc lấy URL dùng Biểu thức chính quy (Regular Expression)
+  final List<RegExp> locBieuThuc = [];
+  /// Lọc bỏ chính xác (không áp dụng mã lệnh với các URL chính xác trong danh sách)
+  final List<String> boChinhXac = [];
+  /// Lọc bỏ URL dùng Biểu thức chính quy (Regular Expression)
+  final List<RegExp> boBieuThuc = [];
+
+  MaLenhNhapThongTinSach({required this.maLenh});
+
+  bool kiemTraUrl(String url) {
+    for (final loc in boChinhXac) {
+      if (loc == url) {
+        return false;
+      }
+    }
+    for (final loc in locChinhXac) {
+      if (loc == url) {
+        return true;
+      }
+    }
+    for (final loc in boBieuThuc) {
+      if (loc.hasMatch(url)) {
+        // print("REGEX exclue true: ${loc.pattern} => $url");
+        return false;
+      }
+      // print("REGEX exclue false: ${loc.pattern} => $url");
+    }
+    for (final loc in locBieuThuc) {
+      if (loc.hasMatch(url)) {
+        // print("REGEX include true: ${loc.pattern} => $url");
+        return true;
+      }
+      // print("REGEX include false: ${loc.pattern} => $url");
+    }
+    return false;
+  }
+}
+
+class DieuKhienManHinhWeb extends DieuKhienManHinh with XuLyNutLuiAndroid {
+
+  final List<WebsiteThongTinSach> _websites = [];
+  final List<MaLenhNhapThongTinSach> _maLenh = [];
+
   /// Webview controller
   final WebViewController _webController = WebViewController();
   /// Điều khiển nút trích xuất
   final DieuKhienCoSo _dkNutTrichXuat = DieuKhienCoSo(khaDung: false);
   /// Hàm xử lý khi nhấn chọn 1 sách khi trích xuất
   final Function(Map<String, String>)? khiChonSach;
-  /// Bật trích xuất (là trang Lưu chiểu)
-  final bool batTrichXuat;
   /// Đang tải
-  bool dangTai = false;
+  bool _dangTai = false;
   /// Đã tải thành công
-  bool daTaiThanhCong = false;
+  bool _daTaiThanhCong = false;
   /// Đã tiêm nhiễm thành công code JS để trích xuất dữ liệu
-  bool trichXuatSanSang = false;
-  /// Danh sách nhà xuất bản đã trích xuất
-  Map<String, String> dsNXB = {};
-  /// Danh sách Sách đã trích xuất
-  List<List<String>> dsSach = [];
-  /// Đã cấu hình
-  bool _daCauHinh = false;
+  bool _trichXuatSanSang = false;
 
+  /// Danh sách Sách đã trích xuất
+  final List<Map<String, String>> _dsSach = [];
+  int _sanSang = 0;
+
+  final Vbht _tieuDeManHinh = Vbht.trucTiep("Website");
   DieuKhienManHinhTuDuoiDay? _dkHopThoaiChonSach;
+  DieuKhienManHinhTuDuoiDay? _dkHopThoaiChonWebsite;
 
   DieuKhienManHinhWeb({
-    required this.url,
-    required this.tieuDe,
-    this.khiChonSach,
-    bool? coTheTrichXuat
-  }) : batTrichXuat = coTheTrichXuat ?? (url == HangSo.urlLuuChieu || url == HangSo.urlDKXuatBan) {
+    this.khiChonSach
+  }){
     widgetCuaManHinh = _ManHinhWeb(dkManHinh: this);
     _webController.setJavaScriptMode(JavaScriptMode.unrestricted);
     _webController.setNavigationDelegate(NavigationDelegate(
@@ -76,30 +159,129 @@ class DieuKhienManHinhWeb extends DieuKhienManHinh with XuLyNutLuiAndroid {
       onPageFinished: _khiKetThucTaiTrang,
       onHttpError: _khiTaiTrangLoi
     ));
-    dangTai = true;
-    daTaiThanhCong = false;
-    trichXuatSanSang = false;
+    _dangTai = true;
+    _daTaiThanhCong = false;
+    _trichXuatSanSang = false;
+    _napDanhSachWebsites();
   }
 
   void _cauHinhNutTrichXuat() => _dkNutTrichXuat.khaDung = choPhepTrichXuat;
 
-  /// Kiểm tra xem nút trích xuất có thể sử dụng được hay không
-  bool get choPhepTrichXuat {
-    final bool koChoPhep = dangTai || !daTaiThanhCong || !batTrichXuat || !trichXuatSanSang;
-    return !koChoPhep;
+  void _kiemTraSanSang() {
+    _sanSang += 1;
+    if (_sanSang == 2) {
+      _khiNhanTieuDeManHinh();
+    }
   }
 
   @override
   void manHinhDaThanhManHinhChinhTrongLuong() {
     super.manHinhDaThanhManHinhChinhTrongLuong();
-    if (_daCauHinh) { return; }
-    _daCauHinh = true;
+    _kiemTraSanSang();
+  }
+
+  void _napDanhSachWebsites() async {
+    final String tenTep = "nhap_sach.json";
+    File tepJson = File(join(CoSoDuLieu().thuMucAnhCoSo, tenTep));
+    if (await tepJson.exists()) {
+      final noiDung = await tepJson.readAsString();
+      await _napDsWebsitesTu(noiDung);
+    }
+    if (_websites.isEmpty) {
+      final noiDung = await rootBundle.loadString(join("assets", tenTep));
+      await _napDsWebsitesTu(noiDung);
+    }
+    _kiemTraSanSang();
+  }
+
+  Future<void> _napDsWebsitesTu(String duLieu) async {
+    try {
+      final Map<String, dynamic> thongTin = jsonDecode(duLieu);
+      final dsMaLenh = thongTin["ma_lenh"];
+      if (dsMaLenh != null && dsMaLenh is List<dynamic>) {
+        for (final muc in dsMaLenh) {
+          if (muc is Map<String, dynamic>) {
+            final ma = muc["ma"];
+            if (ma is String) {
+              MaLenhNhapThongTinSach maLenh = MaLenhNhapThongTinSach(maLenh: ma);
+              var loc = muc["loc_chinh_xac"];
+              if (loc != null && loc is List<dynamic>) {
+                for (final mucLoc in loc) {
+                  if (mucLoc is String) {
+                    maLenh.locChinhXac.add(mucLoc);
+                  }
+                }
+              }
+              loc = muc["bo_chinh_xac"];
+              if (loc != null && loc is List<dynamic>) {
+                for (final mucLoc in loc) {
+                  if (mucLoc is String) {
+                    maLenh.boChinhXac.add(mucLoc);
+                  }
+                }
+              }
+              loc = muc["loc_regex"];
+              if (loc != null && loc is List<dynamic>) {
+                for (final mucLoc in loc) {
+                  if (mucLoc is String) {
+                    maLenh.locBieuThuc.add(RegExp(mucLoc));
+                  }
+                }
+              }
+              loc = muc["bo_regex"];
+              if (loc != null && loc is List<dynamic>) {
+                for (final mucLoc in loc) {
+                  if (mucLoc is String) {
+                    maLenh.boBieuThuc.add(RegExp(mucLoc));
+                  }
+                }
+              }
+              _maLenh.add(maLenh);
+            }
+          }
+        }
+      }
+      final dsWebsites = thongTin["urls"];
+      if (dsWebsites is List<dynamic>) {
+        for (final muc in dsWebsites) {
+          if (muc is Map<String, dynamic>) {
+            final WebsiteThongTinSach aWeb = WebsiteThongTinSach(
+              ten: muc["ten"] as String,
+              url: muc["url"] as String
+            );
+            _websites.add(aWeb);
+          }
+        }
+      }
+    } catch (_){}
+  }
+
+  /// Kiểm tra xem nút trích xuất có thể sử dụng được hay không
+  bool get choPhepTrichXuat {
+    final bool koChoPhep = _dangTai || !_daTaiThanhCong || !_trichXuatSanSang;
+    return !koChoPhep;
+  }
+
+  @override
+  bool khiNhanNutLuiAndroid() {
+    _khiNhanQuayLai();
+    return false;
+  }
+
+  void _napTrangWeb(WebsiteThongTinSach doiTuong) {
+    _dangTai = true;
+    _daTaiThanhCong = false;
+    _trichXuatSanSang = false;
+    _cauHinhNutTrichXuat();
+    _tieuDeManHinh.ganTrucTiep(doiTuong.ten);
     final LuuTruCauHinh cauHinh = LuuTruCauHinh();
-    final Uri uri = Uri.parse(url);
+    final Uri uri = Uri.parse(doiTuong.url);
+    // print("DEBUG kich hoat $uri");
     cauHinh.layLuuYTrangWeb(uri.host).then((gt) {
+      // print("DEBUG kich hoat $uri da xac nhan $gt");
       if (!gt) {
         HopThoai.hienThiHopThoaiThongBao(
-          noiDung: Vbht.tuKhoa(TK.luuYTrangWebNgoai, ts: [url]),
+          noiDung: Vbht.tuKhoa(TK.luuYTrangWebNgoai, ts: [doiTuong.url]),
           nhanCacNut: [Vbht.tuKhoa(TK.moTrongTrinhDuyet), Vbht.tuKhoa(TK.moTrongUngDung)],
           boCucHangDoc: true,
           khiDong: (stt, _) {
@@ -118,151 +300,152 @@ class DieuKhienManHinhWeb extends DieuKhienManHinh with XuLyNutLuiAndroid {
     });
   }
 
-  @override
-  bool khiNhanNutLuiAndroid() {
-    _khiNhanQuayLai();
-    return false;
+  void _khiNhanTieuDeManHinh() {
+    final PhongCachGiaoDien phongCach = PhongCachGiaoDien();
+    _dkHopThoaiChonWebsite = HopThoai.hienThiHopThoaiTuDuoiDay(
+      noiDung: Material(
+        color: phongCach.mauNen,
+        borderRadius: const BorderRadius.all(Radius.circular(20)),
+        clipBehavior: Clip.antiAliasWithSaveLayer,
+        child: ListView.separated(
+          itemBuilder: (ctx2, index) {
+            return ListTile(
+              title: VbhtWidget(
+                text: Vbht.trucTiep(_websites[index].ten),
+                coChu: CoChu.binhThuong,
+                style: const TextStyle(fontWeight: FontWeight.bold)
+              ),
+              subtitle: VbhtWidget(
+                text: Vbht.trucTiep(_websites[index].url),
+                coChu: CoChu.nho,
+                style: const TextStyle(fontStyle: FontStyle.italic),
+              ),
+              isThreeLine: true,
+              onTap: () {
+                _dongHopThoaiChonWebsite(_websites[index]);
+              },
+            );
+          },
+          separatorBuilder: (ctx3, index) {
+            return Divider(
+              color: phongCach.mauVien,
+              thickness: 1,
+              height: 1,
+            );
+          },
+          itemCount: _websites.length
+        )
+      ),
+      khiDong: () => _dongHopThoaiChonWebsite(null),
+    );
   }
 
   void _khiNhanQuayLai() {
     luongManHinh?.loaiManHinh(manHinh: this);
   }
 
+  void _dongHopThoaiChonWebsite(WebsiteThongTinSach? web) {
+    if (_dkHopThoaiChonWebsite != null) {
+      _dkHopThoaiChonWebsite!.luongManHinh?.loaiManHinh(
+        manHinh: _dkHopThoaiChonWebsite!
+      );
+      _dkHopThoaiChonWebsite = null;
+      if (web != null) {
+        // print("DEBUG doi web ${web.ten}");
+        _webController.currentUrl().then((urlHienTai) {
+          if (web.url != urlHienTai) {
+            // print("  DEBUG doi web $urlHienTai -> ${web.ten}");
+            _napTrangWeb(web);
+          }
+        });
+      }
+    }
+  }
+
   void _khiNhanTaiLaiTrang() {
-    dangTai = true;
-    daTaiThanhCong = false;
-    trichXuatSanSang = false;
-    _cauHinhNutTrichXuat();
-    _webController.loadRequest(Uri.parse(url));
+    _webController.reload();
   }
 
   /// Khi webview bắt đầu tải trang
   void _khiBatDauTaiTrang(String url) {
-    dangTai = true;
-    daTaiThanhCong = false;
-    trichXuatSanSang = false;
+    // print("DEBUG bat dau $url");
+    _dangTai = true;
+    _daTaiThanhCong = false;
+    _trichXuatSanSang = false;
     _cauHinhNutTrichXuat();
   }
 
   /// Khi webview kết thúc tải trang
   void _khiKetThucTaiTrang(String url) {
-    if (batTrichXuat) {
-      _webController.runJavaScript(
-        """
-        function layDanhSachNXB() {
-          let ketQua = "";
-          const selectTag = document.getElementsByName("id_nxb");
-          if (selectTag.length > 0) {
-            selectTag.item(0).childNodes.forEach(function (item, index, list) {
-              if (item.tagName == "OPTION") {
-                ketQua += `\${item.value}\\n\${item.text}\\n`;
-              }
-            });
-          }
-          return ketQua;
-        }
-
-        function layDanhSachSach() {
-          let ketQua = "";
-          const divKetQua = document.getElementById("list_data_return");
-          if (divKetQua != null) {
-            divKetQua.childNodes.forEach(function (divKqItem, divKqIndex, divKqList) {
-              if (divKqItem.tagName == "TABLE") {
-                divKqItem.childNodes.forEach(function (tableItem, tableIndex, tableList) {
-                  if (tableItem.tagName == "TBODY") {
-                    tableItem.childNodes.forEach(function (tbodyItem, tbodyIndex, tbodyList) {
-                      if (tbodyItem.tagName == "TR") {
-                        tbodyItem.childNodes.forEach(function (trItem, trIndex, trList) {
-                          if (trItem.tagName == "TD") {
-                            ketQua += `\${trItem.textContent}\\n`;
-                          }
-                        })
-                        ketQua += "\\r\\n";
-                      }
-                    })
-                  }
-                })
-              }
-            })
-          }
-          return ketQua;
-        }
-        """
-      ).then((value) {
-        trichXuatSanSang = true;
-        _cauHinhNutTrichXuat();
-      });
+    _webController.getTitle().then((tieuDe) {
+      _tieuDeManHinh.ganTrucTiep(tieuDe ?? "");
+    });
+    MaLenhNhapThongTinSach? maLenh;
+    for (final muc in _maLenh) {
+      if (muc.kiemTraUrl(url)) {
+        maLenh = muc;
+        break;
+      }
     }
-
-    dangTai = false;
-    daTaiThanhCong = true;
+    if (maLenh == null) {
+      return;
+    }
+    // print("DEBUG ma lenh: ${maLenh.maLenh}");
+    _webController.runJavaScript(maLenh.maLenh).then((_) {
+      _trichXuatSanSang = true;
+      _cauHinhNutTrichXuat();
+    });
+    _dangTai = false;
+    _daTaiThanhCong = true;
     _cauHinhNutTrichXuat();
   }
 
   /// Khi tải trang thất bại
   void _khiTaiTrangLoi(HttpResponseError error) {
-    dangTai = false;
-    daTaiThanhCong = false;
+    _dangTai = false;
+    _daTaiThanhCong = false;
     _cauHinhNutTrichXuat();
   }
 
   /// Mở URL gốc trong trình duyệt ngoài
   void _khiNhanNutTrinhDuyet() {
-    launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+    _webController.currentUrl().then((url) {
+      if (url != null) {
+        launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+      }
+    });
   }
 
   /// Khi nhấn nút trích xuất
   void _khiNhanNutTrichXuat() {
-    // _trichXuatDsNXB();
     _trichXuatDsSach();
-  }
-
-  /// Reserved
-  void _trichXuatDsNXB() {
-    dsNXB.clear();
-    dsSach.clear();
-    _webController.runJavaScriptReturningResult("layDanhSachNXB();").then((value) {
-      String ketQua = value as String;
-      List<String> cacDong = ketQua.split(Platform.isAndroid ? "\\n" : "\n");
-      bool dongLe = false;
-      String tenNXB = "";
-      String maNXB = "";
-      Map<String, String> dsNXB = {};
-      for (final dong in cacDong) {
-        if (dongLe) {
-          tenNXB = dong;
-          if (maNXB != "-1") {
-            dsNXB[maNXB] = tenNXB;
-          }
-        } else {
-          maNXB = dong;
-        }
-        dongLe = !dongLe;
-      }
-      List<String> dsMa = dsNXB.keys.toList();
-      dsMa.sort((a, b) => (int.tryParse(a) ?? 0) - (int.tryParse(b) ?? 0));
-      for (final ma in dsMa) {
-        print("(\"${dsNXB[ma]}\", \"$ma\"),\n");
-      }
-      _trichXuatDsSach();
-    }).onError((error, stackTrace) {
-      _trichXuatDsSach();
-    });
   }
 
   /// Trích xuất danh sách sách
   void _trichXuatDsSach() {
-    _webController.runJavaScriptReturningResult("layDanhSachSach();").then((value) {
+    String maLenh = "layDanhSachSach();";
+    if (Platform.isIOS) {
+      maLenh = "JSON.stringify(layDanhSachSach());";
+    }
+    _webController.runJavaScriptReturningResult(maLenh).then((value) {
+      _dsSach.clear();
       String ketQua = value as String;
-      List<String> cacDoan = ketQua.split(Platform.isAndroid ? "\\n\\r\\n" : "\n\r\n");
-      dsSach.clear();
-      for (final doan in cacDoan) {
-        List<String> cacDong = doan.split(Platform.isAndroid ? "\\n" : "\n");
-        if (cacDong.length > 6) {
-          dsSach.add(cacDong);
+      // print("DEBUG kq trich xuat: $value");
+      final dynamic ketQuaJson = jsonDecode(ketQua);
+      if (ketQuaJson is List<dynamic>) {
+        for (final muc in ketQuaJson) {
+          if (muc is Map<String, dynamic>) {
+            final Map<String, String> mucKq = {};
+            muc.forEach((khoa, giaTri) {
+              if (giaTri is String) {
+                mucKq[khoa] = giaTri;
+              }
+            });
+            _dsSach.add(mucKq);
+          }
         }
       }
-      if (dsSach.isEmpty) {
+      if (_dsSach.isEmpty) {
         _khongCoKetQuaTrichXuat();
       } else {
         _xuLyKetQuaTrichXuat();
@@ -286,15 +469,28 @@ class DieuKhienManHinhWeb extends DieuKhienManHinh with XuLyNutLuiAndroid {
         manHinh: _dkHopThoaiChonSach!
       );
       _dkHopThoaiChonSach = null;
-      if (thongTinSach != null) {
-        khiChonSach?.call(thongTinSach);
-        luongManHinh?.loaiManHinh(manHinh: this);
-      }
     }
+    if (thongTinSach != null) {
+      _khiChonSach(thongTinSach);
+    }
+  }
+
+  void _khiChonSach(Map<String, String> thongTinSach) {
+    _webController.currentUrl().then((url) {
+      if (url != null) {
+        thongTinSach["nhan:URL::hien"] = url;
+      }
+      khiChonSach?.call(thongTinSach);
+      luongManHinh?.loaiManHinh(manHinh: this);
+    });
   }
 
   /// Xử lý kết quả trích xuất: hiển thị bottom sheet cho user chọn
   void _xuLyKetQuaTrichXuat() {
+    if (_dsSach.length == 1) {
+      _khiChonSach(_dsSach.first);
+      return;
+    }
     final PhongCachGiaoDien phongCach = PhongCachGiaoDien();
     _dkHopThoaiChonSach = HopThoai.hienThiHopThoaiTuDuoiDay(
       noiDung: Material(
@@ -305,31 +501,26 @@ class DieuKhienManHinhWeb extends DieuKhienManHinh with XuLyNutLuiAndroid {
           itemBuilder: (ctx2, index) {
             return ListTile(
               leading: VbhtWidget(
-                text: Vbht.trucTiep(dsSach[index][0]),
+                text: Vbht.trucTiep(_dsSach[index][TruongThongTinSachTuInternet.stt.giaTri] ?? "0"),
                 coChu: CoChu.to,
               ),
               title: VbhtWidget(
-                text: Vbht.trucTiep(dsSach[index][2]),
+                text: Vbht.trucTiep(_dsSach[index][TruongThongTinSachTuInternet.ten.giaTri] ?? ""),
                 coChu: CoChu.binhThuong,
                 style: const TextStyle(fontWeight: FontWeight.bold)
               ),
               subtitle: VbhtWidget(
-                text: Vbht.trucTiep("ISBN: ${dsSach[index][1]}\nTG: ${dsSach[index][3]}\nNXB: ${dsSach[index][5]}"),
+                text: Vbht.trucTiep(
+                  "ISBN: ${_dsSach[index][TruongThongTinSachTuInternet.isbn.giaTri]}\n"
+                  "TG: ${_dsSach[index][TruongThongTinSachTuInternet.tacGia.giaTri]}\n"
+                  "NXB: ${_dsSach[index][TruongThongTinSachTuInternet.nxb.giaTri]}"
+                ),
                 coChu: CoChu.nho,
                 style: const TextStyle(fontStyle: FontStyle.italic),
               ),
               isThreeLine: true,
               onTap: () {
-                Map<String, String> thongTinSach = {};
-                List<String> duLieu = dsSach[index];
-                thongTinSach["ISBN"] = LinhTinh.chuanHoaMaSo(duLieu[1]);
-                thongTinSach["ten"] = duLieu[2].trim();
-                thongTinSach["TG"] = duLieu[3].trim();
-                thongTinSach["BTV"] = duLieu[4].trim();
-                thongTinSach["NXB"] = duLieu[5].trim();
-                thongTinSach["DT"] = duLieu[6].trim();
-                thongTinSach["in"] = duLieu[7].trim();
-                thongTinSach["ngay"] = duLieu[8].trim();
+                Map<String, String> thongTinSach = _dsSach[index];
                 _dongHopThoaiChonSach(thongTinSach);
               },
             );
@@ -341,11 +532,19 @@ class DieuKhienManHinhWeb extends DieuKhienManHinh with XuLyNutLuiAndroid {
               height: 1,
             );
           },
-          itemCount: dsSach.length
+          itemCount: _dsSach.length
         )
       ),
       khiDong: () => _dongHopThoaiChonSach(null),
     );
+  }
+
+  void _khiNhanLui() {
+    _webController.goBack();
+  }
+
+  void _khiNhanTien() {
+    _webController.goForward();
   }
 
 }
@@ -361,30 +560,53 @@ class _ManHinhWeb extends StatelessWidget  {
   Widget build(BuildContext context) {
     List<Widget> nutPhai = [
       NutBamBieuTuong(
-        bieuTuong: Icons.open_in_browser,
-        thuocThanhDieuHuong: true,
-        khiNhan: dkManHinh._khiNhanNutTrinhDuyet
-      ),
-      NutBamBieuTuong(
-        bieuTuong: Icons.refresh,
-        thuocThanhDieuHuong: true,
-        khiNhan: dkManHinh._khiNhanTaiLaiTrang
-      )
-    ];
-    if (dkManHinh.batTrichXuat) {
-      nutPhai.add(NutBamBieuTuong(
         bieuTuong: Icons.input,
         khiNhan: dkManHinh._khiNhanNutTrichXuat,
         thuocThanhDieuHuong: true,
         dieuKhien: dkManHinh._dkNutTrichXuat
-      ));
-    }
-    nutPhai.add(ManHinhCoSo.taoNutHuongDan(KieuHuongDan.web));
+      ),
+      ManHinhCoSo.taoNutHuongDan(KieuHuongDan.web)
+    ];
+    final PhongCachGiaoDien phongCach = PhongCachGiaoDien();
     return ManHinhCoSo(
-      tieuDe: dkManHinh.tieuDe,
+      tieuDe: dkManHinh._tieuDeManHinh,
       khiNhanQuayLai: dkManHinh._khiNhanQuayLai,
+      khiNhanTieuDe: dkManHinh._khiNhanTieuDeManHinh,
       nutPhai: nutPhai,
-      noiDung: WebViewWidget(key: dkManHinh.khoaWidgetGoc, controller: dkManHinh._webController)
+      noiDung: Column(
+        children: [
+          Expanded(child: WebViewWidget(key: dkManHinh.khoaWidgetGoc, controller: dkManHinh._webController)),
+          Container(
+            color: phongCach.mauChinh,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                NutBamBieuTuong(
+                  bieuTuong: Icons.arrow_back,
+                  thuocThanhDieuHuong: true,
+                  khiNhan: dkManHinh._khiNhanLui
+                ),
+                NutBamBieuTuong(
+                  bieuTuong: Icons.open_in_browser,
+                  thuocThanhDieuHuong: true,
+                  khiNhan: dkManHinh._khiNhanNutTrinhDuyet
+                ),
+                NutBamBieuTuong(
+                  bieuTuong: Icons.refresh,
+                  thuocThanhDieuHuong: true,
+                  khiNhan: dkManHinh._khiNhanTaiLaiTrang
+                ),
+                NutBamBieuTuong(
+                  bieuTuong: Icons.arrow_forward,
+                  thuocThanhDieuHuong: true,
+                  khiNhan: dkManHinh._khiNhanTien
+                )
+              ]
+            )
+          ),
+          Container(height: 30, color: phongCach.mauChinh)
+        ],
+      )
     );
   }
 

@@ -17,7 +17,6 @@
  */
 
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:path/path.dart';
@@ -60,6 +59,8 @@ class CoSoDuLieu {
   final int _dbVersion = 1;
   String _thuMucAnhSach = "";
   String get thuMucAnhSach => _thuMucAnhSach;
+  String _thuMucCoSo = "";
+  String get thuMucAnhCoSo => _thuMucCoSo;
   /// Đã mở hay chưa
   bool get daMo => _db != null;
   /// Thời điểm tham chiếu (thời điểm cài app)
@@ -83,6 +84,7 @@ class CoSoDuLieu {
     if (duongDanCoSo == null) {
       return false;
     }
+    _thuMucCoSo = duongDanCoSo;
     final String duongDanCSDL = join(duongDanCoSo, tenDB);
     final csdlTonTai = await databaseExists(duongDanCSDL);
     // final dbExisted = false; // DEBUG: overwrite

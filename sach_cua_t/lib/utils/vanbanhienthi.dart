@@ -23,8 +23,6 @@ import 'package:sach_cua_t/utils/common.dart';
 enum TK {
   /// Sách của T
   sachCuaT,
-  /// Lưu chiểu
-  luuChieu,
   /// Đăng ký xuất bản
   dkxb,
   /// Đã đọc xong
@@ -41,8 +39,8 @@ enum TK {
   thongTinSach,
   /// Sách mới
   sachMoi,
-  /// Tra cứu lưu chiểu
-  traCuuLuuChieu,
+  /// Nhập thông tin sách từ Internet\
+  nhapThongTinSach,
   /// Tra cứu Đăng ký xuất bản
   traCuuDKXB,
   /// ISBN
@@ -184,6 +182,12 @@ class Vbht {
         _vanBan += " ${thamSo!}";
       }
     }
+  }
+
+  /// Sử dụng để thay đổi trực tiếp nội dung
+  void ganTrucTiep(String noiDung) {
+    _vanBan = noiDung;
+    khiXong?.call(_vanBan);
   }
 
   /// CONSTRUCTOR

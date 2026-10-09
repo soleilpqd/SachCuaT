@@ -380,8 +380,11 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo, X
   }
 
   /// Khi nhấn nút Tra cứu lưu chiểu
-  void _khiNhanTraCuuLuuChieu() {
-    _moWebCucXuatBan(url: HangSo.urlLuuChieu, tieuDe: TK.luuChieu);
+  void _khiNhanNhapThongTinSach() {
+    final DieuKhienManHinhWeb dkMhWeb = DieuKhienManHinhWeb(
+      khiChonSach: _khiChonSachTuInternet
+    );
+    luongManHinh?.themManHinh(manHinh: dkMhWeb);
   }
 
   /// Khi nhấn nút Tìm ảnh
@@ -392,19 +395,6 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo, X
         _dkHinhAnh.hinhAnh = LinhTinh.taoDuongDan(phanLoai: PhanLoaiDuongDan.file, duongDan: dsKetQua.first);
       }
     });
-  }
-
-  void _moWebCucXuatBan({required String url, required TK tieuDe}) {
-    String urlCuoi = url;
-    if (_dkTenSach.vanBan.isNotEmpty) {
-      urlCuoi += "?query=${Uri.encodeComponent(_dkTenSach.vanBan)}";
-    }
-    final DieuKhienManHinhWeb dkMhWeb = DieuKhienManHinhWeb(
-      url: urlCuoi,
-      tieuDe: Vbht.tuKhoa(tieuDe, dem: _demVbht),
-      khiChonSach: _khiChonSachTuLuuChieu
-    );
-    luongManHinh?.themManHinh(manHinh: dkMhWeb);
   }
 
   /// Khi nhấn vào sửa tập
@@ -501,22 +491,7 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo, X
       return;
     }
     HeThongMay.duyNhat.urlSach.value = "";
-    bool timThay = false;
-    for (final muc in _dsDkNhan) {
-      if (muc.vbTieuDe == "URL") {
-        muc.vanBan = urlStr;
-        timThay = true;
-        break;
-      }
-    }
-    if (!timThay) {
-      DieuKhienTruongVanBan dkVb = DieuKhienTruongVanBan(goiYNoiDung: _goiYGiaTriNhan, goiYTieuDe: _goiYTenNhan, luonHienThi: true);
-      dkVb.debugInfo = "NN URL";
-      dkVb.vanBan = urlStr;
-      dkVb.vbTieuDe = "URL";
-      dkVb.trangThaiNutBenPhai = null;
-      dkVb.themTheoDoi(this);
-      _dsDkNhan.add(dkVb);
+    if (!_themNhanTuDong("URL", urlStr, "NN URL", true)) {
       _cauHinhLaiDauVao();
       trangThaiWidgetManHinh?.capNhatGiaoDienCuaManHinh(dieuKhienManHinh: this);
     }
@@ -1114,13 +1089,13 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo, X
   }
 
   /// Khi chọn sách từ lưu chiểu
-  void _khiChonSachTuLuuChieu(Map<String, String> duLieu) {
-    // print("DEBUG $duLieu\n${widget.dkManHinh.dsNxb}");
-    String isbn = duLieu["ISBN"] ?? "";
-    String ten = duLieu["ten"] ?? "";
-    String tacGia = duLieu["TG"] ?? "";
-    String nxb = duLieu["NXB"] ?? "";
-    String doiTac = (duLieu["DT"] ?? "").toUpperCase();
+  void _khiChonSachTuInternet(Map<String, String> duLieu) {
+    // print("DEBUG nhap thong tin sach $duLieu");
+    String isbn = LinhTinh.chuanHoaMaSo(duLieu[TruongThongTinSachTuInternet.isbn.giaTri] ?? "");
+    String ten = duLieu[TruongThongTinSachTuInternet.ten.giaTri] ?? "";
+    String tacGia = duLieu[TruongThongTinSachTuInternet.tacGia.giaTri] ?? "";
+    String nxb = duLieu[TruongThongTinSachTuInternet.nxb.giaTri] ?? "";
+    String doiTac = (duLieu[TruongThongTinSachTuInternet.doiTac.giaTri] ?? "").toUpperCase();
     _lamSachTatCaDauVao();
     _dkHinhAnh.hinhAnh = null;
     _dkISBN.vanBan = isbn;
@@ -1139,11 +1114,58 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo, X
         break;
       }
     }
+    final Map<String, String> dsNhanTuDong = {};
+    final Map<String, bool> dsNhanLuonHien = {};
+    duLieu.forEach((khoa, giaTri) {
+      if (khoa.contains(":")) {
+        final arrKhoa = khoa.split(":");
+        if (arrKhoa.length > 1 && arrKhoa[0] == "nhan") {
+          if (arrKhoa.length > 2 && arrKhoa[2] == "so") {
+            dsNhanTuDong[arrKhoa[1]] = LinhTinh.chuanHoaMaSo(giaTri);
+          } else {
+            dsNhanTuDong[arrKhoa[1]] = giaTri;
+          }
+          if (arrKhoa.length > 3 && arrKhoa[3] == "hien") {
+            dsNhanLuonHien[arrKhoa[1]] = true;
+          }
+        }
+      }
+    });
     _khoiTaoDSNhan().then((_) {
       _taoDieuKhienNhanLuonHienThi();
+      dsNhanTuDong.forEach((khoa, gTri) {
+        final bool luonHien = dsNhanLuonHien[khoa] ?? false;
+        _themNhanTuDong(khoa, gTri, "NN $khoa", luonHien);
+      });
       _cauHinhLaiDauVao();
       trangThaiWidgetManHinh?.capNhatGiaoDienCuaManHinh(dieuKhienManHinh: this);
     });
+  }
+
+  /// Tự động thêm nhãn
+  bool _themNhanTuDong(String ten, String giaTri, String debugInfo, bool luonHienThi) {
+    bool timThay = false;
+    for (final muc in _dsDkNhan) {
+      if (muc.vbTieuDe == ten) {
+        muc.vanBan = giaTri;
+        timThay = true;
+        break;
+      }
+    }
+    if (!timThay) {
+      DieuKhienTruongVanBan dkVb = DieuKhienTruongVanBan(
+        goiYNoiDung: _goiYGiaTriNhan,
+        goiYTieuDe: _goiYTenNhan,
+        luonHienThi: luonHienThi
+      );
+      dkVb.debugInfo = debugInfo;
+      dkVb.vanBan = giaTri;
+      dkVb.vbTieuDe = ten;
+      dkVb.trangThaiNutBenPhai = null;
+      dkVb.themTheoDoi(this);
+      _dsDkNhan.add(dkVb);
+    }
+    return timThay;
   }
 
   /// Thu thập dữ liệu từ màn hình vào object dữ liệu cuối
@@ -1400,10 +1422,10 @@ class _TrangThaiNoiDungManHinhSach extends TrangThaiWidgetCuaDieuKhien<_NoiDungM
   Widget? _xayDungWidgetsMucChung(int dong) {
     final DieuKhienManHinhSach dkMh = widget.dieuKhienManHinh;
     return switch (dong) {
-      // Tra cứu lưu chiểu
+      // Nhập thông tin sách từ Internet
       0 => (dkMh.chiDoc || dkMh.maSach != null) ? null : TruongNutBam(
-        khiNhan: dkMh._khiNhanTraCuuLuuChieu,
-        tieuDe: Vbht.tuKhoa(TK.traCuuLuuChieu, dem: dkMh._demVbht),
+        khiNhan: dkMh._khiNhanNhapThongTinSach,
+        tieuDe: Vbht.tuKhoa(TK.nhapThongTinSach, dem: dkMh._demVbht),
         icon: Icons.arrow_forward,
         dieuKhien: dkMh._dkLuuChieu,
       ),
@@ -1570,7 +1592,10 @@ class _TrangThaiNoiDungManHinhSach extends TrangThaiWidgetCuaDieuKhien<_NoiDungM
       bool hienThiDayDu = dkMh._dkHienThiDSTapDayDu.giaTri;
       if (dkMh._dsCacTap.length > 3) {
         ketQua.add(
-          TruongBatTat(tieuDe: Vbht.tuKhoa(TK.hienThiDSTapDayDu, dem: dkMh._demVbht, ts: ["${dkMh._dsCacTap.length}"]), trinhDieuKhien: dkMh._dkHienThiDSTapDayDu),
+          TruongBatTat(
+            tieuDe: Vbht.tuKhoa(TK.hienThiDSTapDayDu, dem: dkMh._demVbht, ts: ["${dkMh._dsCacTap.length}"]),
+            trinhDieuKhien: dkMh._dkHienThiDSTapDayDu
+          ),
         );
       } else {
         hienThiDayDu = true;

@@ -5,10 +5,7 @@
 ![mh_sach_1.png](mh_sach_1.png)
 
 - Mục 1: nút Lưu.
-- `Tra cứu lưu chiểu`: lối tắt để chuyển sang màn hình web và mở các trang web *Lưu chiểu* của **Cục xuất bản, in và phát hành**, **Bộ văn hoá, thể thao và du lịch**, nhằm mục đích tra cứu, đối chiếu thông tin.
-
-> Ghi chú: trang trên không được cung cấp bởi ứng dụng này. Ứng dụng chỉ đóng vai trò như 1 trình duyệt web truy cập vào.
-
+- `Nhập thông tin sách từ Internet`: chuyển sang màn hình web để mở một số trang web, tìm kiếm và nhập thông tin của sách.
 - `Đã đọc xong`: đánh dấu cuốn sách là đã đọc xong.
 - Khung ảnh: trường hợp chưa cài đặt ảnh nào thì sẽ hiển thị 3 nút
   - 3: Dán
