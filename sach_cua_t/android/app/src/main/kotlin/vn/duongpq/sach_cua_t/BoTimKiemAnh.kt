@@ -44,7 +44,11 @@ import kotlin.math.min
 @Serializable
 internal data class ThongTinWebsite(
     val url: String,
-    @SerialName("tham_so") val thamSo: Map<String, String>? = null
+    @SerialName("tham_so") val thamSo: Map<String, String>? = null,
+    @SerialName("anh") val laAnh: Boolean? = null,
+    @SerialName("thong_tin") val laThongTin: Boolean? = null,
+    @SerialName("isbn_nhom") val nhomISBN: List<Int>? = null,
+    @SerialName("isbn_chia") val dauPhanTachISBN: String? = null
 ) {
 
     fun xayDungUrl(tuKhoa: String): Uri? {
@@ -61,11 +65,17 @@ internal data class ThongTinWebsite(
             builder.path(path)
             if (thamSo != null && thamSo.isNotEmpty()) {
                 thamSo!!.forEach { khoa, giaTri ->
-                    var gt = giaTri
-                    if (gt.contains(choCanDien)) {
-                        gt = gt.replace(choCanDien, tuKhoa)
+                    var gt = ""
+                    if (giaTri.contains(choCanDien)) {
+                        if (tuKhoa.isNotEmpty()) {
+                            gt = giaTri.replace(choCanDien, tuKhoa)
+                        }
+                    } else {
+                        gt = giaTri
                     }
-                    builder.appendQueryParameter(khoa, gt)
+                    if (gt.isNotEmpty()) {
+                        builder.appendQueryParameter(khoa, gt)
+                    }
                 }
             }
             return builder.build()
@@ -103,7 +113,11 @@ object BoTimKiemAnh {
             it.readText()
         }
         val dsWeb: List<ThongTinWebsite> = Json.decodeFromString<List<ThongTinWebsite>>(duLieu)
-        dsWebsitesTimAnh.addAll(dsWeb)
+        for (muc in dsWeb) {
+            if (muc.laAnh ?: false) {
+                dsWebsitesTimAnh.add(muc);
+            }
+        }
     }
 
     private fun napDanhSachWebsites() {

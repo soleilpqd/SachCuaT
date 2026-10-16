@@ -22,10 +22,18 @@ import SafariServices
 struct ThongTinWebsite: Decodable {
     let url: String
     let thamSo: [String: String]?
+    let laAnh: Bool?
+    let laThongTin: Bool?
+    let nhomISBN: [Int]?
+    let dauPhanTachISBN: String?
 
     private enum CodingKeys: String, CodingKey {
         case url
         case thamSo = "tham_so"
+        case laAnh = "anh"
+        case laThongTin = "thong_tin"
+        case nhomISBN = "isbn_nhom"
+        case dauPhanTachISBN = "isbn_chia"
     }
 
     func xayDungURL(_ tuKhoa: String) -> URL? {
@@ -42,12 +50,18 @@ struct ThongTinWebsite: Decodable {
         for (ten, giaTri) in thamSo ?? [:] {
             var gt = giaTri
             if gt.contains(choCanDien) {
-                gt = gt.replacingOccurrences(
-                    of: choCanDien,
-                    with: tuKhoa
-                )
+                if !tuKhoa.isEmpty {
+                    gt = gt.replacingOccurrences(
+                        of: choCanDien,
+                        with: tuKhoa
+                    )
+                } else {
+                    gt = ""
+                }
             }
-            thamSoUrl.append(URLQueryItem(name: ten, value: gt))
+            if !gt.isEmpty {
+                thamSoUrl.append(URLQueryItem(name: ten, value: gt))
+            }
         }
         xayUrl.queryItems = thamSoUrl
         return xayUrl.url
@@ -81,7 +95,7 @@ final class BoXuLyTimKiemAnh: NSObject {
         else {
             return false
         }
-        for muc in thongTin {
+        for muc in thongTin where (muc.laAnh ?? false) {
             let boChuyenDoi = BoChuyenDoiTrangWeb(thongTin: muc)
             boChuyenDoi.boTimKiem = self
             dsChuyenDoiWebsites.append(boChuyenDoi)
@@ -104,17 +118,6 @@ final class BoXuLyTimKiemAnh: NSObject {
         napDsChuyenDoiWebsites(duongDanDoc)
 
         if dsChuyenDoiWebsites.count <= 1,
-           //           let flutterBundleUrl = Bundle.main.url(
-           //            forResource: "App",
-            //            withExtension: "framework",
-            //            subdirectory: "Frameworks"
-            //           ),
-            //           let flutterBundle = Bundle(url: flutterBundleUrl),
-            //           let websitesJsonUrl = flutterBundle.url(
-            //            forResource: tenTepDlWebsites,
-            //            withExtension: duoiTepDLWebsites,
-            //            subdirectory: "flutter_assets/assets"
-            //           ) {
            let duongDanFlutter = AppDelegate.app.rootViewController?.lookupKey(forAsset: "assets/\(tenTepDlWebsites)"),
            let websitesJsonUrl = Bundle.main.url(forResource: duongDanFlutter, withExtension: nil) {
             napDsChuyenDoiWebsites(websitesJsonUrl)

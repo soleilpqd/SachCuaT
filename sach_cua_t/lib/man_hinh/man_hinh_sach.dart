@@ -16,10 +16,14 @@
   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:http/http.dart' as Http;
 import 'package:man_hinh_ung_dung/luong_man_hinh.dart';
 import 'package:man_hinh_ung_dung/man_hinh_ung_dung.dart';
+import 'package:path/path.dart';
 import 'package:sach_cua_t/man_hinh/man_hinh_co_so.dart';
 import 'package:sach_cua_t/man_hinh/man_hinh_tim_kiem.dart';
 import 'package:sach_cua_t/man_hinh/man_hinh_tro_giup.dart';
@@ -52,6 +56,7 @@ import 'package:sach_cua_t/views/truong_sach.dart';
 import 'package:sach_cua_t/views/truong_tieu_de.dart';
 import 'package:sach_cua_t/views/truong_van_ban.dart';
 import 'package:sach_cua_t/views/van_ban_hien_thi_widget.dart';
+import 'package:sqflite/sqflite.dart';
 
 /// Phân đoạn màn hình Sách
 enum _PhanDoanManHinhSach {
@@ -382,6 +387,8 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo, X
   /// Khi nhấn nút Tra cứu lưu chiểu
   void _khiNhanNhapThongTinSach() {
     final DieuKhienManHinhWeb dkMhWeb = DieuKhienManHinhWeb(
+      tenSach: _dkTenSach.vanBan,
+      isbn: _dkISBN.vanBan,
       khiChonSach: _khiChonSachTuInternet
     );
     luongManHinh?.themManHinh(manHinh: dkMhWeb);
@@ -934,7 +941,7 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo, X
   }
 
   /// Khoá (Disable) toàn màn hình
-  void _khoaManHinh() {
+  void _khoaManHinh(bool khaDung) {
     List<DieuKhienCoSo> tatCaDieuKhien = [
       _dkTimAnh,
       _dkLuuChieu,
@@ -958,7 +965,7 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo, X
     tatCaDieuKhien.addAll(_dsDkDanhDau);
     tatCaDieuKhien.addAll(_dsDkNhan);
     for (final muc in tatCaDieuKhien) {
-      muc.khaDung = false;
+      muc.khaDung = khaDung;
     }
   }
 
@@ -1088,21 +1095,68 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo, X
     Future.delayed(Duration(milliseconds: 100)).then((_) => _batBanPhimVaoOTiepTheo());
   }
 
+  /// Có cần định dạng lại văn bản lấy từ trang web không?
+  bool _duLieuThoCanCheBien(String vanBan) => vanBan.isNotEmpty && (vanBan == vanBan.toLowerCase() || vanBan == vanBan.toUpperCase());
+
+  Future<void> _nhapAnhTuInternet(String url) async {
+    final Uri uri = Uri.parse(url);
+    final Http.Response response = await Http.get(uri);
+    if (response.statusCode == 200 && response.bodyBytes.isNotEmpty) {
+      final Directory thuMucChua = DuLieuTam().duongDanThuMucDan();
+      File tepChua = File(join(thuMucChua.path, uri.pathSegments.last));
+      String ext = extension(tepChua.path);
+      String ten = basenameWithoutExtension(tepChua.path);
+      int stt = 1;
+      while (await tepChua.exists()) {
+        tepChua = File(join(thuMucChua.path, "${ten}_$stt.$ext"));
+        stt += 1;
+      }
+      await tepChua.writeAsBytes(response.bodyBytes);
+      _dkHinhAnh.hinhAnh = LinhTinh.taoDuongDan(phanLoai: PhanLoaiDuongDan.file, duongDan: tepChua.path);
+    }
+  }
+
   /// Khi chọn sách từ lưu chiểu
   void _khiChonSachTuInternet(Map<String, String> duLieu) {
     // print("DEBUG nhap thong tin sach $duLieu");
     String isbn = LinhTinh.chuanHoaMaSo(duLieu[TruongThongTinSachTuInternet.isbn.giaTri] ?? "");
     String ten = duLieu[TruongThongTinSachTuInternet.ten.giaTri] ?? "";
+    String? anh = duLieu[TruongThongTinSachTuInternet.anh.giaTri];
+    if (anh != null && anh.isNotEmpty) {
+      _nhapAnhTuInternet(anh);
+    }
+    if (_duLieuThoCanCheBien(ten)) {
+      ten = LinhTinh.vietHoaChuCaiDau(ten);
+    }
     String tacGia = duLieu[TruongThongTinSachTuInternet.tacGia.giaTri] ?? "";
+    if (_duLieuThoCanCheBien(tacGia)) {
+      tacGia = LinhTinh.vietHoaTenRieng(tacGia);
+    }
+    String dichGia = duLieu[TruongThongTinSachTuInternet.dichGia.giaTri] ?? "";
+    if (_duLieuThoCanCheBien(dichGia)) {
+      dichGia = LinhTinh.vietHoaTenRieng(dichGia);
+    }
     String nxb = duLieu[TruongThongTinSachTuInternet.nxb.giaTri] ?? "";
+    if (_duLieuThoCanCheBien(nxb)) {
+      nxb = LinhTinh.vietHoaTenRieng(nxb);
+    }
+    nxb = nxb.replaceAll("Nhà xuất bản ", "");
+    nxb = nxb.replaceAll("Nhà Xuất Bản ", "");
     String doiTac = (duLieu[TruongThongTinSachTuInternet.doiTac.giaTri] ?? "").toUpperCase();
     _lamSachTatCaDauVao();
     _dkHinhAnh.hinhAnh = null;
     _dkISBN.vanBan = isbn;
     _dkTenSach.vanBan = ten;
-    DieuKhienTruongVanBan dkTg = DieuKhienTruongVanBan();
-    dkTg.vanBan = tacGia;
-    _dsDkTacGia.add(dkTg);
+    if (tacGia.isNotEmpty) {
+      DieuKhienTruongVanBan dkTg = DieuKhienTruongVanBan();
+      dkTg.vanBan = tacGia;
+      _dsDkTacGia.add(dkTg);
+    }
+    if (dichGia.isNotEmpty) {
+      DieuKhienTruongVanBan dkDg = DieuKhienTruongVanBan();
+      dkDg.vanBan = dichGia;
+      _dsDkDichGia.add(dkDg);
+    }
     DieuKhienTruongVanBan dkNxb = DieuKhienTruongVanBan();
     dkNxb.vanBan = nxb;
     _dsDkNxb.add(dkNxb);
@@ -1212,9 +1266,23 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo, X
     return thongTinSach;
   }
 
+  void _khiLoiLuuSach(Object? err) {
+    Vbht mieuTa;
+    if (err is DatabaseException && err.isUniqueConstraintError()) {
+      mieuTa = Vbht.tuKhoa(TK.maTrungLap);
+    } else {
+      mieuTa = Vbht.trucTiep("$err");
+    }
+    HopThoai.hienThiHopThoaiThongBao(
+      noiDung: mieuTa,
+      nhanCacNut: [Vbht.tuKhoa(TK.dong)],
+      khiDong: (_, _) => _khoaManHinh(true)
+    );
+  }
+
   /// Tiến hành lưu thông tin vào CSDL
   void _luuSach() {
-    _khoaManHinh();
+    _khoaManHinh(false);
     final Sach thongTinSach = _thongTinSachTuGiaoDien();
     // thongTinSach.inThongTinChiTiet();
     final List<Sach> dsCacTap = _dsCacTap.toList();
@@ -1225,16 +1293,20 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo, X
     thaoTac.luuThongTin().then((value) {
       khiLuuSach?.call();
       luongManHinh?.loaiManHinh(manHinh: this);
+    }).onError((err, trace) {
+      _khiLoiLuuSach(err);
     });
   }
 
   /// Tiến hành xoá sách
   void _xoaSach() {
-    _khoaManHinh();
+    _khoaManHinh(false);
     final ThaoTacXoaThongTinSach thaoTac = ThaoTacXoaThongTinSach(maSach!);
     thaoTac.xoa().then((_) {
       khiLuuSach?.call();
       luongManHinh?.loaiManHinh(manHinh: this);
+    }).onError((err, trace) {
+      _khiLoiLuuSach(err);
     });
   }
 

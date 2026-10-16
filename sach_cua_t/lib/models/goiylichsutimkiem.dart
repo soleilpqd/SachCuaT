@@ -19,15 +19,21 @@
 import 'package:sach_cua_t/models/luutrucauhinh.dart';
 import 'package:sach_cua_t/views/truong_van_ban.dart';
 
-/// Class test, không có tính ứng dụng
+/// Gợi ý từ khoá lịch sử tìm tiếm
 class GoiYLichSuTimKiem extends GoiYVanBan {
 
-  final int soLuongToiDa = 5;
+  final int _soLuongToiDa = 5;
   void Function(String)? khiChonGoiY;
-  List<String> _dsTuKhoa = [];
+  final List<String> _dsTuKhoa = [];
 
   GoiYLichSuTimKiem() {
-    LuuTruCauHinh().layLichSuTimKiem().then((dsTk) => _dsTuKhoa = dsTk);
+    LuuTruCauHinh().layLichSuTimKiem().then((dsTk) {
+      final List<String> lsTk = dsTk.where((test) => test.isNotEmpty).toList();
+      while (lsTk.length > _soLuongToiDa) {
+        lsTk.removeLast();
+      }
+      _dsTuKhoa.addAll(lsTk);
+    });
   }
 
   @override
@@ -44,8 +50,14 @@ class GoiYLichSuTimKiem extends GoiYVanBan {
   }
 
   void capNhatLichSu(String tuKhoa) {
+    if (tuKhoa.isEmpty) {
+      return;
+    }
     _dsTuKhoa.remove(tuKhoa);
     _dsTuKhoa.insert(0, tuKhoa);
+    while (_dsTuKhoa.length > _soLuongToiDa) {
+      _dsTuKhoa.removeLast();
+    }
     LuuTruCauHinh().luuLichSuTimKiem(_dsTuKhoa);
   }
 

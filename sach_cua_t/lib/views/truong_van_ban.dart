@@ -277,6 +277,8 @@ class CauHinhTruongVanBan {
   final bool tuDongKichHoatNhap;
   /// Thêm gợi ý là viết hoa tên riêng cho nội dung đã nhập
   final bool laTenRieng;
+  /// Hiển thị nút xoá văn bản
+  final bool hienThiNutXoa;
   /// Kiểm soát ký tự nhập vào
   final List<TextInputFormatter>? kiemSoatNhapLieu;
   /// Kiểu nút Enter
@@ -290,6 +292,7 @@ class CauHinhTruongVanBan {
     this.kiemSoatNhapLieu,
     this.laTenRieng = false,
     this.tuDongKichHoatNhap = false,
+    this.hienThiNutXoa = false,
     this.kieuNutEnter,
     this.khiNhanEnter
   });
@@ -523,7 +526,13 @@ class _TrangThaiTruongVanBan extends TrangThaiCoSo<TruongVanBan> {
                 fontSize: phongCach.coFontSieuNho,
                 fontStyle: FontStyle.italic,
                 color: widget.dieuKhien!.khaDung ? phongCach.mauNoiDungNen : phongCach.mauNoiDungKhoaNen
-              )
+              ),
+              suffixIcon: cauHinh.hienThiNutXoa ?
+                NutBamBieuTuong(
+                  bieuTuong: Icons.clear,
+                  thuocThanhDieuHuong: false,
+                  khiNhan: textEditingController.clear
+                ) : null
             ),
             keyboardType: cauHinh.kieuBanPhim,
             textInputAction: cauHinh.kieuNutEnter,

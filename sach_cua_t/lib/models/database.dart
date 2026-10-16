@@ -60,7 +60,7 @@ class CoSoDuLieu {
   String _thuMucAnhSach = "";
   String get thuMucAnhSach => _thuMucAnhSach;
   String _thuMucCoSo = "";
-  String get thuMucAnhCoSo => _thuMucCoSo;
+  String get thuMucCoSo => _thuMucCoSo;
   /// Đã mở hay chưa
   bool get daMo => _db != null;
   /// Thời điểm tham chiếu (thời điểm cài app)
@@ -312,7 +312,7 @@ class CoSoDuLieu {
     "ten" : thongTin.ten,
     "ten_kd": LinhTinh.loaiBoDautiengViet(thongTin.ten),
     "xong": thongTin.daHoanThanh ? 1 : 0,
-    "isbn": thongTin.isbn,
+    "isbn": thongTin.isbn.isEmpty ? null : thongTin.isbn,
     "xem": thoiDiemThamChieuHienTai
   };
 
@@ -339,7 +339,7 @@ class CoSoDuLieu {
     thongTin.maSo = banGhi["ma"] as int;
     thongTin.ten = banGhi["ten"] as String;
     thongTin.daHoanThanh = (banGhi["xong"] as int) != 0;
-    thongTin.isbn = banGhi["isbn"] as String;
+    thongTin.isbn = (banGhi["isbn"] ?? "") as String;
     thongTin.tap = banGhi["tap"] as int?;
     thongTin.maNhieuTap = banGhi["chuoi"] as int?;
   }

@@ -152,7 +152,11 @@ enum TK {
   /// Xoá "#_"
   xoaNoiDung,
   /// Tìm hình ảnh
-  timAnh
+  timAnh,
+  /// Địa chỉ trang web không đúng
+  diaChiWebKhongDung,
+  /// Mã trùng lặp cần kiểm tra lại dữ liệu (ISBN, ...)
+  maTrungLap
   ;
 }
 

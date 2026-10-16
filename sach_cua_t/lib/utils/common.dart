@@ -67,6 +67,8 @@ extension SafeWidgetState on State {
 /// Tổng hợp các hàm lặt vặt
 class LinhTinh {
 
+  LinhTinh._();
+
   /// Dừng nhập văn bản
   static void dungNhapVanBan() {
     FocusManager.instance.primaryFocus?.unfocus();
@@ -338,6 +340,12 @@ class LinhTinh {
       }
     }
     return ketQua;
+  }
+
+  /// Viết hoa chữ cái đầu tiên
+  static String vietHoaChuCaiDau(String noiDung) {
+    String ketQua = noiDung.toLowerCase();
+    return ketQua.substring(0, 1).toUpperCase() + ketQua.substring(1);
   }
 
   static String dinhDangKichThuocTep(int kichThuoc) {

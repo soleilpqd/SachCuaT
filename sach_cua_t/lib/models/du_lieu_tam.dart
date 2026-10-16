@@ -87,14 +87,14 @@ class DuLieuTam {
     }
   }
 
-  /// Lấy đường dẫn thư mục chứa các tệp được dán từ pasteboard
+  /// Lấy đường dẫn thư mục chứa các tệp được dán từ pasteboard / Internet
   Directory duongDanThuMucDan() => Directory(_thuMucDan);
   /// Lấy danh sách các tệp được dán
   Future<Iterable<String>> layDsCacTepDuocDan() async => _layDsCacTepTrongThuMucTam(_thuMucDan);
   /// Xoá các tệp được dán
   Future<void> xoaCacTepDan() async => _xoaCacTepTam(_thuMucDan);
 
-  /// Lấy đường dẫn thư mục chứa các tệp được dán từ pasteboard
+  /// Lấy đường dẫn thư mục chứa các tệp được chia sẻ từ các ứng dụng bên ngoài
   Directory duongDanThuMucChiaSe() => Directory(_thuMucChiaSe);
   /// Xoá các tệp được chia sẻ
   Future<void> xoaTepDuocChiaSe() async => _xoaCacTepTam(_thuMucChiaSe);
@@ -113,25 +113,5 @@ class DuLieuTam {
     xoaCacTepDan();
     xoaTepDuocChiaSe();
   }
-
-  // Future<void> xoaTepTam(String duongDan) async {
-  //   final Directory thuMucChiaSe = await _duongDanThuMucTam(true, _tenChiaSe);
-  //   final Directory thuMucDan = await _duongDanThuMucTam(true, _tenDan);
-  //   final File target = File(duongDan);
-  //   if ((duongDan.startsWith(thuMucChiaSe.path) || duongDan.startsWith(thuMucDan.path)) && target.existsSync()) {
-  //     try {
-  //       await target.delete();
-  //     } catch (_) {}
-  //   }
-  // }
-
-  // String suDungTepTam() {
-
-  //   return "";
-  // }
-
-  // void lamSachTepTam(String duongDan) {
-
-  // }
 
 }

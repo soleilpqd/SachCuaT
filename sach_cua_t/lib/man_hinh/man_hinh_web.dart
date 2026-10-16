@@ -25,6 +25,7 @@ import 'package:path/path.dart';
 import 'package:sach_cua_t/man_hinh/man_hinh_co_so.dart';
 import 'package:sach_cua_t/man_hinh/man_hinh_tro_giup.dart';
 import 'package:sach_cua_t/models/database.dart';
+import 'package:sach_cua_t/models/goiydiachiweb.dart';
 import 'package:sach_cua_t/models/luutrucauhinh.dart';
 import 'package:sach_cua_t/models/xu_ly_nut_lui_android.dart';
 import 'package:sach_cua_t/utils/hopthoai.dart';
@@ -32,6 +33,7 @@ import 'package:sach_cua_t/utils/vanbanhienthi.dart';
 import 'package:sach_cua_t/views/dieu_khien_co_so.dart';
 import 'package:sach_cua_t/views/nut_bam_bieu_tuong.dart';
 import 'package:sach_cua_t/views/phong_cach_giao_dien.dart';
+import 'package:sach_cua_t/views/truong_van_ban.dart';
 import 'package:sach_cua_t/views/van_ban_hien_thi_widget.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
@@ -42,10 +44,14 @@ enum TruongThongTinSachTuInternet {
   stt,
   /// ISBN
   isbn,
+  /// Ảnh
+  anh,
   /// Tên sách
   ten,
   /// Tác giả
   tacGia,
+  /// Dịch giả
+  dichGia,
   /// Biên tập viên
   bienTapVien,
   /// Nhà xuất bản
@@ -61,22 +67,13 @@ enum TruongThongTinSachTuInternet {
   String get giaTri {
     return switch (this) {
       tacGia => "tac_gia",
+      dichGia => "dich_gia",
       bienTapVien => "bien_tap_vien",
       doiTac => "doi_tac",
       inAn => "in",
       _ => name
     };
   }
-}
-
-/// Website để nhập thông tin sách
-class WebsiteThongTinSach {
-  /// Tên hiển thị
-  final String ten;
-  /// URL
-  final String url;
-
-  const WebsiteThongTinSach({required this.ten, required this.url});
 }
 
 /// Mã lệnh JS để nhập thông tin sách
@@ -125,13 +122,16 @@ class MaLenhNhapThongTinSach {
 
 class DieuKhienManHinhWeb extends DieuKhienManHinh with XuLyNutLuiAndroid {
 
-  final List<WebsiteThongTinSach> _websites = [];
   final List<MaLenhNhapThongTinSach> _maLenh = [];
 
+  late final DieuKhienTruongVanBan _truongDiaChi;
+  late final GoiYDiaChiWeb _goiYDiaChi;
   /// Webview controller
   final WebViewController _webController = WebViewController();
   /// Điều khiển nút trích xuất
   final DieuKhienCoSo _dkNutTrichXuat = DieuKhienCoSo(khaDung: false);
+  final String tenSach;
+  final String isbn;
   /// Hàm xử lý khi nhấn chọn 1 sách khi trích xuất
   final Function(Map<String, String>)? khiChonSach;
   /// Đang tải
@@ -147,15 +147,24 @@ class DieuKhienManHinhWeb extends DieuKhienManHinh with XuLyNutLuiAndroid {
 
   final Vbht _tieuDeManHinh = Vbht.trucTiep("Website");
   DieuKhienManHinhTuDuoiDay? _dkHopThoaiChonSach;
-  DieuKhienManHinhTuDuoiDay? _dkHopThoaiChonWebsite;
+  // DieuKhienManHinhTuDuoiDay? _dkHopThoaiChonWebsite;
 
   DieuKhienManHinhWeb({
+    required this.tenSach,
+    required this.isbn,
     this.khiChonSach
   }){
+    _goiYDiaChi = GoiYDiaChiWeb(tenSach: tenSach, isbn: isbn, khiNapXong: _kiemTraSanSang);
+    _goiYDiaChi.khiChonGoiY = (_) {
+      _napTrangWeb();
+    };
+    _truongDiaChi = DieuKhienTruongVanBan(goiYNoiDung: _goiYDiaChi);
     widgetCuaManHinh = _ManHinhWeb(dkManHinh: this);
     _webController.setJavaScriptMode(JavaScriptMode.unrestricted);
     _webController.setNavigationDelegate(NavigationDelegate(
       onPageStarted: _khiBatDauTaiTrang,
+      onProgress: _khiDangNapTrang,
+      onUrlChange: _khiThayDoiDiaChi,
       onPageFinished: _khiKetThucTaiTrang,
       onHttpError: _khiTaiTrangLoi
     ));
@@ -165,12 +174,10 @@ class DieuKhienManHinhWeb extends DieuKhienManHinh with XuLyNutLuiAndroid {
     _napDanhSachWebsites();
   }
 
-  void _cauHinhNutTrichXuat() => _dkNutTrichXuat.khaDung = choPhepTrichXuat;
-
   void _kiemTraSanSang() {
     _sanSang += 1;
-    if (_sanSang == 2) {
-      _khiNhanTieuDeManHinh();
+    if (_sanSang == 3) { // Màn hình đã lên + Đã nạp xong ds websites + Đã nạp xong gợi ý địa chỉ
+      Future.delayed(const Duration(milliseconds: 500)).then((_) => _truongDiaChi.trangThaiNhap = TrangThaiNhapVanBan.noiDung);
     }
   }
 
@@ -180,21 +187,23 @@ class DieuKhienManHinhWeb extends DieuKhienManHinh with XuLyNutLuiAndroid {
     _kiemTraSanSang();
   }
 
+  void _cauHinhNutTrichXuat() => _dkNutTrichXuat.khaDung = choPhepTrichXuat;
+
   void _napDanhSachWebsites() async {
     final String tenTep = "nhap_sach.json";
-    File tepJson = File(join(CoSoDuLieu().thuMucAnhCoSo, tenTep));
+    File tepJson = File(join(CoSoDuLieu().thuMucCoSo, tenTep));
     if (await tepJson.exists()) {
       final noiDung = await tepJson.readAsString();
-      await _napDsWebsitesTu(noiDung);
+      await _napDsMaLenhTu(noiDung);
     }
-    if (_websites.isEmpty) {
+    if (_maLenh.isEmpty) {
       final noiDung = await rootBundle.loadString(join("assets", tenTep));
-      await _napDsWebsitesTu(noiDung);
+      await _napDsMaLenhTu(noiDung);
     }
     _kiemTraSanSang();
   }
 
-  Future<void> _napDsWebsitesTu(String duLieu) async {
+  Future<void> _napDsMaLenhTu(String duLieu) async {
     try {
       final Map<String, dynamic> thongTin = jsonDecode(duLieu);
       final dsMaLenh = thongTin["ma_lenh"];
@@ -241,18 +250,6 @@ class DieuKhienManHinhWeb extends DieuKhienManHinh with XuLyNutLuiAndroid {
           }
         }
       }
-      final dsWebsites = thongTin["urls"];
-      if (dsWebsites is List<dynamic>) {
-        for (final muc in dsWebsites) {
-          if (muc is Map<String, dynamic>) {
-            final WebsiteThongTinSach aWeb = WebsiteThongTinSach(
-              ten: muc["ten"] as String,
-              url: muc["url"] as String
-            );
-            _websites.add(aWeb);
-          }
-        }
-      }
     } catch (_){}
   }
 
@@ -268,102 +265,70 @@ class DieuKhienManHinhWeb extends DieuKhienManHinh with XuLyNutLuiAndroid {
     return false;
   }
 
-  void _napTrangWeb(WebsiteThongTinSach doiTuong) {
+  void _napTrangWeb() {
+    Uri? uri;
+    try {
+      uri = Uri.parse(_truongDiaChi.vanBan);
+      if (!(uri.isScheme("HTTP") || uri.isScheme("HTTPS"))) {
+        uri = null;
+      }
+    } catch (_) {
+      uri = null;
+    }
+    if (uri == null) {
+      _truongDiaChi.thongBaoLoi = Vbht.tuKhoa(TK.diaChiWebKhongDung);
+      return;
+    }
+    _truongDiaChi.thongBaoLoi = null;
+    _truongDiaChi.trangThaiNhap = TrangThaiNhapVanBan.khong;
     _dangTai = true;
     _daTaiThanhCong = false;
     _trichXuatSanSang = false;
     _cauHinhNutTrichXuat();
-    _tieuDeManHinh.ganTrucTiep(doiTuong.ten);
+    _tieuDeManHinh.ganTrucTiep("0%");
     final LuuTruCauHinh cauHinh = LuuTruCauHinh();
-    final Uri uri = Uri.parse(doiTuong.url);
     // print("DEBUG kich hoat $uri");
     cauHinh.layLuuYTrangWeb(uri.host).then((gt) {
       // print("DEBUG kich hoat $uri da xac nhan $gt");
       if (!gt) {
         HopThoai.hienThiHopThoaiThongBao(
-          noiDung: Vbht.tuKhoa(TK.luuYTrangWebNgoai, ts: [doiTuong.url]),
+          noiDung: Vbht.tuKhoa(TK.luuYTrangWebNgoai, ts: [uri.toString()]),
           nhanCacNut: [Vbht.tuKhoa(TK.moTrongTrinhDuyet), Vbht.tuKhoa(TK.moTrongUngDung)],
           boCucHangDoc: true,
           khiDong: (stt, _) {
             if (stt == 0) {
-              launchUrl(uri, mode: LaunchMode.externalApplication);
+              launchUrl(uri!, mode: LaunchMode.externalApplication);
               luongManHinh?.loaiManHinh(manHinh: this);
             } else {
-              cauHinh.luuLuuYTrangWeb(uri.host);
+              cauHinh.luuLuuYTrangWeb(uri!.host);
               _webController.loadRequest(uri);
             }
           },
         );
       } else {
-        _webController.loadRequest(uri);
+        _webController.loadRequest(uri!);
       }
     });
   }
 
   void _khiNhanTieuDeManHinh() {
-    final PhongCachGiaoDien phongCach = PhongCachGiaoDien();
-    _dkHopThoaiChonWebsite = HopThoai.hienThiHopThoaiTuDuoiDay(
-      noiDung: Material(
-        color: phongCach.mauNen,
-        borderRadius: const BorderRadius.all(Radius.circular(20)),
-        clipBehavior: Clip.antiAliasWithSaveLayer,
-        child: ListView.separated(
-          itemBuilder: (ctx2, index) {
-            return ListTile(
-              title: VbhtWidget(
-                text: Vbht.trucTiep(_websites[index].ten),
-                coChu: CoChu.binhThuong,
-                style: const TextStyle(fontWeight: FontWeight.bold)
-              ),
-              subtitle: VbhtWidget(
-                text: Vbht.trucTiep(_websites[index].url),
-                coChu: CoChu.nho,
-                style: const TextStyle(fontStyle: FontStyle.italic),
-              ),
-              isThreeLine: true,
-              onTap: () {
-                _dongHopThoaiChonWebsite(_websites[index]);
-              },
-            );
-          },
-          separatorBuilder: (ctx3, index) {
-            return Divider(
-              color: phongCach.mauVien,
-              thickness: 1,
-              height: 1,
-            );
-          },
-          itemCount: _websites.length
-        )
-      ),
-      khiDong: () => _dongHopThoaiChonWebsite(null),
-    );
   }
 
   void _khiNhanQuayLai() {
     luongManHinh?.loaiManHinh(manHinh: this);
   }
 
-  void _dongHopThoaiChonWebsite(WebsiteThongTinSach? web) {
-    if (_dkHopThoaiChonWebsite != null) {
-      _dkHopThoaiChonWebsite!.luongManHinh?.loaiManHinh(
-        manHinh: _dkHopThoaiChonWebsite!
-      );
-      _dkHopThoaiChonWebsite = null;
-      if (web != null) {
-        // print("DEBUG doi web ${web.ten}");
-        _webController.currentUrl().then((urlHienTai) {
-          if (web.url != urlHienTai) {
-            // print("  DEBUG doi web $urlHienTai -> ${web.ten}");
-            _napTrangWeb(web);
-          }
-        });
-      }
-    }
-  }
-
   void _khiNhanTaiLaiTrang() {
     _webController.reload();
+  }
+
+  void _hienThiThongTinTrangWeb() {
+    _webController.getTitle().then((tieuDe) {
+      _tieuDeManHinh.ganTrucTiep(tieuDe ?? "");
+    });
+    _webController.currentUrl().then((diaChi) {
+      _truongDiaChi.vanBan = diaChi ?? "";
+    });
   }
 
   /// Khi webview bắt đầu tải trang
@@ -373,13 +338,12 @@ class DieuKhienManHinhWeb extends DieuKhienManHinh with XuLyNutLuiAndroid {
     _daTaiThanhCong = false;
     _trichXuatSanSang = false;
     _cauHinhNutTrichXuat();
+    _hienThiThongTinTrangWeb();
   }
 
   /// Khi webview kết thúc tải trang
   void _khiKetThucTaiTrang(String url) {
-    _webController.getTitle().then((tieuDe) {
-      _tieuDeManHinh.ganTrucTiep(tieuDe ?? "");
-    });
+    _hienThiThongTinTrangWeb();
     MaLenhNhapThongTinSach? maLenh;
     for (final muc in _maLenh) {
       if (muc.kiemTraUrl(url)) {
@@ -405,6 +369,14 @@ class DieuKhienManHinhWeb extends DieuKhienManHinh with XuLyNutLuiAndroid {
     _dangTai = false;
     _daTaiThanhCong = false;
     _cauHinhNutTrichXuat();
+  }
+
+  void _khiDangNapTrang(int tienTrinh) {
+    _hienThiThongTinTrangWeb();
+  }
+
+  void _khiThayDoiDiaChi(UrlChange thayDoi) {
+    _hienThiThongTinTrangWeb();
   }
 
   /// Mở URL gốc trong trình duyệt ngoài
@@ -575,6 +547,22 @@ class _ManHinhWeb extends StatelessWidget  {
       nutPhai: nutPhai,
       noiDung: Column(
         children: [
+          TruongVanBan(
+            cauHinh: CauHinhTruongVanBan(
+              kieuBanPhim: TextInputType.url,
+              kieuNutEnter: TextInputAction.go,
+              hienThiNutXoa: true,
+              khiNhanEnter: (_, _) => dkManHinh._napTrangWeb()
+            ),
+            trinhDieuKhien: dkManHinh._truongDiaChi,
+            xayDungNutBenPhai: (_, khaDung) {
+              return NutBamBieuTuong(
+                bieuTuong: Icons.arrow_forward,
+                thuocThanhDieuHuong: false,
+                khiNhan: dkManHinh._napTrangWeb,
+              );
+            },
+          ),
           Expanded(child: WebViewWidget(key: dkManHinh.khoaWidgetGoc, controller: dkManHinh._webController)),
           Container(
             color: phongCach.mauChinh,

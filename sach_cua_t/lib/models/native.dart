@@ -296,6 +296,8 @@ class HeThongMay {
   }
 
   /// Mở màn hình tìm kiếm ảnh trên Internet (trình duyệt web nhúng trong ứng dụng iOS: Safari/ Android: Chrome)
+  /// Dùng chung tệp cấu hình `websites.json` với chức năng `Nhập thông tin sách từ Internet`.
+  /// Tuy nhiên `tuKhoa` hiện tại chỉ áp dụng với tên sách (bỏ qua ISBN)
   Future<List<String>?> moTimKiemAnh(String tuKhoa) async {
     final Map<String, Object?> thamSo = {};
     thamSo["tu_khoa"] = tuKhoa;
