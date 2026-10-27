@@ -11,7 +11,7 @@ function layDanhSachSach() {
             sach["nhan:Giá bìa:so:hien"] = muc.textContent;
         }
     }
-    let contents = document.getElementById("nav-desc").children[0].children[0].children[0].innerText.split('\n');
+    let contents = document.getElementById("nav-desc").children[0].children[0].children[0].innerText.split('\\n');
     for (const muc of contents) {
         if (muc.indexOf("Tác giả") === 0) {
             sach["tac_gia"] = muc.substring(8).trim();

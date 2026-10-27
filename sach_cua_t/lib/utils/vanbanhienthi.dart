@@ -156,7 +156,11 @@ enum TK {
   /// Địa chỉ trang web không đúng
   diaChiWebKhongDung,
   /// Mã trùng lặp cần kiểm tra lại dữ liệu (ISBN, ...)
-  maTrungLap
+  maTrungLap,
+  /// Đang nạp (Loading)
+  dangNap,
+  /// Trang web tại địa chỉ hiện tại không được hỗ trợ (không có mã lệnh trích xuất dữ liệu)
+  khongCoMaLenh
   ;
 }
 
@@ -194,24 +198,32 @@ class Vbht {
     khiXong?.call(_vanBan);
   }
 
+  void napLai(String tuKhoa) {
+    String? vbDem = dem?[tuKhoa];
+    if (vbDem != null) {
+      _vanBan = vbDem;
+      _apDungThamSo();
+    } else {
+      VanBanHienThi().napVanBanHienThi(tuKhoa).then((value) {
+        _vanBan = value;
+        dem?[tuKhoa] = value;
+        _apDungThamSo();
+        khiXong?.call(value);
+      });
+    }
+  }
+
+  void napLaiTK(TK tuKhoa) {
+    napLai(tuKhoa.name);
+  }
+
   /// CONSTRUCTOR
   /// Nếu [trucTiep] = true thì [vanBan] là [tuKhoa].
   /// [trucTiep] = false thì dùng [tuKhoa] để nạp nội dung từ `VanBanHienThi`, sau đó chạy [khiXong]
   Vbht({required this.tuKhoa, bool trucTiep = true, this.dem, this.thamSo, Future<String?>? nguon}) {
     _vanBan = tuKhoa;
     if (!trucTiep) {
-      String? vbDem = dem?[tuKhoa];
-      if (vbDem != null) {
-        _vanBan = vbDem;
-        _apDungThamSo();
-      } else {
-        VanBanHienThi().napVanBanHienThi(tuKhoa).then((value) {
-          _vanBan = value;
-          dem?[tuKhoa] = value;
-          _apDungThamSo();
-          khiXong?.call(value);
-        });
-      }
+      napLai(tuKhoa);
     } else if (nguon != null) {
       nguon.then((giaTri) {
         _vanBan = giaTri ?? "";

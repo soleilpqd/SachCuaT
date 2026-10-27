@@ -21,6 +21,7 @@ import SafariServices
 
 struct ThongTinWebsite: Decodable {
     let url: String
+    let urlGoc: String?
     let thamSo: [String: String]?
     let laAnh: Bool?
     let laThongTin: Bool?
@@ -29,6 +30,7 @@ struct ThongTinWebsite: Decodable {
 
     private enum CodingKeys: String, CodingKey {
         case url
+        case urlGoc = "url_goc"
         case thamSo = "tham_so"
         case laAnh = "anh"
         case laThongTin = "thong_tin"
@@ -38,14 +40,17 @@ struct ThongTinWebsite: Decodable {
 
     func xayDungURL(_ tuKhoa: String) -> URL? {
         let choCanDien = "%TK%"
-        var urlGoc = url
-        if urlGoc.contains(choCanDien) {
-            urlGoc = urlGoc.replacingOccurrences(
+        var urlCuoi = url
+        if tuKhoa.isEmpty, let urlG = urlGoc, !urlG.isEmpty {
+            urlCuoi = urlG
+        }
+        if urlCuoi.contains(choCanDien) {
+            urlCuoi = urlCuoi.replacingOccurrences(
                 of: choCanDien,
                 with: (tuKhoa as NSString).addingPercentEncoding(withAllowedCharacters: CharacterSet()) ?? ""
             )
         }
-        guard var xayUrl = URLComponents(string: urlGoc) else { return nil }
+        guard var xayUrl = URLComponents(string: urlCuoi) else { return nil }
         var thamSoUrl = [URLQueryItem]()
         for (ten, giaTri) in thamSo ?? [:] {
             var gt = giaTri

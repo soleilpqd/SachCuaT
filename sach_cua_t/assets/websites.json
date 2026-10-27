@@ -39,6 +39,7 @@
         "thong_tin": true
     }, {
         "url": "https://www.nxbtre.com.vn/tim-kiem",
+        "url_goc": "https://www.nxbtre.com.vn",
         "tham_so": {
             "q": "%TK%"
         },
@@ -108,21 +109,22 @@
             "q": "%TK%"
         },
         "anh": true,
-        "thong_tin": false
+        "thong_tin": true
     }, {
         "url": "https://nxbdantri.com.vn/",
+        "can_tham_so": true,
         "tham_so": {
             "s": "%TK%"
         },
         "anh": true,
-        "thong_tin": false
+        "thong_tin": true
     }, {
         "url": "https://www.phucminhbooks.vn/search",
         "tham_so": {
             "q": "%TK%"
         },
         "anh": true,
-        "thong_tin": false
+        "thong_tin": true
     }, {
         "url": "https://sbooks.vn/",
         "tham_so": {
@@ -148,18 +150,17 @@
         "thong_tin": true
     }, {
         "url": "https://dinhtibooks.com.vn/search/%TK%.html",
-        "tham_so": {
-            "": ""
-        },
+        "url_goc": "https://dinhtibooks.com.vn/",
+        "tham_so": {},
         "anh": true,
-        "thong_tin": false
+        "thong_tin": true
     }, {
         "url": "https://www.trithucvietbook.com/search",
         "tham_so": {
             "query": "%TK%"
         },
         "anh": true,
-        "thong_tin": false
+        "thong_tin": true
     }, {
         "url": "https://www.alphabooks.vn/search",
         "tham_so": {
@@ -180,7 +181,7 @@
             "q": "%TK%"
         },
         "anh": true,
-        "thong_tin": false
+        "thong_tin": true
     }, {
         "url": "https://sanhobooks.com/",
         "tham_so": {
@@ -188,13 +189,13 @@
             "post_type": "product"
         },
         "anh": true,
-        "thong_tin": false
+        "thong_tin": true
     }, {
         "url": "https://linhlanbooks.vn/search",
         "tham_so": {
             "q": "%TK%"
         },
         "anh": true,
-        "thong_tin": false
+        "thong_tin": true
     }
 ]

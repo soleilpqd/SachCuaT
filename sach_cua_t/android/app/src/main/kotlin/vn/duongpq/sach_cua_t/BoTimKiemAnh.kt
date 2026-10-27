@@ -44,6 +44,7 @@ import kotlin.math.min
 @Serializable
 internal data class ThongTinWebsite(
     val url: String,
+    @SerialName("url_goc") val urlGoc: String? = null,
     @SerialName("tham_so") val thamSo: Map<String, String>? = null,
     @SerialName("anh") val laAnh: Boolean? = null,
     @SerialName("thong_tin") val laThongTin: Boolean? = null,
@@ -54,11 +55,14 @@ internal data class ThongTinWebsite(
     fun xayDungUrl(tuKhoa: String): Uri? {
         val choCanDien = "%TK%"
         try {
-            val urlGoc = url.toUri()
+            var urlCuoi = url.toUri()
+            if (tuKhoa.isEmpty() && urlGoc != null && urlGoc.isNotEmpty()) {
+                urlCuoi = urlGoc.toUri();
+            }
             val builder = Uri.Builder()
-            builder.scheme(urlGoc.scheme)
-            builder.authority(urlGoc.authority)
-            var path = urlGoc.path ?: ""
+            builder.scheme(urlCuoi.scheme)
+            builder.authority(urlCuoi.authority)
+            var path = urlCuoi.path ?: ""
             if (path.contains(choCanDien)) {
                 path.replace(choCanDien, URLEncoder.encode(tuKhoa, Charsets.UTF_8.name()))
             }

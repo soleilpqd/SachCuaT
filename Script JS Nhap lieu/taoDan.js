@@ -20,8 +20,8 @@ function layDanhSachSach() {
         }
     }
 
-    const divTab1 = document.getElementById("tab-1");
-    for (const muc of divTab1.children[0].children) {
+    const divTab1 = document.getElementsByClassName("rte")[0];
+    for (const muc of divTab1.children) {
         if (muc.tagName === "TABLE") {
             const tbody = muc.children[0];
             for (const tr of tbody.children) {

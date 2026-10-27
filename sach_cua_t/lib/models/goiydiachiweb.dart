@@ -60,11 +60,12 @@ class GoiYDiaChiWeb extends GoiYVanBan {
             final dynamic laWebThongTin = muc["thong_tin"];
             if (laWebThongTin is bool && laWebThongTin) {
               final url = muc["url"];
+              final urlGoc = muc["url_goc"];
               final thamSo = muc["tham_so"];
               final nhomIsbn = muc["isbn_nhom"];
               final dauChiaIsbn = muc["isbn_chia"];
               if (url is String && thamSo is Map<String, dynamic>) {
-                _napWebsiteTu(url, thamSo, nhomIsbn, dauChiaIsbn);
+                _napWebsiteTu(url, urlGoc, thamSo, nhomIsbn, dauChiaIsbn);
               }
             }
           }
@@ -108,12 +109,15 @@ class GoiYDiaChiWeb extends GoiYVanBan {
     return ketQua;
   }
 
-  void _napWebsiteTu(String url, Map<String, dynamic> thamSo, dynamic nhomIsbn, dynamic dauChiaIsbn) {
+  void _napWebsiteTu(String url, String? urlGoc, Map<String, dynamic> thamSo, dynamic nhomIsbn, dynamic dauChiaIsbn) {
     final String giuCho = "%TK%";
-    String link = url;
     String ts = "";
     int stt = 0;
     String tuKhoa = _xayDungTuKhoa(nhomIsbn, dauChiaIsbn);
+    String link = url;
+    if (tuKhoa.isEmpty && urlGoc != null && urlGoc.isNotEmpty) {
+      link = urlGoc;
+    }
     if (link.contains(giuCho)) {
       link = link.replaceAll(giuCho, Uri.encodeComponent(tuKhoa));
     }

@@ -3,7 +3,11 @@ function layDanhSachSach() {
     sach["nxb"] = "Nhã Nam";
     sach["ten"] = document.getElementsByClassName("title-page")[0].textContent;
     sach["anh"] = document.getElementById("lightgallery").children[0].href;
-    sach["nhan:Giá bìa:so:hien"] = document.getElementsByClassName("product-price-old")[0].textContent.trim();
+    let tagGia = document.getElementsByClassName("product-price-old");
+    if (tagGia.length === 0) {
+        tagGia = document.getElementsByClassName("product-price");
+    }
+    sach["nhan:Giá bìa:so:hien"] = tagGia[0].textContent.trim();
     for (const muc of document.getElementsByClassName("book-info-detail")[0].children) {
         let ten = muc.children[0].textContent.trim();
         let giaTri =  muc.children[1].textContent.trim();
@@ -13,7 +17,7 @@ function layDanhSachSach() {
         if (ten === "Dịch giả") {
             sach["dich_gia"] = giaTri;
         }
-        if (ten === "Nhà xuất bản") {
+        if (ten === "Nhà xuất bản" && !giaTri.toLowerCase().includes("nhã nam")) {
             sach["nxb"] = giaTri + ";" + sach["nxb"];
         }
         if (ten === "Số trang" && giaTri !== "Đang cập nhật") {

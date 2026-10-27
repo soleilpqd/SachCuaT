@@ -542,7 +542,11 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo, X
     if (_dsNhanLuonHien.isNotEmpty) {
       int dem = 0;
       for (final muc in _dsNhanLuonHien) {
-        DieuKhienTruongVanBan dkVb = DieuKhienTruongVanBan(goiYNoiDung: _goiYGiaTriNhan, goiYTieuDe: _goiYTenNhan, luonHienThi: true);
+        DieuKhienTruongVanBan dkVb = DieuKhienTruongVanBan(
+          goiYNoiDung: _goiYGiaTriNhan,
+          goiYTieuDe: _goiYTenNhan,
+          luonHienThi: true
+        );
         dkVb.debugInfo = "NN $dem";
         dkVb.vanBan = "";
         dkVb.vbTieuDe = muc;
@@ -1145,24 +1149,30 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo, X
     String doiTac = (duLieu[TruongThongTinSachTuInternet.doiTac.giaTri] ?? "").toUpperCase();
     _lamSachTatCaDauVao();
     _dkHinhAnh.hinhAnh = null;
-    _dkISBN.vanBan = isbn;
+    if (_dkISBN.vanBan.isEmpty) {
+      _dkISBN.vanBan = isbn;
+    }
     _dkTenSach.vanBan = ten;
     if (tacGia.isNotEmpty) {
       DieuKhienTruongVanBan dkTg = DieuKhienTruongVanBan();
+      dkTg.themTheoDoi(this);
       dkTg.vanBan = tacGia;
       _dsDkTacGia.add(dkTg);
     }
     if (dichGia.isNotEmpty) {
       DieuKhienTruongVanBan dkDg = DieuKhienTruongVanBan();
+      dkDg.themTheoDoi(this);
       dkDg.vanBan = dichGia;
       _dsDkDichGia.add(dkDg);
     }
     DieuKhienTruongVanBan dkNxb = DieuKhienTruongVanBan();
+    dkNxb.themTheoDoi(this);
     dkNxb.vanBan = nxb;
     _dsDkNxb.add(dkNxb);
     for (final muc in _dsNxb) {
       if (muc != nxb && doiTac.contains(muc.toUpperCase())) {
         dkNxb = DieuKhienTruongVanBan();
+        dkNxb.themTheoDoi(this);
         dkNxb.vanBan = muc;
         _dsDkNxb.add(dkNxb);
         break;

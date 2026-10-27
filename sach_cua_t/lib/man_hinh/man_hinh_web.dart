@@ -16,6 +16,7 @@
   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import 'dart:developer';
 import 'dart:io';
 import 'dart:convert';
 import 'package:flutter/material.dart';
@@ -322,10 +323,17 @@ class DieuKhienManHinhWeb extends DieuKhienManHinh with XuLyNutLuiAndroid {
     _webController.reload();
   }
 
-  void _hienThiThongTinTrangWeb() {
-    _webController.getTitle().then((tieuDe) {
-      _tieuDeManHinh.ganTrucTiep(tieuDe ?? "");
-    });
+  void _hienThiThongTinTrangWeb(bool tieuDe) {
+    if (tieuDe) {
+      _webController.getTitle().then((tieuDe) {
+        _tieuDeManHinh.ganTrucTiep(tieuDe ?? "");
+      }).onError((_, _) {
+        _tieuDeManHinh.ganTrucTiep("");
+      });
+    } else {
+      _tieuDeManHinh.napLaiTK(TK.dangNap);
+    }
+
     _webController.currentUrl().then((diaChi) {
       _truongDiaChi.vanBan = diaChi ?? "";
     });
@@ -338,29 +346,27 @@ class DieuKhienManHinhWeb extends DieuKhienManHinh with XuLyNutLuiAndroid {
     _daTaiThanhCong = false;
     _trichXuatSanSang = false;
     _cauHinhNutTrichXuat();
-    _hienThiThongTinTrangWeb();
+    _hienThiThongTinTrangWeb(false);
+  }
+
+  Future<MaLenhNhapThongTinSach?> _timMaLenh() async {
+    final String? url = await _webController.currentUrl();
+    if (url != null) {
+      for (final muc in _maLenh) {
+        if (muc.kiemTraUrl(url)) {
+          return muc;
+        }
+      }
+    }
+    return null;
   }
 
   /// Khi webview kết thúc tải trang
   void _khiKetThucTaiTrang(String url) {
-    _hienThiThongTinTrangWeb();
-    MaLenhNhapThongTinSach? maLenh;
-    for (final muc in _maLenh) {
-      if (muc.kiemTraUrl(url)) {
-        maLenh = muc;
-        break;
-      }
-    }
-    if (maLenh == null) {
-      return;
-    }
-    // print("DEBUG ma lenh: ${maLenh.maLenh}");
-    _webController.runJavaScript(maLenh.maLenh).then((_) {
-      _trichXuatSanSang = true;
-      _cauHinhNutTrichXuat();
-    });
+    _hienThiThongTinTrangWeb(true);
     _dangTai = false;
     _daTaiThanhCong = true;
+    _trichXuatSanSang = true;
     _cauHinhNutTrichXuat();
   }
 
@@ -369,14 +375,15 @@ class DieuKhienManHinhWeb extends DieuKhienManHinh with XuLyNutLuiAndroid {
     _dangTai = false;
     _daTaiThanhCong = false;
     _cauHinhNutTrichXuat();
+    _hienThiThongTinTrangWeb(true);
   }
 
   void _khiDangNapTrang(int tienTrinh) {
-    _hienThiThongTinTrangWeb();
+    _hienThiThongTinTrangWeb(true);
   }
 
   void _khiThayDoiDiaChi(UrlChange thayDoi) {
-    _hienThiThongTinTrangWeb();
+    _hienThiThongTinTrangWeb(true);
   }
 
   /// Mở URL gốc trong trình duyệt ngoài
@@ -394,15 +401,25 @@ class DieuKhienManHinhWeb extends DieuKhienManHinh with XuLyNutLuiAndroid {
   }
 
   /// Trích xuất danh sách sách
-  void _trichXuatDsSach() {
-    String maLenh = "layDanhSachSach();";
+  Future<void> _trichXuatDsSach() async {
+    final MaLenhNhapThongTinSach? mLenh = await _timMaLenh();
+    if (mLenh == null) {
+      HopThoai.hienThiHopThoaiThongBao(
+        noiDung: Vbht.tuKhoa(TK.khongCoMaLenh),
+        nhanCacNut: [Vbht.tuKhoa(TK.dong)]
+      );
+      return;
+    }
+    String maLenh;
     if (Platform.isIOS) {
-      maLenh = "JSON.stringify(layDanhSachSach());";
+      maLenh = "${mLenh.maLenh}\nJSON.stringify(layDanhSachSach());";
+    } else {
+      maLenh = "${mLenh.maLenh}\nlayDanhSachSach();";
     }
     _webController.runJavaScriptReturningResult(maLenh).then((value) {
       _dsSach.clear();
       String ketQua = value as String;
-      // print("DEBUG kq trich xuat: $value");
+      print("DEBUG kq trich xuat: $value");
       final dynamic ketQuaJson = jsonDecode(ketQua);
       if (ketQuaJson is List<dynamic>) {
         for (final muc in ketQuaJson) {
@@ -423,6 +440,7 @@ class DieuKhienManHinhWeb extends DieuKhienManHinh with XuLyNutLuiAndroid {
         _xuLyKetQuaTrichXuat();
       }
     }).onError((error, stackTrace) {
+      log("TRICH XUAT THAT BAI: $error\n$maLenh");
       _khongCoKetQuaTrichXuat();
     });
   }

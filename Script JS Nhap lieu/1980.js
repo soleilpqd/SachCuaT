@@ -2,7 +2,12 @@ function layDanhSachSach() {
     let sach = {};
     sach["nxb"] = "1980 Books";
     sach["ten"] = document.getElementsByClassName("product-heading")[0].children[0].textContent.trim();
-    sach["anh"] = document.getElementsByClassName("product-gallery slick-slide slick-current slick-active")[0].children[0].href;
+    const divAnh = document.getElementsByClassName("product-gallery slick-slide slick-current slick-active");
+    if (divAnh.length > 0) {
+        sach["anh"] = divAnh[0].children[0].href;
+    } else {
+        sach["anh"] = document.getElementsByClassName("product-gallery")[0].children[0].src;
+    }
     const divGia = document.getElementById("price-preview");
     for (const muc of divGia.children) {
         if (muc.tagName === "DEL") {
