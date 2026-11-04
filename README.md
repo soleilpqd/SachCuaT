@@ -8,7 +8,7 @@ Tôi có một đống sách (giấy), tôi cất chỗ này để chỗ kia. Đ
 
 Nên tôi tự tạo cho mình 1 ứng dụng nhỏ, nhằm lưu trữ danh sách và tìm kiếm các cuốn sách của mình.
 
-![Xem trước 1](docs/mh_mo_dau_2.png) ![Xem trước 2](docs/mh_sach_1.png) ![Xem trước 3](docs/mh_timkiem_1.png)
+![Xem trước 1](docs/huong_dan/mh_mo_dau_2.png) ![Xem trước 2](docs/huong_dan/mh_sach_1.png) ![Xem trước 3](docs/huong_dan/mh_timkiem_1.png)
 
 ## Bản quyền và trách nhiệm
 
@@ -37,3 +37,4 @@ Trong ứng dụng có liên kết đến 2 trang web công cộng bên ngoài [
 - Sửa các lỗi lặt vặt.
 - Lọc bỏ các mục đã nhập ở chức năng gợi ý nhập ở màn hình nhập thông tin sách.
 - Màn hình xem ảnh.
+- Nhập thông tin và ảnh từ Internet.
