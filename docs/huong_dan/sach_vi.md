@@ -5,7 +5,7 @@
 ![mh_sach_1.png](mh_sach_1.png)
 
 - Mục 1: nút Lưu.
-- `Nhập thông tin sách từ Internet`: chuyển sang màn hình web để mở một số trang web, tìm kiếm và nhập thông tin của sách.
+- `Nhập thông tin sách từ Internet`: chuyển sang màn hình web để mở một số trang web, tìm kiếm và nhập thông tin của sách. Có thể nhập tên sách hoặc/và mã ISBN làm từ khoá tìm kiếm trước khi nhấn vào chức năng này.
 - `Đã đọc xong`: đánh dấu cuốn sách là đã đọc xong.
 - Khung ảnh: trường hợp chưa cài đặt ảnh nào thì sẽ hiển thị 3 nút
   - 3: Dán
@@ -58,7 +58,7 @@ Các thao tác trên màn hình xem ảnh toàn màn hình:
   - Dán từ Clipboard/Pasteboard: từ ứng dụng bên ngoài, chọn ảnh muốn sử dụng, mở hộp thoại Chia sẻ (tuỳ thuộc ứng dụng có thể là nhấn nút Chia sẻ hoặc nhấn giữ ảnh), chọn `Sao chép ảnh` (lưu ý, tuỳ ứng dụng có hỗ trợ hay không mới có tuỳ chọn này. Nếu là `Sao chép` thì thường là sao chép URL của ảnh hơn là sao chép ảnh.). Quay lại `Sách của T` và nhấn nút **Dán**.
   - Sử dụng ảnh đã được chia sẻ: từ ứng dụng bên ngoài, chọn ảnh muốn sử dụng, mở hộp thoại Chia sẻ, chọn `Chia sẻ` và chọn ứng dụng `Sách của T` (lưu ý: tuỳ thuộc ứng dụng ngoài hỗ trợ, tuỳ chọn này có thể không xuất hiện). Hệ thống tự động chuyển sang `Sách của T`. Nếu `Sách của T` đang ở sẵn màn hình **Sách**, ảnh tự động được chọn. Nếu `Sách của T` không ở sẵn màn hình **Sách**, di chuyển vào màn hình **Sách** và nhấn nút **Dán**.
   - Khi nhấn nút **Dán** mà không có ảnh trong Clipboard/Pasteboard hay ảnh đã được chia sẻ thì `Sách của T` sẽ mở màn hình chọn tệp của hệ thống để chọn tệp ảnh.
-- Sử dụng mục `Tìm kiếm ảnh từ Internet`: khi nhấn mục này, `Sách của T` sẽ mở màn hình trình duyệt web nhúng (iOS: Safari, Android: Chrome) tại 1 số trang web để tìm kiếm ảnh. Vì đây là màn hình trình duyệt nhũng có sẵn nên cách thức sử dụng khác nhau trên các nền tảng khác nhau:
+- Sử dụng mục `Tìm kiếm ảnh từ Internet`: khi nhấn mục này, `Sách của T` sẽ mở màn hình trình duyệt web nhúng (iOS: Safari, Android: Chrome) tại 1 số trang web để tìm kiếm ảnh (có thể nhập tên sách hoặc mã ISBN trước, để làm từ khoá tìm kiếm). Vì đây là màn hình trình duyệt nhũng có sẵn nên cách thức sử dụng khác nhau trên các nền tảng khác nhau:
   - iOS:
     - Để chọn ảnh: nhấn giữ ảnh muốn chọn để hiển thị thực đơn tác vụ, chọn `Sao chép` (hoặc `Sao chép ảnh`). `Sách của T` tự động dán ảnh và quay về màn hình **Sách**.
     - Để chuyển website: nhấn nút chia sẻ trên thanh công cụ (cạnh thanh địa chỉ), chọn website mong muốn.
@@ -68,7 +68,9 @@ Các thao tác trên màn hình xem ảnh toàn màn hình:
     - Hoặc để chọn ảnh: nhấn giữ ảnh muốn chọn để hiển thị thực đơn tác vụ, chọn `Chia sẻ` > chọn `Sách của T`; màn hình sẽ tự động chuyển về màn hình **Thông tin sách** và dán ảnh đã chọn.
     - Để chuyển website, nhấn nút biểu tượng thực đơn trên góc trên phải màn hình để mở thực đơn chính của trình duyệt nhúng. Lưu ý: thực đơn giới hạn hiển thị 7 mục, khi chọn 1 mục thì thực đợn sẽ hiển thị danh sách các mục kề bên của mục đã chọn.
     - Để đánh dấu trang web hiện tại làm nhãn sách, nhấn nút biểu tượng Chia sẻ trên thanh công cụ của trình duyệt web nhúng, chọn `Chia sẻ` và chọn `Sách của T`.
-- Để cấu hình danh sách website tìm ảnh trên Internet:
+
+### Cấu hình danh sách website tìm ảnh trên Internet
+
   - Cần có kiến thúc kỹ thuật về JSON để chỉnh sửa tệp cấu hình.
   - Tải tệp `websites.json` từ trong mã nguồn của ứng dụng.
   - Chỉnh sửa tệp `websites.json` theo ý muốn:
@@ -77,4 +79,8 @@ Các thao tác trên màn hình xem ảnh toàn màn hình:
       - `url`: đường dẫn đến trang tìm kiếm của website.
       - `tham_so`: danh sách các tham số trong đường dẫn đến trang tìm kiếm. Trong đó phần từ khoá tìm kiếm sẽ được thay thế vào chuỗi `%TK%` có trong danh sách tham số.
       - VD: `"url": "https://www.google.com/search"` và `"tham_so": { "q": "%TK%", "udm": "2" }` để mở trang tìm kiếm hình ảnh của Google tại địa chỉ `https://www.google.com/search&q=%TK%&udm=2`.
+      - `anh`: `true` hoặc `false`. `true` để có thể sử dụng trang web này cho chức năng `Tìm kiếm ảnh từ Internet`.
+      - `thong_tin`: `true` hoặc `false`. `true` để có thể sử dụng trang web này cho chức năng `Nhập thông tin sách từ Internet`.
+      - `isbn_nhom` và `isbn_chia`: có thể thiếu hoặc để trống. Đây là hướng dẫn định dạnh chuỗi ISBN để tìm kiếm trên trang web (với trang web có hỗ trợ). VD: chuỗi ISBN `1234567890123`, `isbn_nhom` là `[3,3,1,5,1]`, `isbn_chia` là `-` thì từ khoá (thay vào `%TK%`) sẽ là `123-456-7-89012-3`.
+      - Từ khoá tìm kiếm để tháy thế vào `%TK%` trong đường link trang web: nếu `isbn_xxx` không có thì sử dụng tên sách, nếu có thì sử dụng mã ISBN đã nhập trước khi mở trang web.
   - Kết nối điện thoại với máy tính để bàn qua cáp USB (xem mục `Sao lưu và khôi phục dữ liệu` trong Hướng dẫn của màn hình **Mở đầu**), kéo thả tệp `websites.json` vào bên cạnh tệp `sachcuat.db`.
