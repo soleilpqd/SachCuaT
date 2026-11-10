@@ -1154,24 +1154,24 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo, X
     }
     _dkTenSach.vanBan = ten;
     if (tacGia.isNotEmpty) {
-      DieuKhienTruongVanBan dkTg = DieuKhienTruongVanBan();
+      DieuKhienTruongVanBan dkTg = DieuKhienTruongVanBan(goiYNoiDung: _goiYTg);
       dkTg.themTheoDoi(this);
       dkTg.vanBan = tacGia;
       _dsDkTacGia.add(dkTg);
     }
     if (dichGia.isNotEmpty) {
-      DieuKhienTruongVanBan dkDg = DieuKhienTruongVanBan();
+      DieuKhienTruongVanBan dkDg = DieuKhienTruongVanBan(goiYNoiDung: _goiYDg);
       dkDg.themTheoDoi(this);
       dkDg.vanBan = dichGia;
       _dsDkDichGia.add(dkDg);
     }
-    DieuKhienTruongVanBan dkNxb = DieuKhienTruongVanBan();
+    DieuKhienTruongVanBan dkNxb = DieuKhienTruongVanBan(goiYNoiDung: _goiYNxb);
     dkNxb.themTheoDoi(this);
     dkNxb.vanBan = nxb;
     _dsDkNxb.add(dkNxb);
     for (final muc in _dsNxb) {
       if (muc != nxb && doiTac.contains(muc.toUpperCase())) {
-        dkNxb = DieuKhienTruongVanBan();
+        dkNxb = DieuKhienTruongVanBan(goiYNoiDung: _goiYNxb);
         dkNxb.themTheoDoi(this);
         dkNxb.vanBan = muc;
         _dsDkNxb.add(dkNxb);
