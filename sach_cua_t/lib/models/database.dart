@@ -118,8 +118,8 @@ class CoSoDuLieu {
       whereArgs: ["_"]
     );
     for (final co in coKiemTra) {
-      final String? coHienTai = await truyVanVanBanHienThi(co["tu_khoa"] as String, co["phan_loai"] as String);
-      if (coHienTai != (co["noi_dung"] as String)) {
+      final String? coHienTai = await truyVanVanBanHienThi(co["tu_khoa"].toString(), co["phan_loai"].toString());
+      if (coHienTai != (co["noi_dung"].toString())) {
         await _delete(BANG_VB_HIEN_THI, where: "\"phan_loai\" = ?", whereArgs: [co["phan_loai"]]);
         final List<Map<String, Object?>> cacTuKhoaGoc = await dbGoc.query(
           BANG_VB_HIEN_THI,
@@ -302,7 +302,7 @@ class CoSoDuLieu {
   Future<List<String>> truyVanDSNxb() async {
     assert(_db != null, "CSDL chưa được khởi tạo.");
     final List<Map<String, Object?>> ketQua = await _query(BANG_NXB, columns: ["ten"]);
-    return ketQua.map((muc) => muc["ten"] as String).toList();
+    return ketQua.map((muc) => muc["ten"].toString()).toList();
   }
 
   // ------
@@ -337,9 +337,9 @@ class CoSoDuLieu {
   /// Gán dữ liệu từ kết quả CSDL sang object
   void _ganDLVaoSach(Map<String, Object?> banGhi, Sach thongTin) {
     thongTin.maSo = banGhi["ma"] as int;
-    thongTin.ten = banGhi["ten"] as String;
+    thongTin.ten = banGhi["ten"].toString();
     thongTin.daHoanThanh = (banGhi["xong"] as int) != 0;
-    thongTin.isbn = (banGhi["isbn"] ?? "") as String;
+    thongTin.isbn = (banGhi["isbn"] ?? "").toString();
     thongTin.tap = banGhi["tap"] as int?;
     thongTin.maNhieuTap = banGhi["chuoi"] as int?;
   }
@@ -407,8 +407,8 @@ class CoSoDuLieu {
     return duLieu.map((muc) {
       final NhaXuatBan kq = NhaXuatBan();
       kq.maSo = muc["ma"] as int;
-      kq.ten = muc["ten"] as String;
-      kq.maLuuChieu = muc["ma_luu_chieu"] as String?;
+      kq.ten = muc["ten"].toString();
+      kq.maLuuChieu = muc["ma_luu_chieu"]?.toString();
       return kq;
     }).toList();
   }
@@ -504,7 +504,7 @@ WHERE "$BANG_NXB_SACH"."sach" = ?;
     return duLieu.map((muc) {
       final TacGia kq = TacGia();
       kq.maSo = muc["ma"] as int;
-      kq.ten = muc["ten"] as String;
+      kq.ten = muc["ten"].toString();
       return kq;
     }).toList();
   }
@@ -599,7 +599,7 @@ WHERE "tac_gia" = ?;
     return duLieu.map((muc) {
       final DichGia kq = DichGia();
       kq.maSo = muc["ma"] as int;
-      kq.ten = muc["ten"] as String;
+      kq.ten = muc["ten"].toString();
       return kq;
     }).toList();
   }
@@ -694,7 +694,7 @@ WHERE "dich_gia" = ?;
     return duLieu.map((muc) {
       final ViTriSach kq = ViTriSach();
       kq.maSo = muc["ma"] as int;
-      kq.ten = muc["ten"] as String;
+      kq.ten = muc["ten"].toString();
       kq.thoiGian = (muc["ngay_nhap"] as int?) ?? -1;
       return kq;
     }).toList();
@@ -879,7 +879,7 @@ WHERE "vi_tri" = ?;
         where: "\"ten\" LIKE ? OR \"ten_kd\" LIKE ?",
         whereArgs: ["%$tuKhoa%", "%$tkKd%"]
       );
-    return ketQua.map((muc) => VanBanNoiBat(vanBanDayDu: muc["ten"] as String, vanBanNoiBat: [tuKhoa], daChon: muc["chon"] as int?)).toList();
+    return ketQua.map((muc) => VanBanNoiBat(vanBanDayDu: muc["ten"].toString(), vanBanNoiBat: [tuKhoa], daChon: muc["chon"] as int?)).toList();
   }
 
   /// Lưu thời điểm đã chọn gợi ý vào bảng [bang]
@@ -915,7 +915,7 @@ GROUP BY "$BANG_NHAN_SACH"."gia_tri";
 """,
       [tenNhan, "%$tuKhoa%", "%$tkKd%"]
     );
-    return ketQua.map((muc) => VanBanNoiBat(vanBanDayDu: muc["gia_tri"] as String, vanBanNoiBat: [tuKhoa], daChon: muc["chon"] as int?)).toList();
+    return ketQua.map((muc) => VanBanNoiBat(vanBanDayDu: muc["gia_tri"].toString(), vanBanNoiBat: [tuKhoa], daChon: muc["chon"] as int?)).toList();
   }
 
   /// Lưu thời điểm chọn giá trị nhãn
@@ -935,7 +935,7 @@ GROUP BY "$BANG_NHAN_SACH"."gia_tri";
   Future<List<String>> layDSNhanLuonHien() async {
     assert(_db != null, "CSDL chưa được khởi tạo.");
     final ketQua = await _query(BANG_NHAN, columns: ["ten"], where: "\"luon_hien\" > 0");
-    return ketQua.map((muc) => muc["ten"] as String).toList();
+    return ketQua.map((muc) => muc["ten"].toString()).toList();
   }
 
   /// Gán dữ liệu từ kết quả CSDL sang object
@@ -943,8 +943,8 @@ GROUP BY "$BANG_NHAN_SACH"."gia_tri";
     return duLieu.map((muc) {
       final NhanSach kq = NhanSach();
       kq.maSo = muc["ma"] as int;
-      kq.ten = muc["ten"] as String;
-      kq.giaTri = muc["gia_tri"] as String?;
+      kq.ten = muc["ten"].toString();
+      kq.giaTri = muc["gia_tri"]?.toString();
       kq.luonHien = (muc["luon_hien"] as int?) ?? 0;
       return kq;
     }).toList();
@@ -1110,7 +1110,7 @@ WHERE "nhan" = ?;
       final DanhDauSach danhDau = DanhDauSach();
       danhDau.maSo = muc["ma"] as int;
       danhDau.maSach = muc["sach"] as int;
-      danhDau.noiDung = muc["ghi_chu"] as String;
+      danhDau.noiDung = muc["ghi_chu"].toString();
       return danhDau;
     }).toList();
   }
@@ -1164,7 +1164,7 @@ ORDER BY "$BANG_DANH_DAU"."thoi_gian" DESC;
       final DanhDauSach danhDau = DanhDauSach();
       danhDau.maSach = sach.maSo ?? 0;
       danhDau.maSo = banGhi["ma_dd"] as int;
-      danhDau.noiDung = (banGhi["ghi_chu"] as String?) ?? "";
+      danhDau.noiDung = (banGhi["ghi_chu"]?.toString()) ?? "";
       sach.danhDau = [danhDau];
       ketQua.add(sach);
     }
@@ -1178,7 +1178,7 @@ ORDER BY "$BANG_DANH_DAU"."thoi_gian" DESC;
     return duLieu.map((muc) {
       final SachNhieuTap kq = SachNhieuTap();
       kq.maSo = muc["ma"] as int;
-      kq.ten = muc["ghi_chu"] as String;
+      kq.ten = muc["ghi_chu"].toString();
       return kq;
     }).toList();
   }
@@ -1333,7 +1333,7 @@ WHERE "chuoi" = ?;
       where: where,
       whereArgs: args
     );
-    final List<VanBanNoiBat> dsSapXep = ketQua.map((muc) => VanBanNoiBat(vanBanDayDu: muc[truong] as String, vanBanNoiBat: [tuKhoa], duLieuDinhKem: muc)).toList();
+    final List<VanBanNoiBat> dsSapXep = ketQua.map((muc) => VanBanNoiBat(vanBanDayDu: muc[truong].toString(), vanBanNoiBat: [tuKhoa], duLieuDinhKem: muc)).toList();
     dsSapXep.sapXep();
     return dsSapXep.map((muc) => muc.duLieuDinhKem as Map<String, Object?>).toList();
   }
@@ -1393,7 +1393,7 @@ WHERE "chuoi" = ?;
       dieuKienAndArgs: [nhan.maSo]
     );
     return ketQua.map((muc) {
-      return muc["gia_tri"] as String;
+      return muc["gia_tri"].toString();
     }).toList();
   }
 

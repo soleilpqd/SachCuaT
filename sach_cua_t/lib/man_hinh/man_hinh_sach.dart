@@ -209,6 +209,7 @@ class DieuKhienManHinhSach extends DieuKhienManHinh with TheoDoiDieuKhienCoSo, X
     _dkHienThiDSTapDayDu.dispose();
     _goiYGiaTriNhan.dispose();
     _dkXoa.dispose();
+    _dkCuon.dispose();
     DuLieuTam().xoaTatCa();
     HeThongMay.duyNhat.urlSach.removeListener(_khiNhanUrlSach);
   }

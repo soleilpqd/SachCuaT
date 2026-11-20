@@ -31,6 +31,10 @@ class DieuKhienCuon {
     );
   }
 
+  void dispose() {
+    _dkCuon.dispose();
+  }
+
   bool _khoiPhucViTri() {
     if (_doLechHienTai != null && _doLechHienTai != _dkCuon.offset && _dkCuon.position.hasContentDimensions) {
       _dkCuon.jumpTo(_doLechHienTai!);

@@ -160,6 +160,7 @@ class DieuKhienManHinhTimKiem extends DieuKhienManHinh with TheoDoiDieuKhienCoSo
   void manHinhBiLoaiBoKhoiLuong() {
     super.manHinhBiLoaiBoKhoiLuong();
     dkTuKhoa.boTheoDoi(this);
+    _dkCuon.dispose();
   }
 
   @override

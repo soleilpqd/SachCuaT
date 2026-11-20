@@ -103,6 +103,12 @@ class DieuKhienManHinhThongKe extends DieuKhienManHinh with XuLyNutLuiAndroid {
     _phanTich();
   }
 
+  @override
+  void manHinhBiLoaiBoKhoiLuong() {
+    super.manHinhBiLoaiBoKhoiLuong();
+    _dkCuon.dispose();
+  }
+
   /// Đếm số lượng sách có cùng 1 thuộc tính
   void _phanTichDanhSach<T>(List<T> dsNguon, List<_MucThongKe<T>> dsDich) {
     for (final T nguon in dsNguon) {

@@ -88,6 +88,16 @@ class DieuKhienManHinhMoDau extends DieuKhienManHinh with XuLyNutLuiAndroid {
   }
 
   @override
+  void manHinhBiLoaiBoKhoiLuong() {
+    super.manHinhBiLoaiBoKhoiLuong();
+    // Ghi chú: màn hình này nằm đầu luồng nên không có trường hợp nào chạy vào đây
+    // tuy nhiên nếu triển khai chức năng khởi động lại ứng dụng (đặt lại toàn bộ luồng màn hình)
+    // thì cần quan tâm đến chỗ này.
+    _dkCuon.dispose();
+    _dkNutPhai.dispose();
+  }
+
+  @override
   bool khiNhanNutLuiAndroid() => true;
 
   void _cauHinhNutDieuHuong() {
